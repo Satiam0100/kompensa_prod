@@ -1,0 +1,385 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 8
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "includeDrafts": true,
+          "q": "subject:Orden_Transmision in:inbox -in:draft newer_than:7d"
+        },
+        "options": {}
+      },
+      "id": "77593258-a82d-4c2e-b3ac-dd252eefe89e",
+      "name": "Gmail Trigger - Orden Transmisión",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3552,
+        1168
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parsear orden de transmisión. Entrada: salida de Gmail Get Message (text, html, from.value[].address)\nconst email = $input.first().json;\n// Get Message: text (plano), html. Trigger: body, textPlain, textHtml, snippet\nconst rawText = email.text ?? email.body ?? email.textPlain ?? email.textHtml ?? '';\nconst subject = email.subject ?? email.Subject ?? '';\n// Get Message: from.value[0].address, from.text. Trigger: from.value, From\nconst emailFrom = email.from?.value?.[0]?.address ?? email.from?.text ?? email.from?.value ?? email.From ?? null;\n\nconst cleanHTML = (text) => {\n  if (!text) return '';\n  return String(text)\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/\\s+/g, ' ')\n    .trim();\n};\n// Preferir texto plano (Get Message text); si no, usar HTML limpiado o snippet\nconst bodyRaw = rawText || (email.html ? cleanHTML(email.html) : '') || email.snippet || '';\nconst bodyFinal = bodyRaw.replace(/[^\\S\\n\\r]+/g, ' ').trim();\n\n// Normalizar nombre de campo (quitar *, /, espacios)\nconst norm = (s) => (s || '').toLowerCase().replace(/[*\\/]/g, '').replace(/\\s+/g, ' ').trim();\n\nconst parsed = {};\nconst lines = bodyFinal.split(/[\\n\\r]+/);\nfor (const line of lines) {\n  const trimmed = line.trim();\n  if (!trimmed || /^[=\\-\\s\\[\\]]+$/.test(trimmed)) continue;\n  const colonIdx = trimmed.indexOf(':');\n  if (colonIdx <= 0) continue;\n  const fieldName = norm(trimmed.slice(0, colonIdx));\n  const value = trimmed.slice(colonIdx + 1).trim();\n  if (fieldName && value) parsed[fieldName] = value;\n}\n\nconst find = (...keys) => {\n  for (const key of keys) {\n    const n = norm(key);\n    const found = Object.keys(parsed).find(k => k === n || k.includes(n) || n.includes(k));\n    if (found) return parsed[found];\n  }\n  return null;\n};\n\nconst extract = (text, patterns) => {\n  if (!text) return null;\n  for (const p of patterns) {\n    const m = text.match(typeof p === 'string' ? new RegExp(p, 'gi') : p);\n    if (m && m[1]) return m[1].trim();\n  }\n  return null;\n};\n\nconst cliente = find('Cliente', 'Cliente*') || extract(bodyFinal, [/Cliente\\s*\\*?\\s*[:\\s]+([^\\n]+?)(?=\\n|Campaña|Producto|$)/i, /Cliente\\s*[:\\s]+(.+?)(?=\\n|$)/i]);\nconst campaña = find('Campaña', 'Campaña / Producto', 'Producto', 'Campaña/Producto') || extract(bodyFinal, [/Campaña\\s*\\/\\s*Producto\\s*\\*?\\s*[:\\s]+([^\\n]+)/i, /Producto\\s*\\*?\\s*[:\\s]+([^\\n]+)/i, /Campaña\\s*\\*?\\s*[:\\s]+([^\\n]+)/i]);\nconst emisora = find('Emisora', 'Emisora / Estación', 'Estación', 'Emisora/Estación') || extract(bodyFinal, [/Emisora\\s*\\/\\s*Estación\\s*\\*?\\s*[:\\s]+([^\\n]+)/i, /Estación\\s*\\*?\\s*[:\\s]+([^\\n]+)/i, /Emisora\\s*\\*?\\s*[:\\s]+([^\\n]+)/i]);\nconst cuñasDiarias = find('Cuñas diarias', 'Cuñas diarias*', 'Cuñas diaria') || extract(bodyFinal, [/Cuñas\\s*\\*?\\s*diarias\\s*[:\\s]+(\\d+)/i, /Cuñas\\s+por\\s+d[ií]a\\s*[:\\s]+(\\d+)/i, /Cuñas\\s+diarias\\s*\\*?\\s*[:\\s]+(\\d+)/i]);\nconst totalContratadas = find('Total de cuñas contratadas', 'Total cuñas contratadas', 'Total contratadas', 'Total cuñas') || extract(bodyFinal, [/Total\\s+de\\s+cuñas\\s+contratadas\\s*\\*?\\s*[:\\s]+(\\d+)/i, /Total\\s+cuñas\\s+contratadas\\s*[:\\s]+(\\d+)/i, /Total\\s+contratadas\\s*[:\\s]+(\\d+)/i, /Total\\s+cuñas\\s*[:\\s]+(\\d+)/i, /Total\\s*[:\\s]+(\\d+)/i]);\n\nlet periodoInicio = find('Fecha inicio', 'Periodo inicio', 'Fecha inicio*');\nlet periodoFin = find('Fecha fin', 'Periodo fin', 'Fecha fin*');\nif (!periodoInicio || !periodoFin) {\n  const periodoStr = extract(bodyFinal, [/Periodo\\s*[:\\s]+([^\\n]+)/i]) || bodyFinal.match(/(\\d{1,2}[\\/\\-]\\d{1,2}[\\/\\-]\\d{2,4})\\s*[-–]\\s*(\\d{1,2}[\\/\\-]\\d{1,2}[\\/\\-]\\d{2,4})/);\n  if (periodoStr) {\n    const str = Array.isArray(periodoStr) ? periodoStr[0] : periodoStr;\n    const fechas = str.split(/[-–]/).map(f => f.trim());\n    if (fechas.length >= 2) {\n      periodoInicio = periodoInicio || fechas[0];\n      periodoFin = periodoFin || fechas[1];\n    }\n  }\n}\n\nconst spotId = find('Spot ID', 'ID') || extract(bodyFinal, [/Spot\\s*ID\\s*[:\\s]+([^\\n]+)/i]);\nconst spotName = find('Spot Name', 'Nombre') || extract(bodyFinal, [/Spot\\s*Name\\s*[:\\s]+([^\\n]+)/i]);\nconst emailCliente = emailFrom || find('Email');\nconst agencia = find('Agencia') || extract(bodyFinal, [/Agencia\\s*[:\\s]+([^\\n]+)/i]);\nconst duracionSeg = find('Duración') || extract(bodyFinal, [/Duraci[oó]n\\s*[:\\s]+(\\d+)/i]);\nconst horario = find('Horario') || extract(bodyFinal, [/Horario\\s*[:\\s]+([^\\n]+)/i]);\nconst ciudad = find('Ciudad') || extract(bodyFinal, [/Ciudad\\s*[:\\s]+([^\\n]+)/i]);\n\nif (!cliente || !campaña || !emisora || !cuñasDiarias || !totalContratadas) {\n  return [{\n    json: {\n      error: true,\n      message: 'Faltan campos requeridos en la orden',\n      campos_encontrados: { cliente: !!cliente, campaña: !!campaña, emisora: !!emisora, cuñasDiarias: !!cuñasDiarias, totalContratadas: !!totalContratadas },\n      body_preview: bodyFinal.substring(0, 500)\n    }\n  }];\n}\n\nconst parseDate = (dateStr) => {\n  if (!dateStr) return null;\n  const s = String(dateStr).trim();\n  const ddmmyyyy = s.match(/(\\d{1,2})[\\/\\-](\\d{1,2})[\\/\\-](\\d{4})/);\n  if (ddmmyyyy) return `${ddmmyyyy[3]}-${ddmmyyyy[2].padStart(2, '0')}-${ddmmyyyy[1].padStart(2, '0')}`;\n  const yyyymmdd = s.match(/(\\d{4})[\\/\\-](\\d{1,2})[\\/\\-](\\d{1,2})/);\n  if (yyyymmdd) return `${yyyymmdd[1]}-${yyyymmdd[2].padStart(2, '0')}-${yyyymmdd[3].padStart(2, '0')}`;\n  return null;\n};\n\nreturn [{\n  json: {\n    cliente,\n    campaña,\n    spot_id: spotId,\n    spot_name: spotName,\n    emisora,\n    cuñas_diarias: parseInt(cuñasDiarias, 10) || 0,\n    total_contratadas: parseInt(totalContratadas, 10) || 0,\n    periodo_inicio: parseDate(periodoInicio),\n    periodo_fin: parseDate(periodoFin),\n    estado: 'activa',\n    email_cliente: emailCliente,\n    agencia: agencia,\n    duracion_seg: duracionSeg ? parseInt(duracionSeg, 10) : null,\n    horario: horario,\n    ciudad: ciudad,\n    email_id: email.id,\n    email_subject: subject,\n    email_from: emailFrom,\n    error: false\n  }\n}];"
+      },
+      "id": "247e3f93-b7c3-4961-8f2f-fafad04c577a",
+      "name": "Code: Parsear Orden",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition-001",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5352a113-9cd3-46c6-a006-71f0e605bd25",
+      "name": "IF: Validar Datos",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2896,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "ordenes_transmision",
+        "dataToSend": "autoMapInputData",
+        "inputsToIgnore": "email_id, email_subject, email_from, error"
+      },
+      "id": "a48d4607-9877-4ede-a732-e1ece2917e2d",
+      "name": "Supabase: Insert Orden",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -2672,
+        1072
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Code: Parsear Orden').first().json.email_subject || $('Get a message').first().json.subject || 'Orden_Transmision' }} - {{ $now.format('YYYY-MM-DD') }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1nfLAg8aGd_BY7XfeD22Ww9SBrPqbM2i4",
+          "mode": "list",
+          "cachedResultName": "Kompensa",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1nfLAg8aGd_BY7XfeD22Ww9SBrPqbM2i4"
+        },
+        "options": {}
+      },
+      "id": "271cd6c8-90d4-4981-a701-476eb6444344",
+      "name": "Google Drive: Guardar Adjunto",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2448,
+        1168
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-001",
+              "name": "orden_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-002",
+              "name": "mensaje",
+              "value": "Orden procesada exitosamente",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75677dab-cd2c-419a-bf03-6f379a98a24e",
+      "name": "Set: Éxito",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2448,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-error-001",
+              "name": "error",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "assign-error-002",
+              "name": "mensaje",
+              "value": "=Error al procesar orden: {{ $json.message }}. Campos faltantes: {{ Object.entries($json.campos_encontrados).filter(([key, value]) => !value).map(([key]) => key).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-error-003",
+              "name": "email_from",
+              "value": "={{ $('Gmail Trigger - Orden Transmisión').item.json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-error-004",
+              "name": "email_id",
+              "value": "={{ $('Gmail Trigger - Orden Transmisión').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-error-005",
+              "name": "campos_faltantes",
+              "value": "={{ Object.entries($json.campos_encontrados).filter(([key, value]) => !value).map(([key]) => key).join(', ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f1ae435-5221-487a-8a54-20e6fdce87a0",
+      "name": "Set: Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2672,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Re: Orden Transmisión - Error en Procesamiento",
+        "message": "=Estimado/a,\n\nHemos recibido su correo con la orden de transmisión, pero no pudimos procesarla debido a que faltan los siguientes campos requeridos:\n\n{{ $json.campos_faltantes }}\n\nPor favor, envíe nuevamente el correo con el asunto \"Orden_Transmision\" incluyendo todos los campos requeridos:\n\n- Cliente\n- Campaña\n- Emisora\n- Cuñas diarias\n- Total contratadas\n\nGracias por su comprensión.\n\nSaludos cordiales",
+        "options": {}
+      },
+      "id": "cb138930-3e09-481c-bf2d-63470376ea51",
+      "name": "Gmail: Enviar Respuesta de Error",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2432,
+        1360
+      ],
+      "webhookId": "d8dbe919-3cb6-41a3-94de-c83f523bb2db",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -3344,
+        1168
+      ],
+      "id": "e1ebd231-dd0c-4671-af6e-491145b24cbb",
+      "name": "Get a message",
+      "webhookId": "8c594fd0-04a6-4e5e-a9d3-2bbb1d3846e6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Solware"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger - Orden Transmisión": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Parsear Orden": {
+      "main": [
+        [
+          {
+            "node": "IF: Validar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Validar Datos": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Insert Orden",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Insert Orden": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Guardar Adjunto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set: Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Error": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Enviar Respuesta de Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Code: Parsear Orden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Gmail Trigger - Orden Transmisión": [
+      {
+        "id": "19c239743eb56f25",
+        "threadId": "19c239743eb56f25",
+        "snippet": "============================== ORDEN DE TRANSMISIÓN ============================== Cliente*: Nestle Campaña / Producto*: Savoy Enamorados Emisora / Estación*: Rumbera Network 99.3 FM Cuñas diarias*: 2",
+        "payload": {
+          "mimeType": "multipart/alternative"
+        },
+        "sizeEstimate": 15033,
+        "historyId": "938226",
+        "internalDate": "1770123628000",
+        "labels": [
+          {
+            "id": "INBOX",
+            "name": "INBOX"
+          },
+          {
+            "id": "IMPORTANT",
+            "name": "IMPORTANT"
+          },
+          {
+            "id": "CATEGORY_PERSONAL",
+            "name": "CATEGORY_PERSONAL"
+          },
+          {
+            "id": "YELLOW_STAR",
+            "name": "YELLOW_STAR"
+          },
+          {
+            "id": "STARRED",
+            "name": "STARRED"
+          }
+        ],
+        "From": "\"Gonzalo Ramírez\" <gonzalocelular@gmail.com>",
+        "Subject": "Orden_Transmision",
+        "To": "\"solwareve@gmail.com\" <solwareve@gmail.com>"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0aef379448f46a7b197468ec98039aa3b83b2fd201f1b47e0d1b1327afad31e"
+  }
+}

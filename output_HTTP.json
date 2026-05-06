@@ -1,0 +1,1170 @@
+[
+  {
+    "client": "RBB",
+    "data": [
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 23:56:23 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 22:56:02 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 21:57:32 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 21:28:33 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 20:57:37 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 20:30:53 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 20:30:31 GMT",
+        "duration_seg": 18,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 19:42:48 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 19:01:08 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 18:25:22 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 17:58:16 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 17:25:17 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 16:58:58 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 16:27:13 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 15:58:43 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 15:27:10 GMT",
+        "duration_seg": 18,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 15:01:16 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 14:27:58 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 13:56:27 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 13:56:08 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 12:55:43 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 12:27:26 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 11:28:33 GMT",
+        "duration_seg": 18,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 11:28:04 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 10:27:26 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 13 Jan 2026 00:25:51 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 23:56:06 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 22:55:50 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 21:59:27 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 21:27:28 GMT",
+        "duration_seg": 17,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 20:57:26 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 20:26:19 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 20:25:59 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 19:27:03 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 18:45:25 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 18:27:42 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 17:55:42 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 17:29:29 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 16:25:36 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 15:56:31 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 15:30:16 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 14:28:25 GMT",
+        "duration_seg": 18,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 14:27:55 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 13:58:37 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 13:57:14 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 12:26:52 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 11:31:14 GMT",
+        "duration_seg": 19,
+        "spot_id": "307f2f1a4d505bb372b0a0384ef9d6c2",
+        "spot_name": "Purolomo"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 11:29:42 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Mon, 12 Jan 2026 10:29:15 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 23:56:02 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 23:00:01 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 21:58:26 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 20:59:08 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 19:27:20 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 18:59:18 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 18:26:56 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 17:56:34 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 16:57:54 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 15:26:16 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 14:55:15 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 13:55:13 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 12:58:02 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 11:58:27 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 11:26:16 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sun, 11 Jan 2026 10:26:07 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 23:27:46 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 22:58:16 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 21:58:11 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 20:57:19 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 19:57:49 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 19:28:24 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 18:26:23 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 16:58:31 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 16:25:16 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 15:28:55 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 14:57:47 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 13:58:20 GMT",
+        "duration_seg": 27,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 12:58:19 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 11:55:46 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 11:28:13 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 10:31:20 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Sat, 10 Jan 2026 00:27:45 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 23:59:08 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 22:56:05 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 22:25:33 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 21:57:33 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 21:27:33 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 19:56:05 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 17:55:56 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 15:59:15 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 14:30:03 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 13:59:00 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 11:28:39 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Fri, 09 Jan 2026 00:29:15 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 23:04:14 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 22:26:24 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 21:47:52 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 21:29:08 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 19:52:04 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 18:04:21 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 15:56:01 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 14:26:32 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 13:57:51 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 11:29:23 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 00:27:11 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Thu, 08 Jan 2026 00:00:35 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 23:01:12 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 22:26:41 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 20:29:37 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 19:33:08 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 19:00:53 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 17:56:40 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 16:25:45 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 14:32:53 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 11:26:05 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Wed, 07 Jan 2026 00:23:16 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 23:58:23 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 22:57:18 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 22:39:40 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 21:49:36 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 21:23:51 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 20:01:38 GMT",
+        "duration_seg": 16,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 18:08:55 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 15:57:37 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 14:27:57 GMT",
+        "duration_seg": 23,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 13:56:14 GMT",
+        "duration_seg": 24,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 11:25:28 GMT",
+        "duration_seg": 26,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      },
+      {
+        "channel_id": "232808",
+        "channel_name": "Radiorama Stereo",
+        "city": "Caracas",
+        "datetime_utc": "Tue, 06 Jan 2026 00:24:44 GMT",
+        "duration_seg": 25,
+        "spot_id": "c7a2bcc027ef3a62b71e2102eade93c4",
+        "spot_name": "Mango Bajito | Tiendas Mango Bajito | Eso es un mango bajito"
+      }
+    ],
+    "meta": {
+      "current_page": 1,
+      "per_page": 5000,
+      "period": {
+        "end": "2026-01-13",
+        "start": "2026-01-06"
+      },
+      "total_pages": 1,
+      "total_records": 128
+    },
+    "status": "success"
+  }
+]

@@ -1,0 +1,968 @@
+{
+  "name": "Kompensa_Flujo_Certificacion",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1nfLAg8aGd_BY7XfeD22Ww9SBrPqbM2i4",
+          "mode": "list",
+          "cachedResultName": "Kompensa",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1nfLAg8aGd_BY7XfeD22Ww9SBrPqbM2i4"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "application/vnd.google-apps.spreadsheet"
+        }
+      },
+      "id": "63db5568-a80d-4e68-b4e3-7f7e70f4a33d",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        224
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/html",
+              "slidesToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "id": "5cb60ccd-6883-4734-9eb3-7ff63dfff4a2",
+      "name": "Download PlayLogger File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        128,
+        128
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validación segura de los inputs\nif (!items[0] || !items[1]) {\n  return [\n    {\n      json: {\n        error: \"No se recibieron los dos objetos requeridos: reporte y orden.\",\n        itemsLength: items.length,\n        msg: \"Verifica el flujo anterior (ej. nodo Merge) para asegurar que ambos objetos estén presentes.\"\n      }\n    }\n  ];\n}\n\nconst rep = items[0].json;\nconst ord = items[1].json;\n\n// Convertir los valores contratados / transmitidos a número con seguridad\nconst contratadas = ord.Total_Cuñas_Contratadas ? Number(ord.Total_Cuñas_Contratadas) : 0;\nconst transmitidas = rep.Total_Cuñas_Transmitidas ? Number(rep.Total_Cuñas_Transmitidas) : 0;\n\n// Calcular faltantes sin que caiga en negativo\nlet faltantes = contratadas - transmitidas;\nif (faltantes < 0) {\n  // En caso de detección de exceso, ajusta a cero o registra como “exceso”\n  faltantes = 0;\n}\n\n// Porcentaje de cumplimiento\nconst porcentaje = contratadas > 0\n  ? ( (transmitidas / contratadas) * 100 ).toFixed(1) + '%'\n  : 'N/A';\n\nreturn [\n  {\n    json: {\n      Cliente: ord.Cliente || null,\n      Producto: ord.Producto || null,\n      Emisora: ord.Emisora || null,\n      Contratadas: contratadas,\n      Transmitidas: transmitidas,\n      Faltantes: faltantes,\n      PorcentajeCumplimiento: porcentaje,\n      // espacio para agregar futura propiedad de desglose diario\n      DetalleComparacion: ord.DetalleProgramadoPorDia && rep.DetallePorDia\n        ? []  // aquí más adelante puedes cruzar los arrays por día\n        : undefined\n    }\n  }\n];\n"
+      },
+      "id": "3bcf4791-ad10-4109-bb7b-1b972ae3cd10",
+      "name": "Code Compare Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "subject": "Certificado de Transmisión",
+        "includeHtml": true,
+        "htmlMessage": "<p>Hola,</p>  <p>Adjunto encontrarás tu <strong>Certificado de Transmisión</strong> correspondiente a la campaña.</p>  <p>Si tienes alguna duda, no dudes en responder a este correo.</p>  <p>Saludos cordiales,<br> Equipo Kompensa</p>",
+        "message": "Hola,  Adjunto encontrarás tu Certificado de Transmisión correspondiente a la campaña.  Si tienes alguna duda, puedes responder este correo.  Saludos cordiales, Equipo Kompensa",
+        "additionalFields": {
+          "toList": [
+            "ventas@solware.agency"
+          ],
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "attachment_0"
+              }
+            ]
+          }
+        }
+      },
+      "id": "3ad8fd79-801b-42cd-8aec-2b5fc3af1673",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        320
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Y72TgSxFqqdSEaAD6l0LeGTcKcBgkwSg9wnhPPVlsKg",
+          "mode": "list",
+          "cachedResultName": "Orden Transmision - Kompensa",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Y72TgSxFqqdSEaAD6l0LeGTcKcBgkwSg9wnhPPVlsKg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1511464662,
+          "mode": "list",
+          "cachedResultName": "Orden Transmision Tipo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Y72TgSxFqqdSEaAD6l0LeGTcKcBgkwSg9wnhPPVlsKg/edit#gid=1511464662"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        320
+      ],
+      "id": "94a9cac7-9236-4042-bd57-205ae0f5c042",
+      "name": "Leer Orden de transmisión",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "H90ISEc1KVrvlcJ9",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items\n  .filter(i => {\n    const c = i.json[\"Completitud (Conteo)\"];\n    return c && c !== \"Anunciante\" && c !== \"Resumen General\";\n  })\n  .map(i => {\n    return {\n      json: {\n        Cliente: i.json[\"Completitud (Conteo)\"],\n        Frec: i.json[\"__EMPTY\"],\n        Estación: i.json[\"__EMPTY_1\"],\n        Campaña: i.json[\"__EMPTY_2\"],\n        Línea_Negocio: i.json[\"__EMPTY_3\"],\n        Version: i.json[\"__EMPTY_4\"],\n        Total_Cuñas_Transmitidas: Number(i.json[\"__EMPTY_27\"])\n      }\n    };\n  })\n  .slice(0, 1);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        128
+      ],
+      "id": "3c98cd24-0cf8-4f18-bbcb-a8772d575944",
+      "name": "Limpiar data playlogger"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        352,
+        128
+      ],
+      "id": "9138e786-ada3-4388-a855-85cfa5b0a9ad",
+      "name": "Extraer info"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items.map(i => i.json);\nconst order = {};\nconst detalleProg = [];\n\n// Primero extraer los campos generales\nfor (const r of rows) {\n  const key = r.col_1;\n  const value = r.col_2;\n  if (!key) continue;\n  switch (key.trim()) {\n    case 'Cliente':\n      order.Cliente = value;\n      break;\n    case 'Producto':\n      order.Producto = value;\n      break;\n    case 'Emisora':\n      order.Emisora = value;\n      break;\n    case 'Dias de transmisión':\n      order.DiasTransmision = value;\n      break;\n    case 'Cuñas diarias':\n      order.CuñasDiarias = Number(value);\n      break;\n    case 'Total cuñas':\n      order.Total_Cuñas_Contratadas = Number(value);\n      break;\n    case 'Periodo':\n      order.Periodo_Inicio = r.col_2;\n      order.Periodo_Fin = r.col_8;\n      break;\n  }\n}\n\n// Luego localizar la fila del desglose diario (por ejemplo, bajo “Emisora” como etiqueta)\nconst filaDesglose = rows.find(r => r.col_1 === order.Emisora);\nif (filaDesglose) {\n  // Suponiendo que col_2 → día 1, col_3 → día 2, etc.\n  for (let i = 2; i < 2 + 31; i++) {\n    const dia = i - 1;\n    const cuñasProg = Number(filaDesglose[`col_${i}`]) || 0;\n    detalleProg.push({ dia: dia, programadas: cuñasProg });\n  }\n}\n\n// Devolver estructura con detalle\nreturn [{\n  json: {\n    Cliente: order.Cliente,\n    Producto: order.Producto,\n    Emisora: order.Emisora,\n    DiasTransmision: order.DiasTransmision,\n    CuñasDiarias: order.CuñasDiarias,\n    Periodo_Inicio: order.Periodo_Inicio,\n    Periodo_Fin: order.Periodo_Fin,\n    Total_Cuñas_Contratadas: order.Total_Cuñas_Contratadas,\n    DetalleProgramadoPorDia: detalleProg\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        320
+      ],
+      "id": "f9d9b0ff-716a-462e-a8f4-b4f7c837869f",
+      "name": "Limpiar Orden"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        224
+      ],
+      "id": "97582773-6f80-48f2-8d82-ae651f20222b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1isxWUrRYkEeFHT-_am7UCwWFs6AnZz31i7Y97VutaZ8",
+          "mode": "list",
+          "cachedResultName": "Plantilla_Certificado_Kompensa",
+          "cachedResultUrl": "https://docs.google.com/document/d/1isxWUrRYkEeFHT-_am7UCwWFs6AnZz31i7Y97VutaZ8/edit?usp=drivesdk"
+        },
+        "name": "={{ $json.Cliente }}-{{ $json.Producto }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA",
+          "mode": "list",
+          "cachedResultName": "colgate palmolive",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        224
+      ],
+      "id": "59062fa1-c134-4803-b5c0-8030a6c61f94",
+      "name": "Copy file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "attachment_0",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "={{ $('Limpiar Orden').first().json.Cliente }}-{{ $('Limpiar Orden').first().json.Producto }}.pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1696,
+        224
+      ],
+      "id": "1037b42c-165b-41da-85d7-aa2a62b9d7f1",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "{{FechaEmision_Certificado}}",
+              "replaceText": "=Por definir"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{ID_Orden}}",
+              "replaceText": "=Por definir"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Cliente}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json.Cliente }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Producto}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json.Producto }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Agencia}}",
+              "replaceText": "=Falta mapear"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Medio}}",
+              "replaceText": "=(Mapear) Radio"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Emisora}}",
+              "replaceText": "={{ $('Limpiar data playlogger').first().json.Frec }}-{{ $('Limpiar data playlogger').first().json['Estación'] }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Dias_Transmision}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json.DiasTransmision }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Cuñas_Diarias}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json['CuñasDiarias'].toString() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Duracion_Seg}}",
+              "replaceText": "MAPEAR"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Horario}}",
+              "replaceText": "MAPEAR"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Periodo_Fin}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json.Periodo_Fin }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Periodo_Inicio}}",
+              "replaceText": "={{ $('Limpiar Orden').first().json.Periodo_Inicio }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Porcentaje_Cumplimiento}}",
+              "replaceText": "={{ $('Code Compare Data').item.json.PorcentajeCumplimiento }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        224
+      ],
+      "id": "768ddb1b-baf7-428c-9c09-885d3f62bb15",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "U7eNAyp62fel4xvM",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk",
+          "mode": "list",
+          "cachedResultName": "Kompensa - Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Demo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID_Orden": "Mapear",
+            "Fecha_Emision_Certificado": "Mapear",
+            "Cliente": "={{ $('Code Compare Data').item.json.Cliente }}",
+            "Producto": "={{ $('Code Compare Data').item.json.Producto }}",
+            "Agencia": "Mapear",
+            "Emisora": "={{ $('Limpiar data playlogger').first().json.Frec }}-{{ $('Limpiar data playlogger').first().json['Estación'] }}",
+            "Dias_Transmision": "={{ $('Limpiar Orden').first().json.DiasTransmision }}",
+            "Cuñas_Diarias": "={{ $('Limpiar Orden').first().json['CuñasDiarias'] }}",
+            "Periodo_Inicio": "={{ $('Limpiar Orden').first().json.Periodo_Inicio }}",
+            "Periodo_Fin": "={{ $('Limpiar Orden').first().json.Periodo_Fin }}",
+            "Total_Cuñas_Contratadas": "={{ $('Code Compare Data').item.json.Contratadas }}",
+            "Total_Cuñas_Transmitidas": "={{ $('Code Compare Data').item.json.Transmitidas }}",
+            "Cuñas_Faltantes": "={{ $('Code Compare Data').item.json.Faltantes }}",
+            "Porcentaje_Cumplimiento": "={{ $('Code Compare Data').item.json.PorcentajeCumplimiento }}",
+            "Archivo_PDF": "={{ $json.webViewLink }}",
+            "Medio": "Mapear",
+            "Duracion_Seg": "Mapear",
+            "Horario": "Mapear",
+            "Cuñas_Compensadas": "Mapear",
+            "Observaciones": "Mapear"
+          },
+          "matchingColumns": [
+            "ID_Orden"
+          ],
+          "schema": [
+            {
+              "id": "ID_Orden",
+              "displayName": "ID_Orden",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha_Emision_Certificado",
+              "displayName": "Fecha_Emision_Certificado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Producto",
+              "displayName": "Producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Agencia",
+              "displayName": "Agencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Medio",
+              "displayName": "Medio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Emisora",
+              "displayName": "Emisora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Dias_Transmision",
+              "displayName": "Dias_Transmision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cuñas_Diarias",
+              "displayName": "Cuñas_Diarias",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Duracion_Seg",
+              "displayName": "Duracion_Seg",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Horario",
+              "displayName": "Horario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo_Inicio",
+              "displayName": "Periodo_Inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Periodo_Fin",
+              "displayName": "Periodo_Fin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total_Cuñas_Contratadas",
+              "displayName": "Total_Cuñas_Contratadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total_Cuñas_Transmitidas",
+              "displayName": "Total_Cuñas_Transmitidas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cuñas_Compensadas",
+              "displayName": "Cuñas_Compensadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cuñas_Faltantes",
+              "displayName": "Cuñas_Faltantes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Porcentaje_Cumplimiento",
+              "displayName": "Porcentaje_Cumplimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Observaciones",
+              "displayName": "Observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Archivo_PDF",
+              "displayName": "Archivo_PDF",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2144,
+        128
+      ],
+      "id": "ca6174cc-cd88-42ad-8675-cfa2bd9729c3",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "H90ISEc1KVrvlcJ9",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "attachment_0",
+        "name": "=Certificado final Kompensa - {{ $('Limpiar Orden').first().json.Cliente }} {{ $('Limpiar Orden').first().json.Producto }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA",
+          "mode": "list",
+          "cachedResultName": "colgate palmolive",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA"
+        },
+        "options": {
+          "simplifyOutput": false
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1920,
+        128
+      ],
+      "id": "65b48bbd-cf02-4f94-980f-793ccfdb7d13",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "exportLinks": {
+            "application/x-vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=ods",
+            "text/tab-separated-values": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=tsv",
+            "application/pdf": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=pdf",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=xlsx",
+            "text/csv": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=csv",
+            "application/zip": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=zip",
+            "application/vnd.oasis.opendocument.spreadsheet": "https://docs.google.com/spreadsheets/export?id=1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY&exportFormat=ods"
+          },
+          "parents": [
+            "1nfLAg8aGd_BY7XfeD22Ww9SBrPqbM2i4"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Solware Agencia",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "02408622960049826757",
+            "emailAddress": "solwareve@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocK9mzRMQhyCr0S4NXlrNlIH36HUru-_PrUGC_SDd9g4U_AwwNM=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Solware Agencia",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "02408622960049826757",
+              "emailAddress": "solwareve@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocK9mzRMQhyCr0S4NXlrNlIH36HUru-_PrUGC_SDd9g4U_AwwNM=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "02408622960049826757",
+              "type": "user",
+              "emailAddress": "solwareve@gmail.com",
+              "role": "owner",
+              "displayName": "Solware Agencia",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocK9mzRMQhyCr0S4NXlrNlIH36HUru-_PrUGC_SDd9g4U_AwwNM=s64",
+              "deleted": false,
+              "pendingOwner": false
+            },
+            {
+              "kind": "drive#permission",
+              "id": "17326739384651352455",
+              "type": "user",
+              "emailAddress": "francisco.vivasvillarreal@gmail.com",
+              "role": "writer",
+              "displayName": "francisco.vivasvillarreal",
+              "photoLink": "https://lh3.googleusercontent.com/a-/ALV-UjUw5O-g1qbMrQjMQWQ21jG1ANYNdZEeyQ-9WuJ2vYYKzDpinRY=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "02408622960049826757",
+            "17326739384651352455"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY",
+          "name": "Playlogger resumen diario",
+          "mimeType": "application/vnd.google-apps.spreadsheet",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "13",
+          "webViewLink": "https://docs.google.com/spreadsheets/d/1a1OK-U33CbKSThWo0yV2o6rEzOHlL1vhW7K4nhcXThY/edit?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.spreadsheet",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBNA_5N5AOFFzxSMDqSlG4drNfL_mFgUT3oqZmW5Us_V_FtOHgQSkMtx_VNSEPoyCTcZNg11cbwDsp-WHhO4ov83B1C0sZGoGQWiI9pbEYVp7CGd_BOcW9IYbf0sIg=s220",
+          "thumbnailVersion": "3",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-10-14T21:16:31.141Z",
+          "createdTime": "2025-10-13T20:11:24.811Z",
+          "modifiedTime": "2025-10-13T20:12:33.260Z",
+          "modifiedByMeTime": "2025-10-13T20:12:33.260Z",
+          "modifiedByMe": true,
+          "shared": true,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "size": "1024",
+          "quotaBytesUsed": "1024",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download PlayLogger File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Leer Orden de transmisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PlayLogger File": {
+      "main": [
+        [
+          {
+            "node": "Extraer info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Compare Data": {
+      "main": [
+        [
+          {
+            "node": "Copy file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        []
+      ]
+    },
+    "Leer Orden de transmisión": {
+      "main": [
+        [
+          {
+            "node": "Limpiar Orden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar data playlogger": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer info": {
+      "main": [
+        [
+          {
+            "node": "Limpiar data playlogger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar Orden": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code Compare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy file": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4c1c153f-da36-4078-ab08-5b8e3ae9e694",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0aef379448f46a7b197468ec98039aa3b83b2fd201f1b47e0d1b1327afad31e"
+  },
+  "id": "P1aNwNcGux5STjm6",
+  "tags": [
+    {
+      "updatedAt": "2025-10-20T16:01:44.319Z",
+      "createdAt": "2025-10-20T16:01:44.319Z",
+      "id": "vfyrt4v18gJ5Rs9e",
+      "name": "Demos"
+    }
+  ]
+}

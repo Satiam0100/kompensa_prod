@@ -1,0 +1,1208 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {}
+          ]
+        }
+      },
+      "id": "7ef081af-738c-4f17-ae7f-3a94d79a98a7",
+      "name": "Cron Trigger - Diario",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        13280,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pruebas: dia simulado como 'hoy' (YYYY-MM-DD).\n// Usa null para fecha real o un string entre comillas, por ejemplo: '2026-02-02'\nconst FECHA_EJECUCION_PRUEBA = '2026-04-13';\n\nconst valorPrueba = FECHA_EJECUCION_PRUEBA == null ? '' : String(FECHA_EJECUCION_PRUEBA).trim();\nif (valorPrueba && !/^\\d{4}-\\d{2}-\\d{2}$/.test(valorPrueba)) {\n  throw new Error(\"FECHA_EJECUCION_PRUEBA debe estar entre comillas y en formato YYYY-MM-DD\");\n}\n\nconst hoyEfectivo = valorPrueba ? new Date(`${valorPrueba}T12:00:00Z`) : new Date();\nif (Number.isNaN(hoyEfectivo.getTime())) {\n  throw new Error(\"Fecha invalida en FECHA_EJECUCION_PRUEBA\");\n}\n\nconst fechaHoy = hoyEfectivo.toISOString().split('T')[0];\nconst esDomingo = hoyEfectivo.getUTCDay() === 0;\n\n// Ventana semanal: 7 dias incluyendo fecha_hoy (hoy y 6 dias hacia atras)\nconst inicioSemanaDate = new Date(hoyEfectivo);\ninicioSemanaDate.setUTCDate(inicioSemanaDate.getUTCDate() - 6);\nconst periodoInicioSemana = inicioSemanaDate.toISOString().split('T')[0];\nconst periodoFinSemana = fechaHoy;\n\nreturn [{\n  json: {\n    fecha_hoy: fechaHoy,\n    es_domingo: esDomingo,\n    generar_certificado: true,\n    periodo_inicio_semana: periodoInicioSemana,\n    periodo_fin_semana: periodoFinSemana,\n    fecha_prueba_usada: valorPrueba || null\n  }\n}];"
+      },
+      "id": "717c0fcf-a907-465f-b158-20e34e409e45",
+      "name": "Code: Calcular Fechas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13504,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const f = $input.first().json;\n\nconst inicio = f.periodo_inicio_semana;\nconst fin = f.periodo_fin_semana;\n\nconst getISOWeek = (dateStr) => {\n  const date = new Date(`${dateStr}T00:00:00Z`);\n  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));\n  const dayNum = d.getUTCDay() || 7;\n  d.setUTCDate(d.getUTCDate() + 4 - dayNum);\n  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));\n  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);\n  return { year: d.getUTCFullYear(), week: String(weekNo).padStart(2, '0') };\n};\n\nconst w = getISOWeek(inicio);\nconst runStamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);\nconst folderName = `Semana_${w.year}-W${w.week}_inicio_${inicio}_fin_${fin}_run_${runStamp}`;\n\nreturn [{\n  json: {\n    ...f,\n    carpeta_semana_nombre: folderName\n  }\n}];"
+      },
+      "id": "3845b9d1-3ec8-4371-8bf5-f7fcb90ecd9d",
+      "name": "Code: Nombre Carpeta Semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13728,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.periodo_inicio_semana }} hasta {{ $json.periodo_fin_semana }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA",
+          "mode": "list",
+          "cachedResultName": "Certificados",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1hQRFkY43O3N5zve_BVbsXb2YXxkK1lQA"
+        },
+        "options": {}
+      },
+      "id": "3dcb0f85-0084-4957-bb76-07f72b66615e",
+      "name": "Google Drive: Crear Carpeta Semana",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        13952,
+        16016
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ordenes_transmision",
+        "matchType": "allFilters"
+      },
+      "id": "5a2d11aa-6565-4299-a57a-de6c0404887b",
+      "name": "Supabase: Campañas Activas",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        14176,
+        16016
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b401c327-5077-441d-a481-5092f3063a98",
+      "name": "Split In Batches - Por Campaña",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        14400,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Salida 'done' de Split In Batches: todas las campañas ya fueron procesadas\nconst fecha = new Date().toISOString().split('T')[0];\nreturn [{ json: { todas_campañas_procesadas: true, fecha: fecha } }];"
+      },
+      "id": "f7e22ad3-0236-4658-a0e2-fbfe7356122c",
+      "name": "Code: Fin de lotes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14624,
+        15824
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-api-key",
+              "name": "api_key",
+              "value": "=mduFkpmfvEJv2NAeyd",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ba9cf04-a70b-47f5-8c9b-03166dd19227",
+      "name": "Set: API Key",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        14624,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://monitoreodigital.net/nueva_app_flask/api/v1/detections",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $json.api_key }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ (() => { const orden = $('Split In Batches - Por Campaña').item.json; const fechas = $('Code: Calcular Fechas').first().json; const s = fechas.periodo_inicio_semana || orden.periodo_inicio; return s > orden.periodo_inicio ? s : orden.periodo_inicio; })() }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ (() => { const orden = $('Split In Batches - Por Campaña').item.json; const fechas = $('Code: Calcular Fechas').first().json; const e = fechas.periodo_fin_semana || orden.periodo_fin; return e < orden.periodo_fin ? e : orden.periodo_fin; })() }}"
+            },
+            {
+              "name": "page",
+              "value": "=1"
+            },
+            {
+              "name": "limit",
+              "value": "=10000"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "c238b228-a4ba-4522-8ea1-21224e447b7f",
+      "name": "HTTP Request: API Detecciones - Página 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14848,
+        16016
+      ],
+      "continueOnFail": true,
+      "notes": "⚠️ IMPORTANTE: Reemplazar 'TU_API_KEY_AQUI' en el nodo 'Set: API Key' con tu API key real"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filtrar detecciones por campaña (filtrado local, NO en API)\n// Estructura real del API: { status, client, meta: { current_page, per_page, total_records, total_pages }, data: [...] }\n// Estructura de cada detección: { channel_id, channel_name, city, datetime_utc, duration_seg, spot_id, spot_name }\nconst response = $input.first().json;\nconst detecciones = response.data || [];\nconst orden = $('Split In Batches - Por Campaña').item.json;\nconst meta = response.meta || {};\n\n// Función para parsear fecha RFC 2822 a YYYY-MM-DD\nconst parsearFechaRFC2822 = (fechaStr) => {\n  if (!fechaStr) return null;\n  try {\n    const fecha = new Date(fechaStr);\n    if (isNaN(fecha.getTime())) return null;\n    const año = fecha.getFullYear();\n    const mes = String(fecha.getMonth() + 1).padStart(2, '0');\n    const dia = String(fecha.getDate()).padStart(2, '0');\n    return `${año}-${mes}-${dia}`;\n  } catch (e) {\n    return null;\n  }\n};\n\n// Sin spot_id/spot_name en la orden: match por cliente o campaña en spot_name del API (primera vez)\nconst ordenSinSpot = !orden.spot_id && !orden.spot_name;\nconst matchPorClienteOCampaña = (d) => {\n  if (!d.spot_name) return false;\n  const sn = d.spot_name.toLowerCase();\n  if (orden.cliente && sn.includes(orden.cliente.toLowerCase())) return true;\n  if (orden.campaña && sn.includes(orden.campaña.toLowerCase())) return true;\n  return false;\n};\n\nconst filtradas = detecciones.filter(d => {\n  const fechaStr = parsearFechaRFC2822(d.datetime_utc);\n  if (!fechaStr) return false;\n  const enRango = fechaStr >= orden.periodo_inicio && fechaStr <= orden.periodo_fin;\n  if (!enRango) return false;\n  \n  const coincideSpot = (\n    (orden.spot_name && d.spot_name && (\n      d.spot_name.toLowerCase().includes(orden.spot_name.toLowerCase()) ||\n      orden.spot_name.toLowerCase().includes(d.spot_name.toLowerCase())\n    )) ||\n    (orden.spot_id && d.spot_id && d.spot_id === orden.spot_id) ||\n    (orden.emisora && d.channel_name && (\n      d.channel_name.toLowerCase().includes(orden.emisora.toLowerCase()) ||\n      orden.emisora.toLowerCase().includes(d.channel_name.toLowerCase())\n    )) ||\n    (orden.emisora && d.channel_id && orden.channel_id && d.channel_id === orden.channel_id) ||\n    (ordenSinSpot && matchPorClienteOCampaña(d))\n  );\n  return coincideSpot;\n});\n\n// Si la orden no tenía spot_id/spot_name y encontramos detecciones, rellenar orden para la próxima vez\nconst actualizar_orden_spot = ordenSinSpot && filtradas.length > 0;\nconst spot_id_obtenido = actualizar_orden_spot ? (filtradas[0].spot_id || null) : null;\nconst spot_name_obtenido = actualizar_orden_spot ? (filtradas[0].spot_name || null) : null;\n\nconst paginaActual = meta.current_page || 1;\nconst totalPaginas = meta.total_pages || 1;\nconst tieneMasPaginas = paginaActual < totalPaginas;\n\nreturn [{\n  json: {\n    detecciones_filtradas: filtradas,\n    total_filtradas: filtradas.length,\n    total_recibidas: detecciones.length,\n    orden: orden,\n    tiene_mas_paginas: tieneMasPaginas,\n    pagina_actual: paginaActual,\n    total_paginas: totalPaginas,\n    actualizar_orden_spot: actualizar_orden_spot,\n    spot_id_obtenido: spot_id_obtenido,\n    spot_name_obtenido: spot_name_obtenido\n  }\n}];"
+      },
+      "id": "d86e685d-7764-4503-9ddb-956c0a16b697",
+      "name": "Code: Filtrar Detecciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15072,
+        16016
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-actualizar-spot",
+              "leftValue": "={{ $json.actualizar_orden_spot }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a46a7f57-2686-4a20-a2e0-d52556bb81cb",
+      "name": "IF: Actualizar Orden Spot",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15296,
+        16112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "ordenes_transmision",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.orden.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "spot_id",
+              "fieldValue": "={{ $json.spot_id_obtenido }}"
+            },
+            {
+              "fieldId": "spot_name",
+              "fieldValue": "={{ $json.spot_name_obtenido }}"
+            }
+          ]
+        }
+      },
+      "id": "ffd9992b-8616-4fc5-b7f9-d62f74e4abed",
+      "name": "Supabase: Update Orden Spot",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15520,
+        16112
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcular métricas del PERIODO DE EVALUACION (semanal) y no de toda la campaña\nconst data = $input.first().json;\nconst detecciones = data.detecciones_filtradas || [];\nconst orden = data.orden;\n\nconst fechas = $('Code: Calcular Fechas').first().json || {};\nconst fechaHoy = fechas.fecha_hoy || new Date().toISOString().split('T')[0];\n\nconst periodoInicioEvaluacion = (() => {\n  const s = fechas.periodo_inicio_semana || orden.periodo_inicio;\n  return s > orden.periodo_inicio ? s : orden.periodo_inicio;\n})();\nconst periodoFinEvaluacion = (() => {\n  const e = fechas.periodo_fin_semana || orden.periodo_fin;\n  return e < orden.periodo_fin ? e : orden.periodo_fin;\n})();\n\nconst parsearFechaRFC2822 = (fechaStr) => {\n  if (!fechaStr) return null;\n  const fecha = new Date(fechaStr);\n  if (isNaN(fecha.getTime())) return null;\n  const año = fecha.getUTCFullYear();\n  const mes = String(fecha.getUTCMonth() + 1).padStart(2, '0');\n  const dia = String(fecha.getUTCDate()).padStart(2, '0');\n  return `${año}-${mes}-${dia}`;\n};\n\nconst porDia = {};\nconst inicio = new Date(`${periodoInicioEvaluacion}T00:00:00Z`);\nconst fin = new Date(`${periodoFinEvaluacion}T00:00:00Z`);\nfor (let d = new Date(inicio); d <= fin; d.setUTCDate(d.getUTCDate() + 1)) {\n  const fechaStr = d.toISOString().split('T')[0];\n  porDia[fechaStr] = 0;\n}\n\ndetecciones.forEach((d) => {\n  const fechaStr = parsearFechaRFC2822(d.datetime_utc);\n  if (fechaStr && Object.prototype.hasOwnProperty.call(porDia, fechaStr)) {\n    porDia[fechaStr] = (porDia[fechaStr] || 0) + 1;\n  }\n});\n\nconst transmitidasHoy = porDia[fechaHoy] || 0;\nconst transmitidasAcum = Object.values(porDia).reduce((a, b) => a + b, 0);\n\nconst milisPorDia = 24 * 60 * 60 * 1000;\nconst diasEvaluacion = Math.max(0, Math.floor((fin - inicio) / milisPorDia) + 1);\nconst cuñasDiarias = Number(orden.cuñas_diarias || 0);\nconst totalContratadasPeriodo = cuñasDiarias * diasEvaluacion;\n\nconst faltantes = Math.max(0, totalContratadasPeriodo - transmitidasAcum);\nconst excedentes = Math.max(0, transmitidasAcum - totalContratadasPeriodo);\nconst kompensadas = excedentes;\n\nlet estado = 'atrasado';\nif (transmitidasAcum >= totalContratadasPeriodo) {\n  estado = transmitidasAcum > totalContratadasPeriodo ? 'en_compensacion' : 'cumple';\n}\n\nconst porcentajeCumplimiento = totalContratadasPeriodo > 0\n  ? ((transmitidasAcum / totalContratadasPeriodo) * 100).toFixed(1)\n  : '0.0';\n\nreturn [{\n  json: {\n    orden,\n    fecha_hoy: fechaHoy,\n    periodo_inicio_evaluacion: periodoInicioEvaluacion,\n    periodo_fin_evaluacion: periodoFinEvaluacion,\n    dias_evaluacion: diasEvaluacion,\n    total_contratadas_periodo: totalContratadasPeriodo,\n    transmitidas_dia: transmitidasHoy,\n    transmitidas_acumuladas: transmitidasAcum,\n    faltantes,\n    excedentes,\n    kompensadas,\n    estado,\n    porcentaje_cumplimiento: porcentajeCumplimiento,\n    detalle_por_dia: porDia,\n    total_detecciones: detecciones.length\n  }\n}];"
+      },
+      "id": "89277dcb-6388-4855-b48d-19441f03ac74",
+      "name": "Code: Calcular Métricas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15296,
+        15920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "resumen_campaña",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "campaña_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.orden.id }}"
+            },
+            {
+              "keyName": "fecha",
+              "condition": "eq",
+              "keyValue": "={{ $json.fecha_hoy ? $json.fecha_hoy : $now.toISO().split('T')[0] }}"
+            }
+          ]
+        }
+      },
+      "id": "c8a1798f-f7e1-4181-a7cd-82bd314f4a23",
+      "name": "Supabase: Get Resumen Existente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15520,
+        15920
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition-exists",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "33ffd3f7-4de0-423b-97ae-415766300d00",
+      "name": "IF: Resumen Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15744,
+        15920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "resumen_campaña",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "transmitidas_dia",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.transmitidas_dia }}"
+            },
+            {
+              "fieldId": "transmitidas_acumuladas",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.transmitidas_acumuladas }}"
+            },
+            {
+              "fieldId": "faltantes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.faltantes }}"
+            },
+            {
+              "fieldId": "excedentes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.excedentes }}"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.estado }}"
+            }
+          ]
+        }
+      },
+      "id": "18253f4b-9117-45ec-9840-cef39bc5aa06",
+      "name": "Supabase: Update Resumen",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15968,
+        15824
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "resumen_campaña",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "campaña_id",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.orden.id }}"
+            },
+            {
+              "fieldId": "fecha",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.fecha_hoy ? $('Code: Calcular Métricas').first().json.fecha_hoy : $now.toISO().split('T')[0] }}"
+            },
+            {
+              "fieldId": "transmitidas_dia",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.transmitidas_dia }}"
+            },
+            {
+              "fieldId": "transmitidas_acumuladas",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.transmitidas_acumuladas }}"
+            },
+            {
+              "fieldId": "faltantes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.faltantes }}"
+            },
+            {
+              "fieldId": "excedentes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.excedentes }}"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.estado }}"
+            }
+          ]
+        }
+      },
+      "id": "eba829e5-e580-4134-90cc-28bfa42424f1",
+      "name": "Supabase: Create Resumen",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15968,
+        16016
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition-cert-001",
+              "leftValue": "={{ (() => { const m = $('Code: Calcular Métricas').first().json; return (Number(m.total_contratadas_periodo || 0) > 0) || (Number(m.transmitidas_acumuladas || 0) > 0) || (Number(m.faltantes || 0) > 0) || (Number(m.kompensadas || 0) > 0) || (Number(m.excedentes || 0) > 0); })() }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9231d039-9c15-46c3-8ead-e417f07fc2fd",
+      "name": "IF: Generar Certificado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        16192,
+        15920
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "1vI6JbXu8DoctwHQo1YwqxBvvoNc6xGBW66_P-8TzKVI",
+          "mode": "list",
+          "cachedResultName": "Certificado_Kompensa_1",
+          "cachedResultUrl": "https://docs.google.com/document/d/1vI6JbXu8DoctwHQo1YwqxBvvoNc6xGBW66_P-8TzKVI/edit?usp=drivesdk"
+        },
+        "name": "=   {{ $('Code: Calcular Métricas').first().json.orden.cliente }}-{{ $('Code: Calcular Métricas').first().json.orden.campaña }}-{{ $('Code: Calcular Métricas').first().json.orden.periodo_inicio }}",
+        "sameFolder": false,
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive: Crear Carpeta Semana').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "e3b9a21a-74b9-4fef-bd82-42985b7dc4bc",
+      "name": "Google Drive: Copy Template",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16416,
+        15848
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "replaceAll",
+              "text": "{{FechaEmision_Certificado}}",
+              "replaceText": "={{ (() => { const f = $('Code: Calcular Métricas').first().json.fecha_hoy || $now.toISO().split('T')[0]; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; })() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Cliente}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.orden.cliente }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Producto}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.orden.campaña }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Emisora}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.orden.emisora }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Periodo_Inicio}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.periodo_inicio_evaluacion }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Periodo_Fin}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.periodo_fin_evaluacion }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Transmitidas}}",
+              "replaceText": "={{ String($('Code: Calcular Métricas').first().json.transmitidas_acumuladas) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Contratadas}}",
+              "replaceText": "={{ String($('Code: Calcular Métricas').first().json.total_contratadas_periodo) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Faltantes}}",
+              "replaceText": "={{ String($('Code: Calcular Métricas').first().json.faltantes) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Excedentes}}",
+              "replaceText": "={{ String($('Code: Calcular Métricas').first().json.excedentes) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Kompensadas}}",
+              "replaceText": "={{ String($('Code: Calcular Métricas').first().json.kompensadas) }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Fecha_de_Emisión}}",
+              "replaceText": "={{ (() => { const f = $('Code: Calcular Métricas').first().json.fecha_hoy || $now.toISO().split('T')[0]; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; })() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Fecha de Emisión}}",
+              "replaceText": "={{ (() => { const f = $('Code: Calcular Métricas').first().json.fecha_hoy || $now.toISO().split('T')[0]; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; })() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Fecha_Emision}}",
+              "replaceText": "={{ (() => { const f = $('Code: Calcular Métricas').first().json.fecha_hoy || $now.toISO().split('T')[0]; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; })() }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Estado}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.estado === 'cumple' ? 'Cumple' : $('Code: Calcular Métricas').first().json.estado === 'atrasado' ? 'Atrasado' : 'En Compensación' }}"
+            },
+            {
+              "action": "replaceAll",
+              "text": "{{Porcentaje_Cumplimiento}}",
+              "replaceText": "={{ $('Code: Calcular Métricas').first().json.porcentaje_cumplimiento }}%"
+            }
+          ]
+        }
+      },
+      "id": "eda18f31-cc3a-40b2-a4b4-62b3b78bd403",
+      "name": "Google Docs: Update Document",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        16640,
+        15848
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "U7eNAyp62fel4xvM",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.documentId }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "certificado_pdf",
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          },
+          "fileName": "={{ $('Code: Calcular Métricas').first().json.orden.cliente }}-{{ $('Code: Calcular Métricas').first().json.orden.campaña }}-{{ $('Code: Calcular Métricas').first().json.orden.periodo_inicio }}.pdf"
+        }
+      },
+      "id": "727519fc-6408-49fe-8323-933e7285826a",
+      "name": "Google Drive: Download as PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16864,
+        15848
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "certificado_pdf",
+        "name": "={{ $('Google Drive: Copy Template').item.json.name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive: Crear Carpeta Semana').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "8751a157-69ee-4da7-9a66-b7de7dc948ed",
+      "name": "Google Drive: Upload PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        17312,
+        15848
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "I5TTI0A94OmVpKcF",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "certificados_emitidos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "campaña_id",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.orden.id }}"
+            },
+            {
+              "fieldId": "semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.orden.periodo_inicio }}"
+            },
+            {
+              "fieldId": "transmitidas",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.transmitidas_acumuladas }}"
+            },
+            {
+              "fieldId": "faltantes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.faltantes }}"
+            },
+            {
+              "fieldId": "excedentes",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.excedentes }}"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "={{ $('Code: Calcular Métricas').first().json.estado }}"
+            },
+            {
+              "fieldId": "pdf_url",
+              "fieldValue": "={{ $json.webViewLink || $json.webContentLink }}"
+            },
+            {
+              "fieldId": "fecha_envio",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "fbdeb2d1-41d3-4535-b465-e55b388cb354",
+      "name": "Supabase: Insert Certificado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        17536,
+        15848
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "wfNuCU8MBiKCwyLP",
+          "name": "Solware Cloud"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subject": "=Certificado de Transmisión - {{ $('Code: Calcular Métricas').first().json.orden.campaña }} - Semana {{ $('Code: Calcular Métricas').first().json.periodo_inicio_evaluacion }} a {{ $('Code: Calcular Métricas').first().json.periodo_fin_evaluacion }}",
+        "includeHtml": true,
+        "htmlMessage": "=<p>Hola,</p><p>Adjunto encontrarás tu <strong>Certificado de Transmisión</strong> correspondiente a la campaña <strong>{{ $('Code: Calcular Métricas').first().json.orden.campaña }}</strong>.</p><p><strong>Periodo evaluado:</strong> {{ $('Code: Calcular Métricas').first().json.periodo_inicio_evaluacion }} al {{ $('Code: Calcular Métricas').first().json.periodo_fin_evaluacion }}<br><strong>Fecha de Emisión:</strong> {{ (() => { const f = $('Code: Calcular Métricas').first().json.fecha_hoy || $now.toISO().split('T')[0]; const [y,m,d] = f.split('-'); return `${d}/${m}/${y}`; })() }}</p><p><strong>Resumen:</strong></p><ul><li>Contratadas: {{ $('Code: Calcular Métricas').first().json.total_contratadas_periodo }}</li><li>Transmitidas: {{ $('Code: Calcular Métricas').first().json.transmitidas_acumuladas }}</li><li>Kompensadas: {{ $('Code: Calcular Métricas').first().json.kompensadas }}</li><li>Faltantes: {{ $('Code: Calcular Métricas').first().json.faltantes }}</li><li>Estado: {{ $('Code: Calcular Métricas').first().json.estado === 'cumple' ? 'Cumple' : $('Code: Calcular Métricas').first().json.estado === 'atrasado' ? 'Atrasado' : 'En Compensación' }}</li></ul><p>Si tienes alguna duda, no dudes en responder a este correo.</p><p>Saludos cordiales,<br>Equipo Kompensa</p>",
+        "message": "=Hola, Adjunto encontrarás tu Certificado de Transmisión correspondiente a la campaña. Si tienes alguna duda, puedes responder este correo. Saludos cordiales, Equipo Kompensa",
+        "additionalFields": {
+          "toList": [
+            "=solwareve@gmail.com"
+          ],
+          "ccList": [
+            "ventas@solware.agency"
+          ],
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "certificado_pdf"
+              }
+            ]
+          }
+        }
+      },
+      "id": "35f09580-73c7-48cd-8bdc-ee68bfbdcb4a",
+      "name": "Gmail: Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        17088,
+        15848
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Solware"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk",
+          "mode": "list",
+          "cachedResultName": "Kompensa - Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2096821022,
+          "mode": "list",
+          "cachedResultName": "Certificados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IQt1I8uOly758fF2EpnS0cpMOUBW6VN6sae1-AmXrfk/edit#gid=2096821022"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $('Code: Calcular Fechas').first().json.fecha_hoy }}",
+            "Cliente": "={{ $('Code: Calcular Métricas').first().json.orden.cliente }}",
+            "Campaña": "={{ $('Code: Calcular Métricas').first().json.orden.campaña }}",
+            "Transmitidas_Semana": "={{ $('Code: Calcular Métricas').first().json.transmitidas_acumuladas }}",
+            "Faltantes": "={{ $('Code: Calcular Métricas').first().json.faltantes }}",
+            "Estado": "={{ $('Code: Calcular Métricas').first().json.estado === 'cumple' ? 'Cumple' : $('Code: Calcular Métricas').first().json.estado === 'atrasado' ? 'Atrasado' : 'En Compensación' }}",
+            "Link_PDF": "={{ $if($('Google Drive: Upload PDF').isExecuted, $('Google Drive: Upload PDF').first().json.webViewLink, 'N/A') }}"
+          },
+          "matchingColumns": [
+            "Fecha",
+            "Cliente",
+            "Campaña"
+          ],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Campaña",
+              "displayName": "Campaña",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transmitidas_Semana",
+              "displayName": "Transmitidas_Semana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Faltantes",
+              "displayName": "Faltantes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link_PDF",
+              "displayName": "Link_PDF",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2cc95912-2ae7-4c7e-9f83-853234084120",
+      "name": "Google Sheets: Append/Update",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        17760,
+        16040
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "H90ISEc1KVrvlcJ9",
+          "name": "Solware"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron Trigger - Diario": {
+      "main": [
+        [
+          {
+            "node": "Code: Calcular Fechas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Calcular Fechas": {
+      "main": [
+        [
+          {
+            "node": "Code: Nombre Carpeta Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Nombre Carpeta Semanal": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Crear Carpeta Semana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Crear Carpeta Semana": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Campañas Activas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Campañas Activas": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches - Por Campaña": {
+      "main": [
+        [
+          {
+            "node": "Code: Fin de lotes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set: API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: API Key": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: API Detecciones - Página 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: API Detecciones - Página 1": {
+      "main": [
+        [
+          {
+            "node": "Code: Filtrar Detecciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Filtrar Detecciones": {
+      "main": [
+        [
+          {
+            "node": "Code: Calcular Métricas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF: Actualizar Orden Spot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Actualizar Orden Spot": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Update Orden Spot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Calcular Métricas": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Resumen Existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Resumen Existente": {
+      "main": [
+        [
+          {
+            "node": "IF: Resumen Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Resumen Existe": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Update Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase: Create Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Update Resumen": {
+      "main": [
+        [
+          {
+            "node": "IF: Generar Certificado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Create Resumen": {
+      "main": [
+        [
+          {
+            "node": "IF: Generar Certificado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Generar Certificado": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Copy Template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets: Append/Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Copy Template": {
+      "main": [
+        [
+          {
+            "node": "Google Docs: Update Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs: Update Document": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Download as PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Download as PDF": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Upload PDF": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Insert Certificado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Insert Certificado": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Append/Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Send Email": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Upload PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Append/Update": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0aef379448f46a7b197468ec98039aa3b83b2fd201f1b47e0d1b1327afad31e"
+  }
+}

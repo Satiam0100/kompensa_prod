@@ -1,0 +1,209 @@
+{
+  "name": "Kompensa - Prueba API Detecciones",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-001",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-api-key",
+              "name": "api_key",
+              "value": "={{ $env.API_DETECCIONES_KEY || 'clave_demo_123' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-start-date",
+              "name": "start_date",
+              "value": "={{ $now.minus({days: 7}).toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-end-date",
+              "name": "end_date",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-page",
+              "name": "page",
+              "value": "1",
+              "type": "string"
+            },
+            {
+              "id": "assign-limit",
+              "name": "limit",
+              "value": "100",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-params-001",
+      "name": "Set: Parámetros API",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://monitoreodigital.net/nueva_app_flask/api/v1/detections",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $json.api_key }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $json.start_date }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $json.end_date }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $json.page }}"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $json.limit }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "http-request-test-001",
+      "name": "HTTP Request: API Detecciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analizar respuesta del API\nconst response = $input.first().json;\n\n// Extraer información de la respuesta\nconst status = response.status;\nconst client = response.client;\nconst meta = response.meta || {};\nconst data = response.data || [];\n\n// Información de paginación\nconst paginacion = {\n  pagina_actual: meta.current_page || 1,\n  por_pagina: meta.per_page || 100,\n  total_registros: meta.total_records || 0,\n  total_paginas: meta.total_pages || 1,\n  periodo: meta.period || {}\n};\n\n// Analizar estructura de las detecciones\nlet estructuraDeteccion = null;\nlet ejemploDeteccion = null;\n\nif (data.length > 0) {\n  ejemploDeteccion = data[0];\n  estructuraDeteccion = {\n    campos: Object.keys(ejemploDeteccion),\n    tipos: {}\n  };\n  \n  // Determinar tipos de datos\n  Object.keys(ejemploDeteccion).forEach(key => {\n    const valor = ejemploDeteccion[key];\n    estructuraDeteccion.tipos[key] = typeof valor;\n  });\n}\n\n// Agrupar por campos clave para análisis\nconst agrupaciones = {\n  por_canal: {},\n  por_spot: {},\n  por_ciudad: {},\n  por_fecha: {}\n};\n\ndata.forEach(d => {\n  // Por canal\n  const canal = d.channel_name || 'Sin canal';\n  agrupaciones.por_canal[canal] = (agrupaciones.por_canal[canal] || 0) + 1;\n  \n  // Por spot\n  const spot = d.spot_name || 'Sin spot';\n  agrupaciones.por_spot[spot] = (agrupaciones.por_spot[spot] || 0) + 1;\n  \n  // Por ciudad\n  const ciudad = d.city || 'Sin ciudad';\n  agrupaciones.por_ciudad[ciudad] = (agrupaciones.por_ciudad[ciudad] || 0) + 1;\n  \n  // Por fecha (parsear formato RFC 2822: \"Mon, 12 Jan 2026 23:56:06 GMT\")\n  if (d.datetime_utc) {\n    try {\n      const fechaObj = new Date(d.datetime_utc);\n      if (!isNaN(fechaObj.getTime())) {\n        const año = fechaObj.getFullYear();\n        const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');\n        const dia = String(fechaObj.getDate()).padStart(2, '0');\n        const fecha = `${año}-${mes}-${dia}`;\n        agrupaciones.por_fecha[fecha] = (agrupaciones.por_fecha[fecha] || 0) + 1;\n      }\n    } catch (e) {\n      // Si falla el parseo, usar string vacío\n      agrupaciones.por_fecha[''] = (agrupaciones.por_fecha[''] || 0) + 1;\n    }\n  }\n});\n\nreturn [{\n  json: {\n    // Información general\n    status: status,\n    client: client,\n    \n    // Paginación\n    paginacion: paginacion,\n    \n    // Estructura de datos\n    total_detecciones_recibidas: data.length,\n    estructura_deteccion: estructuraDeteccion,\n    ejemplo_deteccion: ejemploDeteccion,\n    \n    // Agrupaciones para análisis\n    agrupaciones: agrupaciones,\n    \n    // Respuesta completa (para inspección)\n    respuesta_completa: response,\n    \n    // Resumen\n    resumen: {\n      mensaje: `API respondió con status: ${status}`,\n      total_registros: paginacion.total_registros,\n      registros_en_pagina: data.length,\n      tiene_mas_paginas: paginacion.pagina_actual < paginacion.total_paginas,\n      campos_por_deteccion: estructuraDeteccion ? estructuraDeteccion.campos.length : 0\n    }\n  }\n}];"
+      },
+      "id": "code-analizar-001",
+      "name": "Code: Analizar Respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-output",
+              "name": "resultado_prueba",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-output-001",
+      "name": "Set: Resultado Final",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        224
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set: Parámetros API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Parámetros API": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: API Detecciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: API Detecciones": {
+      "main": [
+        [
+          {
+            "node": "Code: Analizar Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Analizar Respuesta": {
+      "main": [
+        [
+          {
+            "node": "Set: Resultado Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Kompensa",
+      "id": "kompensa-tag"
+    },
+    {
+      "name": "Prueba",
+      "id": "prueba-tag"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-20T00:00:00.000Z",
+  "versionId": "prueba-api-v1"
+}
+
