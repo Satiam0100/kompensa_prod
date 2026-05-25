@@ -12,8 +12,8 @@ export async function OrdenesData() {
         </p>
         <p className="text-body-sm opacity-90">{result.error}</p>
         <p className="text-label-sm mt-3 text-on-surface-variant">
-          Revisa las variables de entorno en{" "}
-          <code className="font-label-mono">.env.local</code> y la conexión a
+          Revisa las variables de entorno (Vercel o{" "}
+          <code className="font-label-mono">.env.local</code>) y la conexión a
           Supabase.
         </p>
       </div>

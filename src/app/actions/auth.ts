@@ -22,18 +22,11 @@ export async function login(
     return { success: false, error: "Usuario y contraseña son obligatorios." };
   }
 
-  try {
-    if (!verifyCredentials(user, password)) {
-      return { success: false, error: "Credenciales incorrectas." };
-    }
-
-    await setSessionCookie(user);
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Error de configuración de auth";
-    return { success: false, error: message };
+  if (!verifyCredentials(user, password)) {
+    return { success: false, error: "Credenciales incorrectas." };
   }
 
+  await setSessionCookie(user);
   redirect("/ordenes/nueva");
 }
 

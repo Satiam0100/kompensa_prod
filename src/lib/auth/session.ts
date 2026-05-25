@@ -2,27 +2,7 @@ import { createHash, timingSafeEqual } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE, SESSION_MAX_AGE_SEC } from "./constants";
-
-function getSecret() {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length < 16) {
-    throw new Error(
-      "AUTH_SECRET no está configurado (mínimo 16 caracteres en .env.local)",
-    );
-  }
-  return new TextEncoder().encode(secret);
-}
-
-export function getAuthCredentials() {
-  const password = process.env.AUTH_PASSWORD;
-  if (!password) {
-    throw new Error("AUTH_PASSWORD no está configurado en .env.local");
-  }
-  return {
-    user: process.env.AUTH_USER ?? "admin",
-    password,
-  };
-}
+import { getAuthCredentials, getAuthSecretBytes } from "./config";
 
 function hashValue(value: string) {
   return createHash("sha256").update(value).digest();
@@ -50,12 +30,12 @@ export async function createSessionToken(username: string) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_SEC}s`)
-    .sign(getSecret());
+    .sign(getAuthSecretBytes());
 }
 
 export async function verifySessionToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, getSecret());
+    const { payload } = await jwtVerify(token, getAuthSecretBytes());
     return typeof payload.sub === "string" ? payload.sub : null;
   } catch {
     return null;

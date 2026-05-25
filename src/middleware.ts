@@ -1,18 +1,11 @@
 import { jwtVerify } from "jose";
 import { type NextRequest, NextResponse } from "next/server";
+import { getAuthSecretBytes } from "@/lib/auth/config";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
 
-function getSecret() {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret) return null;
-  return new TextEncoder().encode(secret);
-}
-
 async function isValidSession(token: string) {
-  const secret = getSecret();
-  if (!secret) return false;
   try {
-    await jwtVerify(token, secret);
+    await jwtVerify(token, getAuthSecretBytes());
     return true;
   } catch {
     return false;
