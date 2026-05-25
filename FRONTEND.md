@@ -4,8 +4,9 @@ Panel web en **Next.js 16** + **TypeScript** + **Tailwind CSS v4** para crear ó
 
 ## Estructura
 
+La app Next.js vive en la **raíz del repositorio** (junto a los flujos n8n y SQL), para que Vercel detecte Next.js sin configurar Root Directory.
+
 ```
-frontend/
 ├── public/
 │   └── kompensa-logo.jpeg
 ├── src/
@@ -40,7 +41,6 @@ Los iconos usan [@mui/icons-material](https://mui.com/material-ui/material-icons
 ## Configuración
 
 ```bash
-cd frontend
 cp .env.example .env.local
 # Editar .env.local: AUTH_* (login) y Supabase
 pnpm install
@@ -85,12 +85,9 @@ Abrir [http://localhost:3000](http://localhost:3000) → redirige a `/ordenes/nu
 
 ## Deploy en Vercel
 
-### Opción A (recomendada): raíz del proyecto = `frontend`
-
 1. Importa el repo en [Vercel](https://vercel.com).
-2. **Root Directory** → `frontend`
-3. Framework: **Next.js** (auto-detectado).
-4. Variables de entorno (Production):
+2. Dejá **Root Directory vacío** (raíz del repo). Vercel detecta **Next.js** y **Node 20+** desde `package.json`.
+3. Variables de entorno (Production):
 
 | Variable | Requerida |
 |----------|-----------|
@@ -101,14 +98,11 @@ Abrir [http://localhost:3000](http://localhost:3000) → redirige a `/ordenes/nu
 | `AUTH_PASSWORD` | Sí |
 | `AUTH_SECRET` | Sí (32+ caracteres) |
 
-5. Deploy. El archivo `frontend/vercel.json` aplica región `gru1`, caché de estáticos, headers de seguridad e `ignoreCommand` (omite el build si no hubo cambios en `frontend/`).
-
-> `rootDirectory` no va en `vercel.json`; solo en **Project Settings → Root Directory**.
+4. Deploy. El `vercel.json` en la raíz aplica región `gru1`, caché de estáticos, headers de seguridad e `ignoreCommand` (omite el build si solo cambiaron flujos n8n/SQL, no la app).
 
 ### CLI
 
 ```bash
-cd frontend
 pnpm dlx vercel
 pnpm dlx vercel --prod
 ```

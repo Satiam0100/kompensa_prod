@@ -14,12 +14,24 @@ Sistema completo de verificación y certificación de transmisiones publicitaria
 ## Estructura del Proyecto
 
 ```
-Kompensa/
+kompensa_prod/
+├── src/                             # Panel Next.js (órdenes de transmisión)
+├── package.json                     # Next.js + Node 20+ (deploy Vercel sin subcarpeta)
 ├── supabase-migrations.sql          # Migraciones SQL para Supabase
 ├── flujo-a-ingesta-ordenes.json     # Flujo n8n: Ingesta de órdenes por correo
 ├── flujo-b-ejecucion-automatica.json # Flujo n8n: Ejecución automática diaria/semanal
+├── FRONTEND.md                      # Documentación del panel web
 └── README.md                        # Esta documentación
 ```
+
+### Panel web (local)
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Ver [FRONTEND.md](./FRONTEND.md) para variables de entorno y deploy en Vercel.
 
 ## Instalación y Configuración
 
