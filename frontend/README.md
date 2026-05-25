@@ -101,11 +101,9 @@ Abrir [http://localhost:3000](http://localhost:3000) → redirige a `/ordenes/nu
 | `AUTH_PASSWORD` | Sí |
 | `AUTH_SECRET` | Sí (32+ caracteres) |
 
-5. Deploy. El archivo `frontend/vercel.json` aplica región `gru1`, caché de estáticos y headers de seguridad.
+5. Deploy. El archivo `frontend/vercel.json` aplica región `gru1`, caché de estáticos, headers de seguridad e `ignoreCommand` (omite el build si no hubo cambios en `frontend/`).
 
-### Opción B: raíz del repositorio
-
-Usa el `vercel.json` en la raíz del monorepo (apunta a `frontend/`). No configures Root Directory manualmente.
+> `rootDirectory` no va en `vercel.json`; solo en **Project Settings → Root Directory**.
 
 ### CLI
 
