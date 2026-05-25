@@ -2,6 +2,7 @@ import Image from "next/image";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ThemeSettingsButton } from "@/components/theme/ThemeSettingsButton";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { isAuthConfigured } from "@/lib/auth/config";
 
 export const metadata = {
   title: "Iniciar sesión | Kompensa",
@@ -42,6 +43,13 @@ export default function LoginPage() {
           <h2 className="text-title-md text-on-surface mb-6">
             Iniciar sesión
           </h2>
+
+          {!isAuthConfigured() && (
+            <p className="text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2 mb-4">
+              Modo temporal (sin variables AUTH en Vercel): usuario{" "}
+              <strong>admin</strong>, contraseña <strong>admin</strong>.
+            </p>
+          )}
 
           <LoginForm />
         </div>
