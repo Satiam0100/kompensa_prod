@@ -3,11 +3,12 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { crearOrdenTransmision } from "@/app/actions/ordenes";
+import { FormDateField } from "@/components/ui/FormDateField";
 import {
   FormField,
-  FormSelect,
   SectionCard,
 } from "@/components/ui/FormField";
+import { FormSelect } from "@/components/ui/FormSelect";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import type { EstadoOrden, OrdenTransmisionForm } from "@/lib/types/orden-transmision";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
@@ -119,6 +120,11 @@ export function TransmissionOrderForm() {
               name="ciudad"
               placeholder="Ubicación geográfica"
             />
+            <FormField
+              label="Agencia"
+              name="agencia"
+              placeholder="Agencia aliada"
+            />
           </div>
         </SectionCard>
 
@@ -139,11 +145,6 @@ export function TransmissionOrderForm() {
                 { value: "pausada", label: "Pausada" },
                 { value: "finalizada", label: "Finalizada" },
               ]}
-            />
-            <FormField
-              label="Agencia"
-              name="agencia"
-              placeholder="Agencia aliada"
             />
             <FormField
               label="Email Cliente"
@@ -181,21 +182,15 @@ export function TransmissionOrderForm() {
               icon="functions"
               placeholder="0"
             />
-            <FormField
+            <FormDateField
               label="Periodo Inicio"
               name="periodo_inicio"
-              type="date"
               required
-              icon="calendar_today"
-              className="[color-scheme:dark]"
             />
-            <FormField
+            <FormDateField
               label="Periodo Fin"
               name="periodo_fin"
-              type="date"
               required
-              icon="event_available"
-              className="[color-scheme:dark]"
             />
           </div>
           <div className="mt-6">

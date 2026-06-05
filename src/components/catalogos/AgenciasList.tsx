@@ -2,6 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { ActivaBadge } from "@/components/catalogos/ActivaBadge";
+import {
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+} from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import type { AgenciaRow } from "@/lib/types/catalogo";
 
@@ -54,14 +58,14 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-lg flex-1 max-w-md">
-          <MaterialIcon name="search" className="text-outline-variant text-sm" />
+        <div className={`${FORM_FIELD_CONTROL_PLAIN} flex-1 max-w-md`}>
+          <MaterialIcon name="search" className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por nombre, dirección, clientes..."
-            className="w-full bg-transparent border-none text-body-sm text-on-surface focus:ring-0"
+            className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>
         <p className="text-label-sm text-on-surface-variant">

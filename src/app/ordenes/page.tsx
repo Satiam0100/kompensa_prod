@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function OrdenesPage() {
   return (
-    <AppShell topBarTitle="Cuñas Registradas">
+    <AppShell>
       <div className="max-w-6xl mx-auto p-8 pb-16">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>

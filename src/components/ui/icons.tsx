@@ -2,6 +2,8 @@ import Add from "@mui/icons-material/Add";
 import Badge from "@mui/icons-material/Badge";
 import BrightnessAuto from "@mui/icons-material/BrightnessAuto";
 import CalendarToday from "@mui/icons-material/CalendarToday";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Close from "@mui/icons-material/Close";
 import DarkMode from "@mui/icons-material/DarkMode";
@@ -33,6 +35,8 @@ export const ICONS = {
   badge: Badge,
   brightness_auto: BrightnessAuto,
   calendar_today: CalendarToday,
+  chevron_left: ChevronLeft,
+  chevron_right: ChevronRight,
   check_circle: CheckCircle,
   close: Close,
   dark_mode: DarkMode,

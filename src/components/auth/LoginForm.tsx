@@ -2,6 +2,10 @@
 
 import { useActionState } from "react";
 import { login, type LoginResult } from "@/app/actions/auth";
+import {
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+} from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 const initialState: LoginResult | null = null;
@@ -18,15 +22,17 @@ export function LoginForm() {
         >
           Usuario
         </label>
-        <input
-          id="user"
-          name="user"
-          type="text"
-          autoComplete="username"
-          required
-          placeholder="admin"
-          className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus transition-all"
-        />
+        <div className={FORM_FIELD_CONTROL_PLAIN}>
+          <input
+            id="user"
+            name="user"
+            type="text"
+            autoComplete="username"
+            required
+            placeholder="admin"
+            className={FORM_FIELD_INPUT}
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -36,15 +42,17 @@ export function LoginForm() {
         >
           Contraseña
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          placeholder="••••••••"
-          className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus transition-all"
-        />
+        <div className={FORM_FIELD_CONTROL_PLAIN}>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            placeholder="••••••••"
+            className={FORM_FIELD_INPUT}
+          />
+        </div>
       </div>
 
       {state && !state.success && (

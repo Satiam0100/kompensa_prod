@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
+import {
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+} from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { formatFecha, formatPeriodo } from "@/lib/format";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
@@ -56,14 +60,14 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-lg flex-1 max-w-md">
-          <MaterialIcon name="search" className="text-outline-variant text-sm" />
+        <div className={`${FORM_FIELD_CONTROL_PLAIN} flex-1 max-w-md`}>
+          <MaterialIcon name="search" className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar por cliente, campaña, emisora..."
-            className="w-full bg-transparent border-none text-body-sm text-on-surface focus:ring-0"
+            className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>
         <p className="text-label-sm text-on-surface-variant">

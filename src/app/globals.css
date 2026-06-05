@@ -175,10 +175,183 @@
   font-family: var(--font-mono-label);
 }
 
-.form-input-focus:focus {
+/* Layout/base de campos: hover y focus vía Tailwind en form-field-classes.ts */
+
+.form-field-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding-block: 12px;
+  font-size: var(--text-body-md);
+  line-height: var(--text-body-md--line-height);
+  font-weight: var(--text-body-md--font-weight);
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  cursor: text;
   outline: none;
-  border-color: #ffb59e;
-  box-shadow: 0 0 0 1px #ffb59e;
+  box-shadow: none;
+}
+
+.form-field-input:focus,
+.form-field-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.form-field-input::placeholder {
+  color: var(--color-on-surface-variant);
+}
+
+.form-field-input[type="number"]::-webkit-inner-spin-button,
+.form-field-input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.65;
+}
+
+.form-field-input[type="number"]:hover::-webkit-inner-spin-button,
+.form-field-input[type="number"]:hover::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+select.form-field-input {
+  cursor: pointer;
+  appearance: none;
+}
+
+.form-field-control--open {
+  border-color: var(--color-tertiary);
+  box-shadow: 0 0 0 1px var(--color-tertiary);
+}
+
+.form-select-field {
+  position: relative;
+}
+
+.form-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding-block: 12px;
+  background: transparent;
+  border: none;
+  font-size: var(--text-body-md);
+  line-height: var(--text-body-md--line-height);
+  font-weight: var(--text-body-md--font-weight);
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  cursor: pointer;
+  outline: none;
+}
+
+.form-select-trigger:focus-visible {
+  outline: none;
+}
+
+.form-select-menu {
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-container-low);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  animation: form-select-in 0.12s ease-out;
+}
+
+.form-select-menu--below {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.form-select-menu--above {
+  border-bottom: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.form-select-field--open-below {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.form-select-field--open-above {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+@keyframes form-select-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.form-select-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 0.625rem 0.75rem;
+  font-size: var(--text-body-md);
+  line-height: var(--text-body-md--line-height);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.form-date-field {
+  position: relative;
+}
+
+.form-date-display {
+  padding-right: 44px;
+  cursor: text;
+}
+
+.form-date-trigger {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-tertiary-container);
+  color: var(--color-tertiary);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.form-date-field:hover .form-date-trigger,
+.form-date-field:focus-within .form-date-trigger,
+.form-date-trigger:hover {
+  background: var(--color-tertiary);
+  color: var(--color-on-tertiary);
+}
+
+.date-picker-popover--below {
+  animation: form-select-in 0.12s ease-out;
+}
+
+.date-picker-popover--above {
+  animation: form-select-in 0.12s ease-out;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

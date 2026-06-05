@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function NuevaOrdenPage() {
   return (
-    <AppShell topBarTitle="Formulario de nueva orden de transmisión">
+    <AppShell>
       <div className="max-w-5xl mx-auto p-8">
         <div className="mb-10">
           <h2 className="text-display-lg text-on-surface mb-2">

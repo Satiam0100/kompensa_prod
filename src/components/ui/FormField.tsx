@@ -1,4 +1,9 @@
 import { type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  FORM_FIELD_CONTROL,
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+} from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -16,62 +21,26 @@ export function FormField({
   className = "",
   ...inputProps
 }: FormFieldProps) {
-  const inputClasses = `w-full bg-transparent border-none py-3 text-body-md text-on-surface focus:ring-0 ${className}`;
-
-  const field = icon ? (
-    <div
-      className={`flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 focus-within:border-tertiary transition-all ${wrapperClassName}`}
-    >
-      <MaterialIcon name={icon} className="text-outline-variant text-sm" />
-      <input className={inputClasses} {...inputProps} />
-    </div>
-  ) : (
-    <input
-      className={`bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus transition-all ${className}`}
-      {...inputProps}
-    />
-  );
-
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-label-sm text-on-surface-variant px-1">
         {label}{" "}
         {required && <span className="text-tertiary">*</span>}
       </label>
-      {field}
-    </div>
-  );
-}
-
-interface FormSelectProps {
-  label: string;
-  name: string;
-  defaultValue?: string;
-  options: { value: string; label: string }[];
-}
-
-export function FormSelect({
-  label,
-  name,
-  defaultValue,
-  options,
-}: FormSelectProps) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-label-sm text-on-surface-variant px-1">
-        {label}
-      </label>
-      <select
-        name={name}
-        defaultValue={defaultValue}
-        className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus appearance-none"
+      <div
+        className={`${icon ? FORM_FIELD_CONTROL : FORM_FIELD_CONTROL_PLAIN} ${wrapperClassName}`}
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+        {icon && (
+          <MaterialIcon
+            name={icon}
+            className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary group-focus-within:text-tertiary"
+          />
+        )}
+        <input
+          className={`${FORM_FIELD_INPUT} ${className}`}
+          {...inputProps}
+        />
+      </div>
     </div>
   );
 }

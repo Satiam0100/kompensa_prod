@@ -3,7 +3,7 @@ import { CatalogListSkeleton } from "@/components/catalogos/CatalogListSkeleton"
 
 export default function EmisorasLoading() {
   return (
-    <AppShell topBarTitle="Emisoras">
+    <AppShell>
       <div className="max-w-6xl mx-auto p-8 pb-16">
         <div className="mb-8">
           <div className="h-10 w-48 bg-surface-container-high rounded animate-pulse mb-2" />
