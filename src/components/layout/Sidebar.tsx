@@ -20,6 +20,18 @@ const navItems = [
     label: "Cuñas registradas",
     match: (path: string) => path === "/ordenes",
   },
+  {
+    href: "/agencias",
+    icon: "business",
+    label: "Agencias",
+    match: (path: string) => path.startsWith("/agencias"),
+  },
+  {
+    href: "/emisoras",
+    icon: "radio",
+    label: "Emisoras",
+    match: (path: string) => path.startsWith("/emisoras"),
+  },
 ] as const;
 
 function navLinkClass(active: boolean) {

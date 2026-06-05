@@ -1,0 +1,174 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { ActivaBadge } from "@/components/catalogos/ActivaBadge";
+import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import type { EmisoraRow } from "@/lib/types/catalogo";
+
+interface EmisorasListProps {
+  emisoras: EmisoraRow[];
+}
+
+function Cell({ value }: { value: string | null | undefined }) {
+  if (!value?.trim()) {
+    return <span className="text-on-surface-variant/60">—</span>;
+  }
+  return <>{value}</>;
+}
+
+export function EmisorasList({ emisoras }: EmisorasListProps) {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return emisoras;
+
+    return emisoras.filter(
+      (e) =>
+        e.nombre.toLowerCase().includes(q) ||
+        (e.ciudad?.toLowerCase().includes(q) ?? false) ||
+        (e.circuito?.toLowerCase().includes(q) ?? false) ||
+        (e.contacto?.toLowerCase().includes(q) ?? false) ||
+        (e.email?.toLowerCase().includes(q) ?? false) ||
+        (e.whatsapp?.includes(q) ?? false),
+    );
+  }, [emisoras, query]);
+
+  if (emisoras.length === 0) {
+    return (
+      <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
+        <MaterialIcon
+          name="radio"
+          className="text-5xl text-outline-variant mb-4"
+        />
+        <h3 className="text-title-md text-on-surface mb-2">
+          No hay emisoras registradas
+        </h3>
+        <p className="text-body-sm text-on-surface-variant max-w-md mx-auto">
+          El catálogo de emisoras está vacío. Importa los datos desde Supabase o
+          el Excel de referencia.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-lg flex-1 max-w-md">
+          <MaterialIcon name="search" className="text-outline-variant text-sm" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nombre, ciudad, circuito..."
+            className="w-full bg-transparent border-none text-body-sm text-on-surface focus:ring-0"
+          />
+        </div>
+        <p className="text-label-sm text-on-surface-variant">
+          {filtered.length} de {emisoras.length} emisoras
+        </p>
+      </div>
+
+      <div className="hidden lg:block bg-surface-container border border-outline-variant rounded-lg overflow-hidden overflow-x-auto">
+        <table className="w-full text-left min-w-[880px]">
+          <thead>
+            <tr className="border-b border-outline-variant bg-surface-container-low">
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                Emisora
+              </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                Ciudad
+              </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                Circuito / Tipo
+              </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                Contacto
+              </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                Estado
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((emisora) => (
+              <tr
+                key={emisora.id}
+                className="border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors"
+              >
+                <td className="px-4 py-4">
+                  <p className="text-body-md text-on-surface font-medium">
+                    {emisora.nombre}
+                  </p>
+                  {emisora.channel_id && (
+                    <p className="text-label-sm text-on-surface-variant font-label-mono">
+                      ID: {emisora.channel_id}
+                    </p>
+                  )}
+                </td>
+                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
+                  <Cell value={emisora.ciudad} />
+                </td>
+                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
+                  <Cell value={emisora.circuito} />
+                  {emisora.tipo && (
+                    <span className="block text-label-sm mt-0.5">
+                      Tipo: {emisora.tipo}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
+                  <Cell value={emisora.contacto} />
+                  {emisora.email && (
+                    <span className="block text-label-sm mt-0.5">
+                      {emisora.email}
+                    </span>
+                  )}
+                  {emisora.whatsapp && (
+                    <span className="block text-label-sm mt-0.5 font-label-mono">
+                      WA: {emisora.whatsapp}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-4">
+                  <ActivaBadge activa={emisora.activa} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 && (
+          <p className="p-8 text-center text-body-sm text-on-surface-variant">
+            Ningún resultado para &quot;{query}&quot;
+          </p>
+        )}
+      </div>
+
+      <div className="lg:hidden grid gap-3">
+        {filtered.map((emisora) => (
+          <article
+            key={emisora.id}
+            className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2"
+          >
+            <div className="flex justify-between items-start gap-2">
+              <p className="text-body-md font-medium text-on-surface">
+                {emisora.nombre}
+              </p>
+              <ActivaBadge activa={emisora.activa} />
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-label-sm text-on-surface-variant">
+              {emisora.ciudad && <span>{emisora.ciudad}</span>}
+              {emisora.circuito && <span>Circuito: {emisora.circuito}</span>}
+            </div>
+            {emisora.contacto && (
+              <p className="text-label-sm text-on-surface-variant">
+                {emisora.contacto}
+              </p>
+            )}
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
