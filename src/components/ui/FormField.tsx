@@ -66,17 +66,17 @@ export function SectionCard({
 }: SectionCardProps) {
   const iconBox =
     iconVariant === "tertiary"
-      ? "bg-tertiary-container border border-on-tertiary-container text-tertiary"
+      ? "bg-tertiary-container border border-on-tertiary-container text-tertiary group-hover:brightness-110 transition-colors"
       : "bg-primary-container border border-outline-variant text-primary group-hover:bg-primary group-hover:text-surface transition-colors";
 
-  const bg =
+  const surface =
     iconVariant === "tertiary"
-      ? "bg-surface-container-low"
-      : "bg-surface-container group hover:border-outline transition-colors";
+      ? "bg-surface-container-low hover:bg-surface-container"
+      : "bg-surface-container hover:bg-surface-container-high";
 
   return (
     <div
-      className={`${colSpan} ${bg} p-6 rounded-lg border border-outline-variant relative overflow-hidden ${className}`}
+      className={`${colSpan} group ${surface} p-6 rounded-lg border border-outline-variant relative overflow-hidden transition-colors hover:border-outline ${className}`}
     >
       {decorationIcon && (
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">

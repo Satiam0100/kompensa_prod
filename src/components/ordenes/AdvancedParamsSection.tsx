@@ -8,7 +8,7 @@ export function AdvancedParamsSection() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:col-span-12 border border-outline-variant rounded-lg overflow-hidden bg-surface-container-low">
+    <div className="md:col-span-12 border border-outline-variant rounded-lg overflow-hidden bg-surface-container-low transition-colors hover:border-outline hover:bg-surface-container">
       <button
         type="button"
         className="w-full flex items-center justify-between p-4 hover:bg-surface-variant transition-colors group"

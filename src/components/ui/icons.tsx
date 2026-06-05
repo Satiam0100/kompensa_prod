@@ -1,5 +1,6 @@
 import Add from "@mui/icons-material/Add";
 import Badge from "@mui/icons-material/Badge";
+import Business from "@mui/icons-material/Business";
 import BrightnessAuto from "@mui/icons-material/BrightnessAuto";
 import CalendarToday from "@mui/icons-material/CalendarToday";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
@@ -33,6 +34,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 export const ICONS = {
   add: Add,
   badge: Badge,
+  business: Business,
   brightness_auto: BrightnessAuto,
   calendar_today: CalendarToday,
   chevron_left: ChevronLeft,

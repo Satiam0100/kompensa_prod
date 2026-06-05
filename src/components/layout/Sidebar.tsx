@@ -63,14 +63,6 @@ export function Sidebar() {
         </div>
       </div>
 
-      <Link
-        href="/ordenes/nueva"
-        className="w-full bg-tertiary text-on-tertiary py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98]"
-      >
-        <MaterialIcon name="add" />
-        Nueva orden
-      </Link>
-
       <nav className="flex flex-col gap-1 flex-grow">
         {navItems.map((item) => (
           <Link

@@ -94,7 +94,7 @@ export function TransmissionOrderForm() {
         <SectionCard
           title="Identificación de Campaña"
           icon="badge"
-          colSpan="md:col-span-8 group"
+          colSpan="md:col-span-8"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             <FormField
