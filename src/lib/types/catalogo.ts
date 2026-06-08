@@ -26,3 +26,26 @@ export interface EmisoraRow {
   created_at: string;
   updated_at: string;
 }
+
+export interface AgenciaForm {
+  nombre: string;
+  email?: string;
+  telefono?: string;
+  direccion?: string;
+  clientes?: string;
+  activa: boolean;
+  notas?: string;
+}
+
+export interface EmisoraForm {
+  nombre: string;
+  ciudad?: string;
+  channel_id?: string;
+  contacto?: string;
+  email?: string;
+  whatsapp?: string;
+  circuito?: string;
+  tipo?: string;
+  activa: boolean;
+  notas?: string;
+}

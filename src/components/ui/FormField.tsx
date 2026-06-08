@@ -45,6 +45,62 @@ export function FormField({
   );
 }
 
+interface FormCheckboxProps {
+  label: string;
+  name: string;
+  defaultChecked?: boolean;
+}
+
+export function FormCheckbox({
+  label,
+  name,
+  defaultChecked = false,
+}: FormCheckboxProps) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer px-1">
+      <input
+        type="checkbox"
+        name={name}
+        defaultChecked={defaultChecked}
+        value="true"
+        className="w-4 h-4 rounded border-outline-variant text-tertiary focus:ring-tertiary"
+      />
+      <span className="text-body-sm text-on-surface">{label}</span>
+    </label>
+  );
+}
+
+interface FormTextareaProps {
+  label: string;
+  name: string;
+  defaultValue?: string;
+  placeholder?: string;
+  rows?: number;
+}
+
+export function FormTextarea({
+  label,
+  name,
+  defaultValue,
+  placeholder,
+  rows = 3,
+}: FormTextareaProps) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-label-sm text-on-surface-variant px-1">
+        {label}
+      </label>
+      <textarea
+        name={name}
+        defaultValue={defaultValue}
+        placeholder={placeholder}
+        rows={rows}
+        className={`${FORM_FIELD_CONTROL_PLAIN} ${FORM_FIELD_INPUT} resize-y min-h-[80px] py-3`}
+      />
+    </div>
+  );
+}
+
 interface SectionCardProps {
   title: string;
   icon: string;

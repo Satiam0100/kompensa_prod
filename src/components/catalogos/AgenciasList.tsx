@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { ActivaBadge } from "@/components/catalogos/ActivaBadge";
+import { EditAgenciaModal } from "@/components/catalogos/EditAgenciaModal";
+import { EditRowButton } from "@/components/ui/EditRowButton";
 import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
@@ -22,6 +24,7 @@ function Cell({ value }: { value: string | null | undefined }) {
 
 export function AgenciasList({ agencias }: AgenciasListProps) {
   const [query, setQuery] = useState("");
+  const [editing, setEditing] = useState<AgenciaRow | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -92,6 +95,9 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Estado
               </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                <span className="sr-only">Acciones</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -122,6 +128,12 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
                 <td className="px-4 py-4">
                   <ActivaBadge activa={agencia.activa} />
                 </td>
+                <td className="px-4 py-4">
+                  <EditRowButton
+                    onClick={() => setEditing(agencia)}
+                    label={`Editar ${agencia.nombre}`}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -143,7 +155,13 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
               <p className="text-body-md font-medium text-on-surface">
                 {agencia.nombre}
               </p>
-              <ActivaBadge activa={agencia.activa} />
+              <div className="flex items-center gap-2 shrink-0">
+                <ActivaBadge activa={agencia.activa} />
+                <EditRowButton
+                  onClick={() => setEditing(agencia)}
+                  label={`Editar ${agencia.nombre}`}
+                />
+              </div>
             </div>
             {agencia.direccion && (
               <p className="text-body-sm text-on-surface-variant">
@@ -162,6 +180,11 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
           </article>
         ))}
       </div>
+
+      <EditAgenciaModal
+        agencia={editing}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { ActivaBadge } from "@/components/catalogos/ActivaBadge";
+import { EditEmisoraModal } from "@/components/catalogos/EditEmisoraModal";
+import { EditRowButton } from "@/components/ui/EditRowButton";
 import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
@@ -22,6 +24,7 @@ function Cell({ value }: { value: string | null | undefined }) {
 
 export function EmisorasList({ emisoras }: EmisorasListProps) {
   const [query, setQuery] = useState("");
+  const [editing, setEditing] = useState<EmisoraRow | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -93,6 +96,9 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Estado
               </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                <span className="sr-only">Acciones</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +144,12 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
                 <td className="px-4 py-4">
                   <ActivaBadge activa={emisora.activa} />
                 </td>
+                <td className="px-4 py-4">
+                  <EditRowButton
+                    onClick={() => setEditing(emisora)}
+                    label={`Editar ${emisora.nombre}`}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -159,7 +171,13 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
               <p className="text-body-md font-medium text-on-surface">
                 {emisora.nombre}
               </p>
-              <ActivaBadge activa={emisora.activa} />
+              <div className="flex items-center gap-2 shrink-0">
+                <ActivaBadge activa={emisora.activa} />
+                <EditRowButton
+                  onClick={() => setEditing(emisora)}
+                  label={`Editar ${emisora.nombre}`}
+                />
+              </div>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-label-sm text-on-surface-variant">
               {emisora.ciudad && <span>{emisora.ciudad}</span>}
@@ -173,6 +191,11 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
           </article>
         ))}
       </div>
+
+      <EditEmisoraModal
+        emisora={editing}
+        onClose={() => setEditing(null)}
+      />
     </div>
   );
 }

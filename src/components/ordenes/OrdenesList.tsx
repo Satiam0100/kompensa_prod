@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
+import { EditRowButton } from "@/components/ui/EditRowButton";
 import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
@@ -97,6 +98,9 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Registro
               </th>
+              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                <span className="sr-only">Acciones</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +142,12 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
                 <td className="px-4 py-4 text-label-sm text-on-surface-variant">
                   {formatFecha(orden.created_at)}
                 </td>
+                <td className="px-4 py-4">
+                  <EditRowButton
+                    href={`/ordenes/${orden.id}/editar`}
+                    label={`Editar ${orden.cliente}`}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -164,7 +174,13 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
                   {orden.campaña}
                 </p>
               </div>
-              <EstadoBadge estado={orden.estado} />
+              <div className="flex items-center gap-2 shrink-0">
+                <EstadoBadge estado={orden.estado} />
+                <EditRowButton
+                  href={`/ordenes/${orden.id}/editar`}
+                  label={`Editar ${orden.cliente}`}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-label-sm text-on-surface-variant">
               <span>
