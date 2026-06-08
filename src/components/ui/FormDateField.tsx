@@ -52,6 +52,7 @@ export function FormDateField({
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
+  const displayRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [selectedISO, setSelectedISO] = useState(defaultValue);
   const [textValue, setTextValue] = useState(() => isoToDisplayInput(defaultValue));
@@ -183,6 +184,40 @@ export function FormDateField({
     commitISO(parsed);
   };
 
+  const flushPendingValue = useCallback(() => {
+    const raw = displayRef.current?.value ?? textValue;
+    const parsed = parseMaskedDate(raw);
+
+    if (parsed === null) {
+      setTextValue(isoToDisplayInput(selectedISO));
+      return;
+    }
+
+    if (parsed === "") {
+      commitISO("");
+      return;
+    }
+
+    if (!isISOInRange(parsed, minStr, maxStr)) {
+      setTextValue(isoToDisplayInput(selectedISO));
+      return;
+    }
+
+    commitISO(parsed);
+  }, [commitISO, minStr, maxStr, selectedISO, textValue]);
+
+  useEffect(() => {
+    const form = containerRef.current?.closest("form");
+    if (!form) return;
+
+    const handleSubmit = () => {
+      flushPendingValue();
+    };
+
+    form.addEventListener("submit", handleSubmit, true);
+    return () => form.removeEventListener("submit", handleSubmit, true);
+  }, [flushPendingValue]);
+
   return (
     <div className="flex flex-col gap-1.5" ref={containerRef}>
       <label htmlFor={fieldId} className="text-label-sm text-on-surface-variant px-1">
@@ -204,6 +239,7 @@ export function FormDateField({
           {...inputProps}
         />
         <input
+          ref={displayRef}
           id={fieldId}
           type="text"
           inputMode="numeric"

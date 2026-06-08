@@ -2,7 +2,10 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { crearOrdenTransmision } from "@/app/actions/ordenes";
+import {
+  actualizarOrdenTransmision,
+  crearOrdenTransmision,
+} from "@/app/actions/ordenes";
 import { FormDateField } from "@/components/ui/FormDateField";
 import {
   FormField,
@@ -10,78 +13,58 @@ import {
 } from "@/components/ui/FormField";
 import { FormSelect } from "@/components/ui/FormSelect";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import type { EstadoOrden, OrdenTransmisionForm } from "@/lib/types/orden-transmision";
+import {
+  parseOrdenFormData,
+  validateOrdenForm,
+} from "@/lib/parse-orden-form";
+import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
-function parseFormData(formData: FormData): OrdenTransmisionForm {
-  const get = (key: string) => (formData.get(key) as string)?.trim() ?? "";
-  const getNum = (key: string) => Number(formData.get(key));
-
-  return {
-    cliente: get("cliente"),
-    campaña: get("campaña"),
-    emisora: get("emisora"),
-    ciudad: get("ciudad") || undefined,
-    estado: (get("estado") || "activa") as EstadoOrden,
-    agencia: get("agencia") || undefined,
-    email_cliente: get("email_cliente"),
-    cuñas_diarias: getNum("cuñas_diarias"),
-    total_contratadas: getNum("total_contratadas"),
-    periodo_inicio: get("periodo_inicio"),
-    periodo_fin: get("periodo_fin"),
-    horario: get("horario") || undefined,
-    spot_id: get("spot_id") || undefined,
-    spot_name: get("spot_name") || undefined,
-    duracion_seg: get("duracion_seg")
-      ? getNum("duracion_seg")
-      : undefined,
-  };
+interface TransmissionOrderFormProps {
+  orden?: OrdenTransmisionRow;
 }
 
-export function TransmissionOrderForm() {
+export function TransmissionOrderForm({ orden }: TransmissionOrderFormProps) {
   const router = useRouter();
+  const isEdit = Boolean(orden);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setSubmitState("loading");
-      setErrorMessage(null);
+      const form = e.currentTarget;
+      const formData = new FormData(form);
+      const data = parseOrdenFormData(formData);
+      const validationError = validateOrdenForm(data);
 
-      const formData = new FormData(e.currentTarget);
-      const data = parseFormData(formData);
-
-      if (
-        !data.cliente ||
-        !data.campaña ||
-        !data.emisora ||
-        !data.email_cliente ||
-        !data.periodo_inicio ||
-        !data.periodo_fin
-      ) {
+      if (validationError) {
         setSubmitState("error");
-        setErrorMessage("Completa todos los campos obligatorios.");
+        setErrorMessage(validationError);
         return;
       }
 
-      const result = await crearOrdenTransmision(data);
+      setSubmitState("loading");
+      setErrorMessage(null);
+
+      const result = isEdit
+        ? await actualizarOrdenTransmision(orden!.id, data)
+        : await crearOrdenTransmision(data);
 
       if (result.success) {
         setSubmitState("success");
         setTimeout(() => {
-          setSubmitState("idle");
-          e.currentTarget.reset();
+          router.push("/ordenes");
           router.refresh();
-        }, 2000);
+        }, 1200);
       } else {
         setSubmitState("error");
         setErrorMessage(result.error);
       }
     },
-    [router],
+    [isEdit, orden, router],
   );
 
   return (
@@ -102,28 +85,33 @@ export function TransmissionOrderForm() {
               name="cliente"
               required
               placeholder="Ej. Corporación Global"
+              defaultValue={orden?.cliente}
             />
             <FormField
               label="Campaña"
-              name="campaña"
+              name="campana"
               required
               placeholder="Nombre del proyecto"
+              defaultValue={orden?.campaña}
             />
             <FormField
               label="Emisora"
               name="emisora"
               required
               placeholder="Frecuencia / Nombre"
+              defaultValue={orden?.emisora}
             />
             <FormField
               label="Ciudad"
               name="ciudad"
               placeholder="Ubicación geográfica"
+              defaultValue={orden?.ciudad ?? ""}
             />
             <FormField
               label="Agencia"
               name="agencia"
               placeholder="Agencia aliada"
+              defaultValue={orden?.agencia ?? ""}
             />
           </div>
         </SectionCard>
@@ -139,7 +127,7 @@ export function TransmissionOrderForm() {
             <FormSelect
               label="Estado"
               name="estado"
-              defaultValue="activa"
+              defaultValue={orden?.estado ?? "activa"}
               options={[
                 { value: "activa", label: "Activa" },
                 { value: "pausada", label: "Pausada" },
@@ -152,6 +140,7 @@ export function TransmissionOrderForm() {
               type="email"
               required
               placeholder="email@dominio.com"
+              defaultValue={orden?.email_cliente}
             />
           </div>
         </SectionCard>
@@ -166,31 +155,35 @@ export function TransmissionOrderForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <FormField
               label="Cuñas Diarias"
-              name="cuñas_diarias"
+              name="cunias_diarias"
               type="number"
               required
-              min={0}
+              min={1}
               icon="repeat"
               placeholder="0"
+              defaultValue={orden?.cuñas_diarias}
             />
             <FormField
               label="Total Contratadas"
               name="total_contratadas"
               type="number"
               required
-              min={0}
+              min={1}
               icon="functions"
               placeholder="0"
+              defaultValue={orden?.total_contratadas}
             />
             <FormDateField
               label="Periodo Inicio"
               name="periodo_inicio"
               required
+              defaultValue={orden?.periodo_inicio}
             />
             <FormDateField
               label="Periodo Fin"
               name="periodo_fin"
               required
+              defaultValue={orden?.periodo_fin}
             />
           </div>
           <div className="mt-6">
@@ -199,11 +192,20 @@ export function TransmissionOrderForm() {
               name="horario"
               icon="schedule"
               placeholder="Ej. 06:00 - 12:00, 18:00 - 22:00"
+              defaultValue={orden?.horario ?? ""}
             />
           </div>
+          <p className="mt-4 text-body-sm text-on-surface-variant">
+            El certificado PDF se envía al email del cliente cuando termina el
+            periodo (fecha fin) y se ejecuta el Flujo B en n8n.
+          </p>
         </SectionCard>
 
-        <AdvancedParamsSection />
+        <AdvancedParamsSection
+          defaultSpotId={orden?.spot_id ?? ""}
+          defaultSpotName={orden?.spot_name ?? ""}
+          defaultDuracionSeg={orden?.duracion_seg}
+        />
 
         {errorMessage && (
           <p className="md:col-span-12 text-error text-body-sm px-2">
@@ -216,6 +218,10 @@ export function TransmissionOrderForm() {
             type="button"
             className="w-full sm:w-auto px-8 py-3 text-body-md font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all rounded-lg"
             onClick={() => {
+              if (isEdit) {
+                router.push("/ordenes");
+                return;
+              }
               const form = document.getElementById(
                 "transmission-form",
               ) as HTMLFormElement | null;
@@ -226,14 +232,22 @@ export function TransmissionOrderForm() {
           >
             Cancelar
           </button>
-          <SubmitButton state={submitState} />
+          <SubmitButton state={submitState} isEdit={isEdit} />
         </div>
       </form>
     </>
   );
 }
 
-function SubmitButton({ state }: { state: SubmitState }) {
+function SubmitButton({
+  state,
+  isEdit,
+}: {
+  state: SubmitState;
+  isEdit: boolean;
+}) {
+  const label = isEdit ? "Guardar cambios" : "Guardar Orden";
+
   if (state === "loading") {
     return (
       <button
@@ -266,7 +280,7 @@ function SubmitButton({ state }: { state: SubmitState }) {
       className="w-full sm:w-auto px-10 py-3 bg-tertiary text-on-tertiary text-body-md font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
     >
       <MaterialIcon name="save" filled />
-      Guardar Orden
+      {label}
     </button>
   );
 }

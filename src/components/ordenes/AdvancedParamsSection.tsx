@@ -4,7 +4,17 @@ import { useState } from "react";
 import { FormField } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
-export function AdvancedParamsSection() {
+interface AdvancedParamsSectionProps {
+  defaultSpotId?: string;
+  defaultSpotName?: string;
+  defaultDuracionSeg?: number | null;
+}
+
+export function AdvancedParamsSection({
+  defaultSpotId = "",
+  defaultSpotName = "",
+  defaultDuracionSeg,
+}: AdvancedParamsSectionProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -31,24 +41,24 @@ export function AdvancedParamsSection() {
       </button>
 
       <div
-        className={`grid transition-all duration-300 ease-in-out border-t ${
-          open
-            ? "grid-rows-[1fr] border-outline-variant"
-            : "grid-rows-[0fr] border-transparent"
+        className={`border-t transition-all duration-300 ease-in-out ${
+          open ? "border-outline-variant" : "border-transparent"
         }`}
+        hidden={!open}
       >
-        <div className="overflow-hidden">
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-lowest/50">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-lowest/50">
             <FormField
               label="Spot ID"
               name="spot_id"
               placeholder="UID-000000"
               className="font-label-mono"
+              defaultValue={defaultSpotId}
             />
             <FormField
               label="Spot Name"
               name="spot_name"
               placeholder="Nombre de archivo .mp3"
+              defaultValue={defaultSpotName}
             />
             <FormField
               label="Duración (seg)"
@@ -56,9 +66,11 @@ export function AdvancedParamsSection() {
               type="number"
               placeholder="20"
               min={0}
+              defaultValue={
+                defaultDuracionSeg != null ? String(defaultDuracionSeg) : ""
+              }
             />
           </div>
-        </div>
       </div>
     </div>
   );
