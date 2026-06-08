@@ -29,8 +29,9 @@ const POPOVER_HEIGHT = 240;
 const POPOVER_GAP = 0;
 
 interface FormDateFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "name"> {
   label: string;
+  name: string;
   required?: boolean;
   defaultValue?: string;
 }
@@ -51,8 +52,6 @@ export function FormDateField({
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const hiddenRef = useRef<HTMLInputElement>(null);
-  const displayRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [selectedISO, setSelectedISO] = useState(defaultValue);
   const [textValue, setTextValue] = useState(() => isoToDisplayInput(defaultValue));
@@ -68,10 +67,33 @@ export function FormDateField({
   const commitISO = useCallback((iso: string) => {
     setSelectedISO(iso);
     setTextValue(isoToDisplayInput(iso));
-    if (hiddenRef.current) hiddenRef.current.value = iso;
     const parsed = fromISODate(iso);
     if (parsed) setViewDate(parsed);
   }, []);
+
+  const normalizeTextValue = useCallback(
+    (raw: string): string => {
+      const trimmed = raw.trim();
+      if (!trimmed) return "";
+
+      const masked = parseMaskedDate(trimmed);
+      if (typeof masked === "string" && masked !== "") {
+        if (!isISOInRange(masked, minStr, maxStr)) {
+          return isoToDisplayInput(selectedISO);
+        }
+        commitISO(masked);
+        return isoToDisplayInput(masked);
+      }
+
+      if (masked === "") {
+        commitISO("");
+        return "";
+      }
+
+      return isoToDisplayInput(selectedISO);
+    },
+    [commitISO, maxStr, minStr, selectedISO],
+  );
 
   const updatePopoverPosition = useCallback(() => {
     if (!triggerRef.current) return;
@@ -147,7 +169,6 @@ export function FormDateField({
       setSelectedISO(defaultValue);
       setTextValue(isoToDisplayInput(defaultValue));
       setViewDate(fromISODate(defaultValue) ?? new Date());
-      if (hiddenRef.current) hiddenRef.current.value = defaultValue;
     };
 
     form.addEventListener("reset", handleReset);
@@ -160,63 +181,36 @@ export function FormDateField({
   };
 
   const handleTextChange = (value: string) => {
-    setTextValue(formatDateMaskFromDigits(value));
+    const masked = formatDateMaskFromDigits(value);
+    setTextValue(masked);
+
+    const parsed = parseMaskedDate(masked);
+    if (typeof parsed === "string" && parsed !== "") {
+      if (isISOInRange(parsed, minStr, maxStr)) {
+        setSelectedISO(parsed);
+        const parsedDate = fromISODate(parsed);
+        if (parsedDate) setViewDate(parsedDate);
+      }
+    } else if (parsed === "") {
+      setSelectedISO("");
+    }
   };
 
   const handleTextBlur = () => {
-    const parsed = parseMaskedDate(textValue);
-
-    if (parsed === null) {
-      setTextValue(isoToDisplayInput(selectedISO));
-      return;
-    }
-
-    if (parsed === "") {
-      commitISO("");
-      return;
-    }
-
-    if (!isISOInRange(parsed, minStr, maxStr)) {
-      setTextValue(isoToDisplayInput(selectedISO));
-      return;
-    }
-
-    commitISO(parsed);
+    setTextValue((current) => normalizeTextValue(current));
   };
-
-  const flushPendingValue = useCallback(() => {
-    const raw = displayRef.current?.value ?? textValue;
-    const parsed = parseMaskedDate(raw);
-
-    if (parsed === null) {
-      setTextValue(isoToDisplayInput(selectedISO));
-      return;
-    }
-
-    if (parsed === "") {
-      commitISO("");
-      return;
-    }
-
-    if (!isISOInRange(parsed, minStr, maxStr)) {
-      setTextValue(isoToDisplayInput(selectedISO));
-      return;
-    }
-
-    commitISO(parsed);
-  }, [commitISO, minStr, maxStr, selectedISO, textValue]);
 
   useEffect(() => {
     const form = containerRef.current?.closest("form");
     if (!form) return;
 
     const handleSubmit = () => {
-      flushPendingValue();
+      setTextValue((current) => normalizeTextValue(current));
     };
 
     form.addEventListener("submit", handleSubmit, true);
     return () => form.removeEventListener("submit", handleSubmit, true);
-  }, [flushPendingValue]);
+  }, [normalizeTextValue]);
 
   return (
     <div className="flex flex-col gap-1.5" ref={containerRef}>
@@ -229,23 +223,14 @@ export function FormDateField({
         className={`${FORM_FIELD_CONTROL} form-date-field ${open ? "form-field-control--open !border-tertiary !shadow-[0_0_0_1px_var(--color-tertiary)]" : ""} ${className}`}
       >
         <input
-          ref={hiddenRef}
-          type="hidden"
-          name={name}
-          defaultValue={defaultValue}
-          required={required}
-          min={min}
-          max={max}
-          {...inputProps}
-        />
-        <input
-          ref={displayRef}
           id={fieldId}
+          name={name}
           type="text"
           inputMode="numeric"
           autoComplete="off"
           placeholder="dd/mm/aaaa"
           maxLength={10}
+          required={required}
           className={`${FORM_FIELD_INPUT} form-date-display ${selectedISO ? "text-on-surface" : "text-on-surface-variant"}`}
           value={textValue}
           onChange={(event) => handleTextChange(event.target.value)}
@@ -273,6 +258,7 @@ export function FormDateField({
             const pasted = event.clipboardData.getData("text");
             handleTextChange(pasted);
           }}
+          {...inputProps}
         />
         <button
           type="button"

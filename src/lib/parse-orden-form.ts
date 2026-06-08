@@ -2,6 +2,7 @@ import type {
   EstadoOrden,
   OrdenTransmisionForm,
 } from "@/lib/types/orden-transmision";
+import { parseMaskedDate } from "@/components/ui/date-picker-utils";
 
 /** Nombres ASCII en el HTML (evita problemas con ñ en FormData en algunos navegadores). */
 export const ORDEN_FORM_NAMES = {
@@ -35,6 +36,23 @@ function readNumber(formData: FormData, key: string): number {
   return Number.isFinite(n) ? n : NaN;
 }
 
+/** Convierte dd/mm/aaaa o yyyy-mm-dd del formulario a ISO yyyy-mm-dd. */
+function readDateField(formData: FormData, key: string): string {
+  const raw = readString(formData, key);
+  if (!raw) return "";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return raw;
+  }
+
+  const parsed = parseMaskedDate(raw);
+  if (typeof parsed === "string" && parsed !== "") {
+    return parsed;
+  }
+
+  return "";
+}
+
 export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
   const n = ORDEN_FORM_NAMES;
   const duracionRaw = readString(formData, n.duracion_seg);
@@ -49,8 +67,8 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
     email_cliente: readString(formData, n.email_cliente),
     cuñas_diarias: readNumber(formData, n.cunias_diarias),
     total_contratadas: readNumber(formData, n.total_contratadas),
-    periodo_inicio: readString(formData, n.periodo_inicio),
-    periodo_fin: readString(formData, n.periodo_fin),
+    periodo_inicio: readDateField(formData, n.periodo_inicio),
+    periodo_fin: readDateField(formData, n.periodo_fin),
     horario: readString(formData, n.horario) || undefined,
     spot_id: readString(formData, n.spot_id) || undefined,
     spot_name: readString(formData, n.spot_name) || undefined,
@@ -58,7 +76,10 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
   };
 }
 
-export function validateOrdenForm(data: OrdenTransmisionForm): string | null {
+export function validateOrdenForm(
+  data: OrdenTransmisionForm,
+  formData?: FormData,
+): string | null {
   const missing: string[] = [];
   if (!data.cliente) missing.push("Cliente");
   if (!data.campaña) missing.push("Campaña");
@@ -68,6 +89,22 @@ export function validateOrdenForm(data: OrdenTransmisionForm): string | null {
   if (!data.periodo_fin) missing.push("Periodo Fin");
 
   if (missing.length > 0) {
+    if (formData) {
+      const invalidDates: string[] = [];
+      const n = ORDEN_FORM_NAMES;
+      if (
+        !data.periodo_inicio &&
+        readString(formData, n.periodo_inicio)
+      ) {
+        invalidDates.push("Periodo Inicio");
+      }
+      if (!data.periodo_fin && readString(formData, n.periodo_fin)) {
+        invalidDates.push("Periodo Fin");
+      }
+      if (invalidDates.length > 0) {
+        return `Fecha inválida en: ${invalidDates.join(", ")}. Usa el formato dd/mm/aaaa.`;
+      }
+    }
     return `Completa los campos obligatorios: ${missing.join(", ")}.`;
   }
 

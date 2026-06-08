@@ -38,7 +38,7 @@ export function TransmissionOrderForm({ orden }: TransmissionOrderFormProps) {
       const form = e.currentTarget;
       const formData = new FormData(form);
       const data = parseOrdenFormData(formData);
-      const validationError = validateOrdenForm(data);
+      const validationError = validateOrdenForm(data, formData);
 
       if (validationError) {
         setSubmitState("error");
