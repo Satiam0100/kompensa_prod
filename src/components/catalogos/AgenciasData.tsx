@@ -1,5 +1,5 @@
 import { listarAgencias } from "@/app/actions/catalogos";
-import { AgenciasList } from "@/components/catalogos/AgenciasList";
+import { AgenciasCatalog } from "@/components/catalogos/AgenciasCatalog";
 import { CatalogError } from "@/components/catalogos/CatalogError";
 
 export async function AgenciasData() {
@@ -14,5 +14,5 @@ export async function AgenciasData() {
     );
   }
 
-  return <AgenciasList agencias={result.data} />;
+  return <AgenciasCatalog agencias={result.data} />;
 }

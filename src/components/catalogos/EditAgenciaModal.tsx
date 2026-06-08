@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { actualizarAgencia } from "@/app/actions/catalogos";
+import { actualizarAgencia, crearAgencia } from "@/app/actions/catalogos";
 import { EditModal } from "@/components/ui/EditModal";
 import {
   FormCheckbox,
@@ -14,34 +14,45 @@ import type { AgenciaRow } from "@/lib/types/catalogo";
 
 interface EditAgenciaModalProps {
   agencia: AgenciaRow | null;
+  creating?: boolean;
   onClose: () => void;
 }
 
-export function EditAgenciaModal({ agencia, onClose }: EditAgenciaModalProps) {
+function readAgenciaForm(formData: FormData) {
+  const get = (key: string) => (formData.get(key) as string)?.trim() ?? "";
+  return {
+    nombre: get("nombre"),
+    email: get("email") || undefined,
+    telefono: get("telefono") || undefined,
+    direccion: get("direccion") || undefined,
+    clientes: get("clientes") || undefined,
+    activa: formData.get("activa") === "true",
+    notas: get("notas") || undefined,
+  };
+}
+
+export function EditAgenciaModal({
+  agencia,
+  creating = false,
+  onClose,
+}: EditAgenciaModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const open = creating || Boolean(agencia);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!agencia) return;
+      if (!creating && !agencia) return;
 
       setLoading(true);
       setError(null);
 
-      const formData = new FormData(e.currentTarget);
-      const get = (key: string) => (formData.get(key) as string)?.trim() ?? "";
-
-      const result = await actualizarAgencia(agencia.id, {
-        nombre: get("nombre"),
-        email: get("email") || undefined,
-        telefono: get("telefono") || undefined,
-        direccion: get("direccion") || undefined,
-        clientes: get("clientes") || undefined,
-        activa: formData.get("activa") === "true",
-        notas: get("notas") || undefined,
-      });
+      const data = readAgenciaForm(new FormData(e.currentTarget));
+      const result = creating
+        ? await crearAgencia(data)
+        : await actualizarAgencia(agencia!.id, data);
 
       setLoading(false);
 
@@ -52,53 +63,57 @@ export function EditAgenciaModal({ agencia, onClose }: EditAgenciaModalProps) {
         setError(result.error);
       }
     },
-    [agencia, onClose, router],
+    [agencia, creating, onClose, router],
   );
 
   return (
     <EditModal
-      open={Boolean(agencia)}
-      title="Editar agencia"
+      open={open}
+      title={creating ? "Nueva agencia" : "Editar agencia"}
       onClose={onClose}
     >
-      {agencia && (
-        <form key={agencia.id} onSubmit={handleSubmit} className="space-y-4">
+      {open && (
+        <form
+          key={creating ? "create" : agencia!.id}
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <FormField
             label="Nombre"
             name="nombre"
             required
-            defaultValue={agencia.nombre}
+            defaultValue={creating ? "" : agencia!.nombre}
           />
           <FormField
             label="Dirección"
             name="direccion"
-            defaultValue={agencia.direccion ?? ""}
+            defaultValue={creating ? "" : (agencia!.direccion ?? "")}
           />
           <FormField
             label="Clientes"
             name="clientes"
-            defaultValue={agencia.clientes ?? ""}
+            defaultValue={creating ? "" : (agencia!.clientes ?? "")}
           />
           <FormField
             label="Email"
             name="email"
             type="email"
-            defaultValue={agencia.email ?? ""}
+            defaultValue={creating ? "" : (agencia!.email ?? "")}
           />
           <FormField
             label="Teléfono"
             name="telefono"
-            defaultValue={agencia.telefono ?? ""}
+            defaultValue={creating ? "" : (agencia!.telefono ?? "")}
           />
           <FormTextarea
             label="Notas"
             name="notas"
-            defaultValue={agencia.notas ?? ""}
+            defaultValue={creating ? "" : (agencia!.notas ?? "")}
           />
           <FormCheckbox
             label="Agencia activa"
             name="activa"
-            defaultChecked={agencia.activa}
+            defaultChecked={creating ? true : agencia!.activa}
           />
 
           {error && <p className="text-error text-body-sm">{error}</p>}
@@ -121,7 +136,7 @@ export function EditAgenciaModal({ agencia, onClose }: EditAgenciaModalProps) {
               ) : (
                 <MaterialIcon name="save" className="text-sm" />
               )}
-              Guardar
+              {creating ? "Crear" : "Guardar"}
             </button>
           </div>
         </form>

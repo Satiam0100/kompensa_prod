@@ -9,10 +9,18 @@ import {
   FORM_FIELD_INPUT,
 } from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { RowSelectCheckbox } from "@/components/ui/RowSelectCheckbox";
+import type { BulkSelection } from "@/hooks/useBulkSelection";
 import type { AgenciaRow } from "@/lib/types/catalogo";
 
 interface AgenciasListProps {
   agencias: AgenciaRow[];
+  creating: boolean;
+  editing: AgenciaRow | null;
+  bulk: BulkSelection;
+  onCreate: () => void;
+  onEdit: (agencia: AgenciaRow) => void;
+  onCloseModal: () => void;
 }
 
 function Cell({ value }: { value: string | null | undefined }) {
@@ -22,9 +30,22 @@ function Cell({ value }: { value: string | null | undefined }) {
   return <>{value}</>;
 }
 
-export function AgenciasList({ agencias }: AgenciasListProps) {
+export function AgenciasList({
+  agencias,
+  creating,
+  editing,
+  bulk,
+  onCreate,
+  onEdit,
+  onCloseModal,
+}: AgenciasListProps) {
   const [query, setQuery] = useState("");
-  const [editing, setEditing] = useState<AgenciaRow | null>(null);
+  const { selecting, selectedIds, toggleSelect } = bulk;
+
+  const rowHighlight = (id: string) =>
+    selecting && selectedIds.has(id)
+      ? "bg-error-container/20 ring-1 ring-inset ring-error/30"
+      : "";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -42,19 +63,34 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
 
   if (agencias.length === 0) {
     return (
-      <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
-        <MaterialIcon
-          name="business"
-          className="text-5xl text-outline-variant mb-4"
+      <>
+        <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
+          <MaterialIcon
+            name="business"
+            className="text-5xl text-outline-variant mb-4"
+          />
+          <h3 className="text-title-md text-on-surface mb-2">
+            No hay agencias registradas
+          </h3>
+          <p className="text-body-sm text-on-surface-variant mb-6 max-w-md mx-auto">
+            Aún no hay agencias en el catálogo. Agrega la primera desde el
+            formulario.
+          </p>
+          <button
+            type="button"
+            onClick={onCreate}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-tertiary text-on-tertiary font-bold rounded-lg hover:brightness-110 transition-all"
+          >
+            <MaterialIcon name="add" />
+            Agregar agencia
+          </button>
+        </div>
+        <EditAgenciaModal
+          creating={creating}
+          agencia={editing}
+          onClose={onCloseModal}
         />
-        <h3 className="text-title-md text-on-surface mb-2">
-          No hay agencias registradas
-        </h3>
-        <p className="text-body-sm text-on-surface-variant max-w-md mx-auto">
-          El catálogo de agencias está vacío. Importa los datos desde Supabase o
-          el Excel de referencia.
-        </p>
-      </div>
+      </>
     );
   }
 
@@ -80,6 +116,11 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
         <table className="w-full text-left min-w-[720px]">
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container-low">
+              {selecting && (
+                <th className="w-12 px-4 py-3">
+                  <span className="sr-only">Seleccionar</span>
+                </th>
+              )}
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Agencia
               </th>
@@ -95,17 +136,28 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Estado
               </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                <span className="sr-only">Acciones</span>
-              </th>
+              {!selecting && (
+                <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                  <span className="sr-only">Acciones</span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {filtered.map((agencia) => (
               <tr
                 key={agencia.id}
-                className="border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors"
+                className={`border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors ${rowHighlight(agencia.id)}`}
               >
+                {selecting && (
+                  <td className="px-4 py-4">
+                    <RowSelectCheckbox
+                      checked={selectedIds.has(agencia.id)}
+                      onChange={() => toggleSelect(agencia.id)}
+                      label={`Seleccionar ${agencia.nombre}`}
+                    />
+                  </td>
+                )}
                 <td className="px-4 py-4">
                   <p className="text-body-md text-on-surface font-medium">
                     {agencia.nombre}
@@ -128,12 +180,14 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
                 <td className="px-4 py-4">
                   <ActivaBadge activa={agencia.activa} />
                 </td>
-                <td className="px-4 py-4">
-                  <EditRowButton
-                    onClick={() => setEditing(agencia)}
-                    label={`Editar ${agencia.nombre}`}
-                  />
-                </td>
+                {!selecting && (
+                  <td className="px-4 py-4">
+                    <EditRowButton
+                      onClick={() => onEdit(agencia)}
+                      label={`Editar ${agencia.nombre}`}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -149,18 +203,29 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
         {filtered.map((agencia) => (
           <article
             key={agencia.id}
-            className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2"
+            className={`bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2 ${rowHighlight(agencia.id)}`}
           >
             <div className="flex justify-between items-start gap-2">
-              <p className="text-body-md font-medium text-on-surface">
-                {agencia.nombre}
-              </p>
+              <div className="flex items-start gap-3 min-w-0">
+                {selecting && (
+                  <RowSelectCheckbox
+                    checked={selectedIds.has(agencia.id)}
+                    onChange={() => toggleSelect(agencia.id)}
+                    label={`Seleccionar ${agencia.nombre}`}
+                  />
+                )}
+                <p className="text-body-md font-medium text-on-surface">
+                  {agencia.nombre}
+                </p>
+              </div>
               <div className="flex items-center gap-2 shrink-0">
                 <ActivaBadge activa={agencia.activa} />
-                <EditRowButton
-                  onClick={() => setEditing(agencia)}
-                  label={`Editar ${agencia.nombre}`}
-                />
+                {!selecting && (
+                  <EditRowButton
+                    onClick={() => onEdit(agencia)}
+                    label={`Editar ${agencia.nombre}`}
+                  />
+                )}
               </div>
             </div>
             {agencia.direccion && (
@@ -182,8 +247,9 @@ export function AgenciasList({ agencias }: AgenciasListProps) {
       </div>
 
       <EditAgenciaModal
+        creating={creating}
         agencia={editing}
-        onClose={() => setEditing(null)}
+        onClose={onCloseModal}
       />
     </div>
   );

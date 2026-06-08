@@ -1,6 +1,6 @@
 import { listarEmisoras } from "@/app/actions/catalogos";
 import { CatalogError } from "@/components/catalogos/CatalogError";
-import { EmisorasList } from "@/components/catalogos/EmisorasList";
+import { EmisorasCatalog } from "@/components/catalogos/EmisorasCatalog";
 
 export async function EmisorasData() {
   const result = await listarEmisoras();
@@ -14,5 +14,5 @@ export async function EmisorasData() {
     );
   }
 
-  return <EmisorasList emisoras={result.data} />;
+  return <EmisorasCatalog emisoras={result.data} />;
 }

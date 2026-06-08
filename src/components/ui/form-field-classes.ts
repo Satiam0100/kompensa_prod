@@ -5,4 +5,7 @@ export const FORM_FIELD_CONTROL = `${FORM_FIELD_CONTROL_BASE} px-3`;
 
 export const FORM_FIELD_CONTROL_PLAIN = `${FORM_FIELD_CONTROL_BASE} px-4`;
 
+/** Contenedor para textarea: sin items-center para no colapsar la altura del texto. */
+export const FORM_FIELD_TEXTAREA_CONTROL = `${FORM_FIELD_CONTROL_BASE} px-4 items-start`;
+
 export const FORM_FIELD_INPUT = "form-field-input";

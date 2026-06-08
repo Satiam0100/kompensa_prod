@@ -1,6 +1,6 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, deleteRowsByIds } from "@/lib/supabase/server";
 import type {
   AgenciaForm,
   AgenciaRow,
@@ -22,6 +22,14 @@ export type ListarEmisorasResult =
 
 export type ActualizarCatalogoResult =
   | { success: true }
+  | { success: false; error: string };
+
+export type CrearCatalogoResult =
+  | { success: true; id: string }
+  | { success: false; error: string };
+
+export type EliminarCatalogoResult =
+  | { success: true; deleted: number }
   | { success: false; error: string };
 
 function agenciaToPayload(data: AgenciaForm) {
@@ -113,6 +121,64 @@ export async function listarEmisoras(): Promise<ListarEmisorasResult> {
   }
 }
 
+export async function crearAgencia(
+  data: AgenciaForm,
+): Promise<CrearCatalogoResult> {
+  if (!data.nombre.trim()) {
+    return { success: false, error: "El nombre es obligatorio." };
+  }
+
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: row, error } = await supabase
+      .from("agencias")
+      .insert(agenciaToPayload(data))
+      .select("id")
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/agencias");
+    revalidateTag(AGENCIAS_CACHE_TAG, "max");
+    return { success: true, id: row.id as string };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error al crear la agencia";
+    return { success: false, error: message };
+  }
+}
+
+export async function crearEmisora(
+  data: EmisoraForm,
+): Promise<CrearCatalogoResult> {
+  if (!data.nombre.trim()) {
+    return { success: false, error: "El nombre es obligatorio." };
+  }
+
+  try {
+    const supabase = createSupabaseServerClient();
+    const { data: row, error } = await supabase
+      .from("emisoras")
+      .insert(emisoraToPayload(data))
+      .select("id")
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/emisoras");
+    revalidateTag(EMISORAS_CACHE_TAG, "max");
+    return { success: true, id: row.id as string };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error al crear la emisora";
+    return { success: false, error: message };
+  }
+}
+
 export async function actualizarAgencia(
   id: string,
   data: AgenciaForm,
@@ -167,6 +233,40 @@ export async function actualizarEmisora(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Error al actualizar la emisora";
+    return { success: false, error: message };
+  }
+}
+
+export async function eliminarAgencias(
+  ids: string[],
+): Promise<EliminarCatalogoResult> {
+  try {
+    const result = await deleteRowsByIds("agencias", ids);
+    if (!result.success) return result;
+
+    revalidatePath("/agencias");
+    revalidateTag(AGENCIAS_CACHE_TAG, "max");
+    return { success: true, deleted: result.deleted };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error al eliminar las agencias";
+    return { success: false, error: message };
+  }
+}
+
+export async function eliminarEmisoras(
+  ids: string[],
+): Promise<EliminarCatalogoResult> {
+  try {
+    const result = await deleteRowsByIds("emisoras", ids);
+    if (!result.success) return result;
+
+    revalidatePath("/emisoras");
+    revalidateTag(EMISORAS_CACHE_TAG, "max");
+    return { success: true, deleted: result.deleted };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error al eliminar las emisoras";
     return { success: false, error: message };
   }
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { actualizarEmisora } from "@/app/actions/catalogos";
+import { actualizarEmisora, crearEmisora } from "@/app/actions/catalogos";
 import { EditModal } from "@/components/ui/EditModal";
 import {
   FormCheckbox,
@@ -14,40 +14,48 @@ import type { EmisoraRow } from "@/lib/types/catalogo";
 
 interface EditEmisoraModalProps {
   emisora: EmisoraRow | null;
+  creating?: boolean;
   onClose: () => void;
+}
+
+function readEmisoraForm(formData: FormData) {
+  const get = (key: string) => (formData.get(key) as string)?.trim() ?? "";
+  return {
+    nombre: get("nombre"),
+    ciudad: get("ciudad") || undefined,
+    channel_id: get("channel_id") || undefined,
+    contacto: get("contacto") || undefined,
+    email: get("email") || undefined,
+    whatsapp: get("whatsapp") || undefined,
+    circuito: get("circuito") || undefined,
+    tipo: get("tipo") || undefined,
+    activa: formData.get("activa") === "true",
+    notas: get("notas") || undefined,
+  };
 }
 
 export function EditEmisoraModal({
   emisora,
+  creating = false,
   onClose,
 }: EditEmisoraModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const open = creating || Boolean(emisora);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!emisora) return;
+      if (!creating && !emisora) return;
 
       setLoading(true);
       setError(null);
 
-      const formData = new FormData(e.currentTarget);
-      const get = (key: string) => (formData.get(key) as string)?.trim() ?? "";
-
-      const result = await actualizarEmisora(emisora.id, {
-        nombre: get("nombre"),
-        ciudad: get("ciudad") || undefined,
-        channel_id: get("channel_id") || undefined,
-        contacto: get("contacto") || undefined,
-        email: get("email") || undefined,
-        whatsapp: get("whatsapp") || undefined,
-        circuito: get("circuito") || undefined,
-        tipo: get("tipo") || undefined,
-        activa: formData.get("activa") === "true",
-        notas: get("notas") || undefined,
-      });
+      const data = readEmisoraForm(new FormData(e.currentTarget));
+      const result = creating
+        ? await crearEmisora(data)
+        : await actualizarEmisora(emisora!.id, data);
 
       setLoading(false);
 
@@ -58,33 +66,37 @@ export function EditEmisoraModal({
         setError(result.error);
       }
     },
-    [emisora, onClose, router],
+    [creating, emisora, onClose, router],
   );
 
   return (
     <EditModal
-      open={Boolean(emisora)}
-      title="Editar emisora"
+      open={open}
+      title={creating ? "Nueva emisora" : "Editar emisora"}
       onClose={onClose}
     >
-      {emisora && (
-        <form key={emisora.id} onSubmit={handleSubmit} className="space-y-4">
+      {open && (
+        <form
+          key={creating ? "create" : emisora!.id}
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <FormField
             label="Nombre"
             name="nombre"
             required
-            defaultValue={emisora.nombre}
+            defaultValue={creating ? "" : emisora!.nombre}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Ciudad"
               name="ciudad"
-              defaultValue={emisora.ciudad ?? ""}
+              defaultValue={creating ? "" : (emisora!.ciudad ?? "")}
             />
             <FormField
               label="Channel ID"
               name="channel_id"
-              defaultValue={emisora.channel_id ?? ""}
+              defaultValue={creating ? "" : (emisora!.channel_id ?? "")}
               className="font-label-mono"
             />
           </div>
@@ -92,40 +104,40 @@ export function EditEmisoraModal({
             <FormField
               label="Circuito"
               name="circuito"
-              defaultValue={emisora.circuito ?? ""}
+              defaultValue={creating ? "" : (emisora!.circuito ?? "")}
             />
             <FormField
               label="Tipo"
               name="tipo"
-              defaultValue={emisora.tipo ?? ""}
+              defaultValue={creating ? "" : (emisora!.tipo ?? "")}
             />
           </div>
           <FormField
             label="Contacto"
             name="contacto"
-            defaultValue={emisora.contacto ?? ""}
+            defaultValue={creating ? "" : (emisora!.contacto ?? "")}
           />
           <FormField
             label="Email"
             name="email"
             type="email"
-            defaultValue={emisora.email ?? ""}
+            defaultValue={creating ? "" : (emisora!.email ?? "")}
           />
           <FormField
             label="WhatsApp"
             name="whatsapp"
-            defaultValue={emisora.whatsapp ?? ""}
+            defaultValue={creating ? "" : (emisora!.whatsapp ?? "")}
             className="font-label-mono"
           />
           <FormTextarea
             label="Notas"
             name="notas"
-            defaultValue={emisora.notas ?? ""}
+            defaultValue={creating ? "" : (emisora!.notas ?? "")}
           />
           <FormCheckbox
             label="Emisora activa"
             name="activa"
-            defaultChecked={emisora.activa}
+            defaultChecked={creating ? true : emisora!.activa}
           />
 
           {error && <p className="text-error text-body-sm">{error}</p>}
@@ -148,7 +160,7 @@ export function EditEmisoraModal({
               ) : (
                 <MaterialIcon name="save" className="text-sm" />
               )}
-              Guardar
+              {creating ? "Crear" : "Guardar"}
             </button>
           </div>
         </form>

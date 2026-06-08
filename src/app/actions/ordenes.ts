@@ -1,6 +1,6 @@
 "use server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, deleteRowsByIds } from "@/lib/supabase/server";
 import type {
   OrdenTransmisionForm,
   OrdenTransmisionRow,
@@ -45,6 +45,10 @@ export type ObtenerOrdenResult =
 
 export type ActualizarOrdenResult =
   | { success: true }
+  | { success: false; error: string };
+
+export type EliminarOrdenesResult =
+  | { success: true; deleted: number }
   | { success: false; error: string };
 
 export async function listarOrdenesTransmision(): Promise<ListarOrdenesResult> {
@@ -138,6 +142,23 @@ export async function actualizarOrdenTransmision(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Error desconocido al actualizar";
+    return { success: false, error: message };
+  }
+}
+
+export async function eliminarOrdenesTransmision(
+  ids: string[],
+): Promise<EliminarOrdenesResult> {
+  try {
+    const result = await deleteRowsByIds("ordenes_transmision", ids);
+    if (!result.success) return result;
+
+    revalidatePath("/ordenes");
+    revalidateTag(ORDENES_CACHE_TAG, "max");
+    return { success: true, deleted: result.deleted };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error al eliminar las órdenes";
     return { success: false, error: message };
   }
 }

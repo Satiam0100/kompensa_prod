@@ -1,5 +1,5 @@
 import { listarOrdenesTransmision } from "@/app/actions/ordenes";
-import { OrdenesList } from "@/components/ordenes/OrdenesList";
+import { OrdenesCatalog } from "@/components/ordenes/OrdenesCatalog";
 
 export async function OrdenesData() {
   const result = await listarOrdenesTransmision();
@@ -20,5 +20,5 @@ export async function OrdenesData() {
     );
   }
 
-  return <OrdenesList ordenes={result.data} />;
+  return <OrdenesCatalog ordenes={result.data} />;
 }

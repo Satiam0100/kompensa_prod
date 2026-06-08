@@ -9,15 +9,19 @@ import {
   FORM_FIELD_INPUT,
 } from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { RowSelectCheckbox } from "@/components/ui/RowSelectCheckbox";
+import type { BulkSelection } from "@/hooks/useBulkSelection";
 import { formatFecha, formatPeriodo } from "@/lib/format";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
 interface OrdenesListProps {
   ordenes: OrdenTransmisionRow[];
+  bulk: BulkSelection;
 }
 
-export function OrdenesList({ ordenes }: OrdenesListProps) {
+export function OrdenesList({ ordenes, bulk }: OrdenesListProps) {
   const [query, setQuery] = useState("");
+  const { selecting, selectedIds, toggleSelect } = bulk;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -32,6 +36,11 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
         (o.spot_name?.toLowerCase().includes(q) ?? false),
     );
   }, [ordenes, query]);
+
+  const rowHighlight = (id: string) =>
+    selecting && selectedIds.has(id)
+      ? "bg-error-container/20 ring-1 ring-inset ring-error/30"
+      : "";
 
   if (ordenes.length === 0) {
     return (
@@ -80,6 +89,11 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container-low">
+              {selecting && (
+                <th className="w-12 px-4 py-3">
+                  <span className="sr-only">Seleccionar</span>
+                </th>
+              )}
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Cliente / Campaña
               </th>
@@ -98,17 +112,28 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Registro
               </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                <span className="sr-only">Acciones</span>
-              </th>
+              {!selecting && (
+                <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                  <span className="sr-only">Acciones</span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {filtered.map((orden) => (
               <tr
                 key={orden.id}
-                className="border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors"
+                className={`border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors ${rowHighlight(orden.id)}`}
               >
+                {selecting && (
+                  <td className="px-4 py-4">
+                    <RowSelectCheckbox
+                      checked={selectedIds.has(orden.id)}
+                      onChange={() => toggleSelect(orden.id)}
+                      label={`Seleccionar ${orden.cliente}`}
+                    />
+                  </td>
+                )}
                 <td className="px-4 py-4">
                   <p className="text-body-md text-on-surface font-medium">
                     {orden.cliente}
@@ -142,12 +167,14 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
                 <td className="px-4 py-4 text-label-sm text-on-surface-variant">
                   {formatFecha(orden.created_at)}
                 </td>
-                <td className="px-4 py-4">
-                  <EditRowButton
-                    href={`/ordenes/${orden.id}/editar`}
-                    label={`Editar ${orden.cliente}`}
-                  />
-                </td>
+                {!selecting && (
+                  <td className="px-4 py-4">
+                    <EditRowButton
+                      href={`/ordenes/${orden.id}/editar`}
+                      label={`Editar ${orden.cliente}`}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -163,23 +190,34 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
         {filtered.map((orden) => (
           <article
             key={orden.id}
-            className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3"
+            className={`bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3 ${rowHighlight(orden.id)}`}
           >
             <div className="flex justify-between items-start gap-2">
-              <div>
-                <p className="text-body-md font-medium text-on-surface">
-                  {orden.cliente}
-                </p>
-                <p className="text-body-sm text-on-surface-variant">
-                  {orden.campaña}
-                </p>
+              <div className="flex items-start gap-3 min-w-0">
+                {selecting && (
+                  <RowSelectCheckbox
+                    checked={selectedIds.has(orden.id)}
+                    onChange={() => toggleSelect(orden.id)}
+                    label={`Seleccionar ${orden.cliente}`}
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-body-md font-medium text-on-surface">
+                    {orden.cliente}
+                  </p>
+                  <p className="text-body-sm text-on-surface-variant">
+                    {orden.campaña}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <EstadoBadge estado={orden.estado} />
-                <EditRowButton
-                  href={`/ordenes/${orden.id}/editar`}
-                  label={`Editar ${orden.cliente}`}
-                />
+                {!selecting && (
+                  <EditRowButton
+                    href={`/ordenes/${orden.id}/editar`}
+                    label={`Editar ${orden.cliente}`}
+                  />
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-label-sm text-on-surface-variant">

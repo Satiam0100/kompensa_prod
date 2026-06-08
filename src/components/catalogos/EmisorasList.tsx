@@ -9,10 +9,18 @@ import {
   FORM_FIELD_INPUT,
 } from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { RowSelectCheckbox } from "@/components/ui/RowSelectCheckbox";
+import type { BulkSelection } from "@/hooks/useBulkSelection";
 import type { EmisoraRow } from "@/lib/types/catalogo";
 
 interface EmisorasListProps {
   emisoras: EmisoraRow[];
+  creating: boolean;
+  editing: EmisoraRow | null;
+  bulk: BulkSelection;
+  onCreate: () => void;
+  onEdit: (emisora: EmisoraRow) => void;
+  onCloseModal: () => void;
 }
 
 function Cell({ value }: { value: string | null | undefined }) {
@@ -22,9 +30,22 @@ function Cell({ value }: { value: string | null | undefined }) {
   return <>{value}</>;
 }
 
-export function EmisorasList({ emisoras }: EmisorasListProps) {
+export function EmisorasList({
+  emisoras,
+  creating,
+  editing,
+  bulk,
+  onCreate,
+  onEdit,
+  onCloseModal,
+}: EmisorasListProps) {
   const [query, setQuery] = useState("");
-  const [editing, setEditing] = useState<EmisoraRow | null>(null);
+  const { selecting, selectedIds, toggleSelect } = bulk;
+
+  const rowHighlight = (id: string) =>
+    selecting && selectedIds.has(id)
+      ? "bg-error-container/20 ring-1 ring-inset ring-error/30"
+      : "";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -43,19 +64,34 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
 
   if (emisoras.length === 0) {
     return (
-      <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
-        <MaterialIcon
-          name="radio"
-          className="text-5xl text-outline-variant mb-4"
+      <>
+        <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
+          <MaterialIcon
+            name="radio"
+            className="text-5xl text-outline-variant mb-4"
+          />
+          <h3 className="text-title-md text-on-surface mb-2">
+            No hay emisoras registradas
+          </h3>
+          <p className="text-body-sm text-on-surface-variant mb-6 max-w-md mx-auto">
+            Aún no hay emisoras en el catálogo. Agrega la primera desde el
+            formulario.
+          </p>
+          <button
+            type="button"
+            onClick={onCreate}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-tertiary text-on-tertiary font-bold rounded-lg hover:brightness-110 transition-all"
+          >
+            <MaterialIcon name="add" />
+            Agregar emisora
+          </button>
+        </div>
+        <EditEmisoraModal
+          creating={creating}
+          emisora={editing}
+          onClose={onCloseModal}
         />
-        <h3 className="text-title-md text-on-surface mb-2">
-          No hay emisoras registradas
-        </h3>
-        <p className="text-body-sm text-on-surface-variant max-w-md mx-auto">
-          El catálogo de emisoras está vacío. Importa los datos desde Supabase o
-          el Excel de referencia.
-        </p>
-      </div>
+      </>
     );
   }
 
@@ -81,6 +117,11 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
         <table className="w-full text-left min-w-[880px]">
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container-low">
+              {selecting && (
+                <th className="w-12 px-4 py-3">
+                  <span className="sr-only">Seleccionar</span>
+                </th>
+              )}
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Emisora
               </th>
@@ -96,17 +137,28 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
               <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
                 Estado
               </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                <span className="sr-only">Acciones</span>
-              </th>
+              {!selecting && (
+                <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
+                  <span className="sr-only">Acciones</span>
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {filtered.map((emisora) => (
               <tr
                 key={emisora.id}
-                className="border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors"
+                className={`border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors ${rowHighlight(emisora.id)}`}
               >
+                {selecting && (
+                  <td className="px-4 py-4">
+                    <RowSelectCheckbox
+                      checked={selectedIds.has(emisora.id)}
+                      onChange={() => toggleSelect(emisora.id)}
+                      label={`Seleccionar ${emisora.nombre}`}
+                    />
+                  </td>
+                )}
                 <td className="px-4 py-4">
                   <p className="text-body-md text-on-surface font-medium">
                     {emisora.nombre}
@@ -144,12 +196,14 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
                 <td className="px-4 py-4">
                   <ActivaBadge activa={emisora.activa} />
                 </td>
-                <td className="px-4 py-4">
-                  <EditRowButton
-                    onClick={() => setEditing(emisora)}
-                    label={`Editar ${emisora.nombre}`}
-                  />
-                </td>
+                {!selecting && (
+                  <td className="px-4 py-4">
+                    <EditRowButton
+                      onClick={() => onEdit(emisora)}
+                      label={`Editar ${emisora.nombre}`}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -165,18 +219,29 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
         {filtered.map((emisora) => (
           <article
             key={emisora.id}
-            className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2"
+            className={`bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2 ${rowHighlight(emisora.id)}`}
           >
             <div className="flex justify-between items-start gap-2">
-              <p className="text-body-md font-medium text-on-surface">
-                {emisora.nombre}
-              </p>
+              <div className="flex items-start gap-3 min-w-0">
+                {selecting && (
+                  <RowSelectCheckbox
+                    checked={selectedIds.has(emisora.id)}
+                    onChange={() => toggleSelect(emisora.id)}
+                    label={`Seleccionar ${emisora.nombre}`}
+                  />
+                )}
+                <p className="text-body-md font-medium text-on-surface">
+                  {emisora.nombre}
+                </p>
+              </div>
               <div className="flex items-center gap-2 shrink-0">
                 <ActivaBadge activa={emisora.activa} />
-                <EditRowButton
-                  onClick={() => setEditing(emisora)}
-                  label={`Editar ${emisora.nombre}`}
-                />
+                {!selecting && (
+                  <EditRowButton
+                    onClick={() => onEdit(emisora)}
+                    label={`Editar ${emisora.nombre}`}
+                  />
+                )}
               </div>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-label-sm text-on-surface-variant">
@@ -193,8 +258,9 @@ export function EmisorasList({ emisoras }: EmisorasListProps) {
       </div>
 
       <EditEmisoraModal
+        creating={creating}
         emisora={editing}
-        onClose={() => setEditing(null)}
+        onClose={onCloseModal}
       />
     </div>
   );

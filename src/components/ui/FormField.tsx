@@ -3,6 +3,7 @@ import {
   FORM_FIELD_CONTROL,
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
+  FORM_FIELD_TEXTAREA_CONTROL,
 } from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
 
@@ -90,13 +91,15 @@ export function FormTextarea({
       <label className="text-label-sm text-on-surface-variant px-1">
         {label}
       </label>
-      <textarea
-        name={name}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        rows={rows}
-        className={`${FORM_FIELD_CONTROL_PLAIN} ${FORM_FIELD_INPUT} resize-y min-h-[80px] py-3`}
-      />
+      <div className={FORM_FIELD_TEXTAREA_CONTROL}>
+        <textarea
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          rows={rows}
+          className={`${FORM_FIELD_INPUT} block w-full resize-y min-h-[80px] py-3`}
+        />
+      </div>
     </div>
   );
 }
