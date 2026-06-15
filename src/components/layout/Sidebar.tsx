@@ -53,14 +53,9 @@ export function Sidebar() {
           height={40}
           className="w-10 h-10 rounded-lg object-cover"
         />
-        <div>
-          <h1 className="text-headline-sm font-extrabold text-primary leading-none">
-            Kompensa
-          </h1>
-          <p className="text-label-sm text-on-surface-variant opacity-70">
-            V2.4.8 (Active)
-          </p>
-        </div>
+        <h1 className="text-headline-sm font-extrabold text-primary leading-none">
+          Kompensa
+        </h1>
       </div>
 
       <nav className="flex flex-col gap-1 flex-grow">

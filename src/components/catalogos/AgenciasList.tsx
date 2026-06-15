@@ -1,15 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ActivaBadge } from "@/components/catalogos/ActivaBadge";
+import { AgenciaCard } from "@/components/catalogos/AgenciaCard";
 import { EditAgenciaModal } from "@/components/catalogos/EditAgenciaModal";
-import { EditRowButton } from "@/components/ui/EditRowButton";
 import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
 } from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { RowSelectCheckbox } from "@/components/ui/RowSelectCheckbox";
+import { RESPONSIVE_CARD_GRID_CLASS } from "@/components/ui/responsive-card-grid";
 import type { BulkSelection } from "@/hooks/useBulkSelection";
 import type { AgenciaRow } from "@/lib/types/catalogo";
 
@@ -23,13 +22,6 @@ interface AgenciasListProps {
   onCloseModal: () => void;
 }
 
-function Cell({ value }: { value: string | null | undefined }) {
-  if (!value?.trim()) {
-    return <span className="text-on-surface-variant/60">—</span>;
-  }
-  return <>{value}</>;
-}
-
 export function AgenciasList({
   agencias,
   creating,
@@ -40,12 +32,6 @@ export function AgenciasList({
   onCloseModal,
 }: AgenciasListProps) {
   const [query, setQuery] = useState("");
-  const { selecting, selectedIds, toggleSelect } = bulk;
-
-  const rowHighlight = (id: string) =>
-    selecting && selectedIds.has(id)
-      ? "bg-error-container/20 ring-1 ring-inset ring-error/30"
-      : "";
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -98,7 +84,10 @@ export function AgenciasList({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
         <div className={`${FORM_FIELD_CONTROL_PLAIN} flex-1 max-w-md`}>
-          <MaterialIcon name="search" className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary" />
+          <MaterialIcon
+            name="search"
+            className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary"
+          />
           <input
             type="search"
             value={query}
@@ -112,139 +101,22 @@ export function AgenciasList({
         </p>
       </div>
 
-      <div className="hidden lg:block bg-surface-container border border-outline-variant rounded-lg overflow-hidden overflow-x-auto">
-        <table className="w-full text-left min-w-[720px]">
-          <thead>
-            <tr className="border-b border-outline-variant bg-surface-container-low">
-              {selecting && (
-                <th className="w-12 px-4 py-3">
-                  <span className="sr-only">Seleccionar</span>
-                </th>
-              )}
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Agencia
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Dirección
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Clientes
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Contacto
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Estado
-              </th>
-              {!selecting && (
-                <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                  <span className="sr-only">Acciones</span>
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((agencia) => (
-              <tr
-                key={agencia.id}
-                className={`border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors ${rowHighlight(agencia.id)}`}
-              >
-                {selecting && (
-                  <td className="px-4 py-4">
-                    <RowSelectCheckbox
-                      checked={selectedIds.has(agencia.id)}
-                      onChange={() => toggleSelect(agencia.id)}
-                      label={`Seleccionar ${agencia.nombre}`}
-                    />
-                  </td>
-                )}
-                <td className="px-4 py-4">
-                  <p className="text-body-md text-on-surface font-medium">
-                    {agencia.nombre}
-                  </p>
-                </td>
-                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
-                  <Cell value={agencia.direccion} />
-                </td>
-                <td className="px-4 py-4 text-body-sm text-on-surface-variant max-w-xs">
-                  <Cell value={agencia.clientes} />
-                </td>
-                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
-                  <Cell value={agencia.email} />
-                  {agencia.telefono && (
-                    <span className="block text-label-sm mt-0.5">
-                      {agencia.telefono}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-4">
-                  <ActivaBadge activa={agencia.activa} />
-                </td>
-                {!selecting && (
-                  <td className="px-4 py-4">
-                    <EditRowButton
-                      onClick={() => onEdit(agencia)}
-                      label={`Editar ${agencia.nombre}`}
-                    />
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <p className="p-8 text-center text-body-sm text-on-surface-variant">
-            Ningún resultado para &quot;{query}&quot;
-          </p>
-        )}
-      </div>
-
-      <div className="lg:hidden grid gap-3">
-        {filtered.map((agencia) => (
-          <article
-            key={agencia.id}
-            className={`bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2 ${rowHighlight(agencia.id)}`}
-          >
-            <div className="flex justify-between items-start gap-2">
-              <div className="flex items-start gap-3 min-w-0">
-                {selecting && (
-                  <RowSelectCheckbox
-                    checked={selectedIds.has(agencia.id)}
-                    onChange={() => toggleSelect(agencia.id)}
-                    label={`Seleccionar ${agencia.nombre}`}
-                  />
-                )}
-                <p className="text-body-md font-medium text-on-surface">
-                  {agencia.nombre}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <ActivaBadge activa={agencia.activa} />
-                {!selecting && (
-                  <EditRowButton
-                    onClick={() => onEdit(agencia)}
-                    label={`Editar ${agencia.nombre}`}
-                  />
-                )}
-              </div>
-            </div>
-            {agencia.direccion && (
-              <p className="text-body-sm text-on-surface-variant">
-                <MaterialIcon
-                  name="location_on"
-                  className="text-sm mr-1 text-outline-variant align-middle"
-                />
-                {agencia.direccion}
-              </p>
-            )}
-            {agencia.clientes && (
-              <p className="text-label-sm text-on-surface-variant">
-                Clientes: {agencia.clientes}
-              </p>
-            )}
-          </article>
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="p-8 text-center text-body-sm text-on-surface-variant bg-surface-container border border-outline-variant rounded-lg">
+          Ningún resultado para &quot;{query}&quot;
+        </p>
+      ) : (
+        <div className={RESPONSIVE_CARD_GRID_CLASS}>
+          {filtered.map((agencia) => (
+            <AgenciaCard
+              key={agencia.id}
+              agencia={agencia}
+              bulk={bulk}
+              onEdit={onEdit}
+            />
+          ))}
+        </div>
+      )}
 
       <EditAgenciaModal
         creating={creating}

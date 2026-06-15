@@ -1,26 +1,31 @@
+import { RESPONSIVE_CARD_GRID_CLASS } from "@/components/ui/responsive-card-grid";
+
+function CatalogCardSkeleton() {
+  return (
+    <div className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3">
+      <div className="flex justify-between gap-2">
+        <div className="space-y-2 flex-1">
+          <div className="h-4 bg-surface-container-high rounded w-3/4" />
+          <div className="h-3 bg-surface-container-high rounded w-1/3" />
+        </div>
+        <div className="h-6 w-16 bg-surface-container-high rounded-full shrink-0" />
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 bg-surface-container-high rounded w-full" />
+        <div className="h-3 bg-surface-container-high rounded w-2/3" />
+      </div>
+      <div className="h-3 bg-surface-container-high rounded w-1/2 pt-1 border-t border-outline-variant/40" />
+    </div>
+  );
+}
+
 export function CatalogListSkeleton() {
   return (
     <div className="space-y-4 animate-pulse">
       <div className="h-10 bg-surface-container-low rounded-lg max-w-md" />
-      <div className="hidden lg:block bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
-        <div className="h-12 bg-surface-container-low border-b border-outline-variant" />
+      <div className={RESPONSIVE_CARD_GRID_CLASS}>
         {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-14 border-b border-outline-variant/40 px-4 flex items-center gap-4"
-          >
-            <div className="h-4 bg-surface-container-high rounded flex-1 max-w-xs" />
-            <div className="h-4 bg-surface-container-high rounded w-32" />
-            <div className="h-4 bg-surface-container-high rounded w-24" />
-          </div>
-        ))}
-      </div>
-      <div className="lg:hidden grid gap-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-24 bg-surface-container border border-outline-variant rounded-lg"
-          />
+          <CatalogCardSkeleton key={i} />
         ))}
       </div>
     </div>
