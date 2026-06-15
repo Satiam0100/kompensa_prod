@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { MobileNav } from "./MobileNav";
 import { Sidebar } from "./Sidebar";
 
 interface AppShellProps {
@@ -9,9 +10,12 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <>
       <Sidebar />
-      <main className="flex-grow overflow-y-auto custom-scrollbar bg-background">
-        {children}
-      </main>
+      <div className="flex flex-col flex-grow min-w-0 h-full">
+        <MobileNav />
+        <main className="flex-grow overflow-y-auto custom-scrollbar bg-background min-h-0">
+          {children}
+        </main>
+      </div>
     </>
   );
 }
