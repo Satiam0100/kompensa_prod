@@ -21,10 +21,6 @@ export const metadata: Metadata = {
   title: "Kompensa | AdCertify Pro",
   description:
     "Panel de gestión de órdenes de transmisión y certificación publicitaria",
-  icons: {
-    icon: "/kompensa-logo.jpeg",
-    apple: "/kompensa-logo.jpeg",
-  },
 };
 
 export default function RootLayout({
