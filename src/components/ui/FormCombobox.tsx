@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { FORM_FIELD_CONTROL_PLAIN } from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
+import { usePortalRoot } from "./portal-root-context";
 import type { SelectOption } from "./FormSelect";
 
 interface FormComboboxProps {
@@ -51,6 +52,7 @@ export function FormCombobox({
   className = "",
   emptyMessage = "Sin coincidencias",
 }: FormComboboxProps) {
+  const portalRoot = usePortalRoot();
   const generatedId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -247,7 +249,7 @@ export function FormCombobox({
               role="listbox"
               aria-label={label}
               style={menuStyle}
-              className={`form-select-menu form-select-menu--${menuPlacement} fixed z-50 max-h-80 overflow-y-auto custom-scrollbar`}
+              className={`form-select-menu form-select-menu--${menuPlacement} fixed z-[100] max-h-80 overflow-y-auto custom-scrollbar`}
             >
               {filteredOptions.length === 0 ? (
                 <li role="presentation">
@@ -280,7 +282,7 @@ export function FormCombobox({
                 })
               )}
             </ul>,
-            document.body,
+            portalRoot,
           )}
       </div>
     </div>

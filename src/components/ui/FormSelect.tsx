@@ -11,6 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { FORM_FIELD_CONTROL_PLAIN } from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
+import { usePortalRoot } from "./portal-root-context";
 
 export interface SelectOption {
   value: string;
@@ -38,6 +39,7 @@ export function FormSelect({
   options,
   className = "",
 }: FormSelectProps) {
+  const portalRoot = usePortalRoot();
   const generatedId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -188,7 +190,7 @@ export function FormSelect({
               role="listbox"
               aria-label={label}
               style={menuStyle}
-              className={`form-select-menu form-select-menu--${menuPlacement} fixed z-50`}
+              className={`form-select-menu form-select-menu--${menuPlacement} fixed z-[100]`}
             >
               {options.map((option) => {
                 const isSelected = option.value === value;
@@ -198,6 +200,7 @@ export function FormSelect({
                       type="button"
                       role="option"
                       aria-selected={isSelected}
+                      onMouseDown={(event) => event.preventDefault()}
                       onClick={() => handleSelect(option.value)}
                       className={[
                         "form-select-option",
@@ -212,7 +215,7 @@ export function FormSelect({
                 );
               })}
             </ul>,
-            document.body,
+            portalRoot,
           )}
       </div>
     </div>

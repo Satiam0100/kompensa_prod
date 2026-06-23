@@ -24,6 +24,7 @@ import {
 } from "./date-picker-utils";
 import { FORM_FIELD_CONTROL, FORM_FIELD_INPUT } from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
+import { usePortalRoot } from "./portal-root-context";
 
 const POPOVER_HEIGHT = 240;
 const POPOVER_GAP = 0;
@@ -47,6 +48,7 @@ export function FormDateField({
   id,
   ...inputProps
 }: FormDateFieldProps) {
+  const portalRoot = usePortalRoot();
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -288,7 +290,7 @@ export function FormDateField({
               onViewChange={setViewDate}
               onSelect={handleSelect}
             />,
-            document.body,
+            portalRoot,
           )}
       </div>
     </div>

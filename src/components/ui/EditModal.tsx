@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { PortalRootContext } from "@/components/ui/portal-root-context";
 
 const MAX_WIDTH_CLASS = {
   lg: "max-w-lg",
@@ -26,6 +27,7 @@ export function EditModal({
   maxWidth = "lg",
 }: EditModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -36,14 +38,17 @@ export function EditModal({
     } else if (!open && dialog.open) {
       dialog.close();
     }
+
+    setPortalRoot(open ? dialog : null);
   }, [open]);
 
   return (
-    <dialog
-      ref={dialogRef}
-      onClose={onClose}
-      className={`backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} max-h-[90vh] shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 overflow-hidden`}
-    >
+    <PortalRootContext value={portalRoot}>
+      <dialog
+        ref={dialogRef}
+        onClose={onClose}
+        className={`backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} max-h-[90vh] shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 overflow-hidden`}
+      >
       <div className="p-5 border-b border-outline-variant flex items-center justify-between shrink-0">
         <h3 className="text-title-md">{title}</h3>
         <button
@@ -59,5 +64,6 @@ export function EditModal({
         {children}
       </div>
     </dialog>
+    </PortalRootContext>
   );
 }

@@ -36,6 +36,12 @@ export function CatalogOrderFields({
   const [ciudad, setCiudad] = useState(defaultCiudad);
   const [agencia, setAgencia] = useState(defaultAgencia);
 
+  useEffect(() => {
+    setEmisora(defaultEmisora);
+    setCiudad(defaultCiudad);
+    setAgencia(defaultAgencia);
+  }, [defaultEmisora, defaultCiudad, defaultAgencia]);
+
   const emisoraOptions = useMemo(
     () =>
       ensureSelectOption(
