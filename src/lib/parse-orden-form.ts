@@ -84,6 +84,7 @@ export function validateOrdenForm(
   if (!data.cliente) missing.push("Cliente");
   if (!data.campaña) missing.push("Campaña");
   if (!data.emisora) missing.push("Emisora");
+  if (!data.ciudad?.trim()) missing.push("Ciudad");
   if (!data.email_cliente) missing.push("Email Cliente");
   if (!data.periodo_inicio) missing.push("Periodo Inicio");
   if (!data.periodo_fin) missing.push("Periodo Fin");

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { listarAgencias, listarEmisoras } from "@/app/actions/catalogos";
 import { obtenerOrdenTransmision } from "@/app/actions/ordenes";
 import { AppShell } from "@/components/layout/AppShell";
 import { TransmissionOrderForm } from "@/components/ordenes/TransmissionOrderForm";
@@ -15,13 +16,26 @@ interface EditarOrdenPageProps {
 
 export default async function EditarOrdenPage({ params }: EditarOrdenPageProps) {
   const { id } = await params;
-  const result = await obtenerOrdenTransmision(id);
+  const [result, emisorasResult, agenciasResult] = await Promise.all([
+    obtenerOrdenTransmision(id),
+    listarEmisoras(),
+    listarAgencias(),
+  ]);
 
   if (!result.success) {
     notFound();
   }
 
   const orden = result.data;
+  const catalogError =
+    !emisorasResult.success || !agenciasResult.success
+      ? [
+          !emisorasResult.success ? emisorasResult.error : null,
+          !agenciasResult.success ? agenciasResult.error : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null;
 
   return (
     <AppShell>
@@ -42,7 +56,12 @@ export default async function EditarOrdenPage({ params }: EditarOrdenPageProps) 
           </p>
         </div>
 
-        <TransmissionOrderForm orden={orden} />
+        <TransmissionOrderForm
+          orden={orden}
+          emisoras={emisorasResult.success ? emisorasResult.data : []}
+          agencias={agenciasResult.success ? agenciasResult.data : []}
+          catalogError={catalogError}
+        />
       </div>
     </AppShell>
   );

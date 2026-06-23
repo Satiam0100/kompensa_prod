@@ -19,14 +19,24 @@ import {
 } from "@/lib/parse-orden-form";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
+import { CatalogOrderFields } from "./CatalogOrderFields";
+import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
 interface TransmissionOrderFormProps {
   orden?: OrdenTransmisionRow;
+  emisoras?: EmisoraRow[];
+  agencias?: AgenciaRow[];
+  catalogError?: string | null;
 }
 
-export function TransmissionOrderForm({ orden }: TransmissionOrderFormProps) {
+export function TransmissionOrderForm({
+  orden,
+  emisoras = [],
+  agencias = [],
+  catalogError = null,
+}: TransmissionOrderFormProps) {
   const router = useRouter();
   const isEdit = Boolean(orden);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
@@ -94,24 +104,13 @@ export function TransmissionOrderForm({ orden }: TransmissionOrderFormProps) {
               placeholder="Nombre del proyecto"
               defaultValue={orden?.campaña}
             />
-            <FormField
-              label="Emisora"
-              name="emisora"
-              required
-              placeholder="Frecuencia / Nombre"
-              defaultValue={orden?.emisora}
-            />
-            <FormField
-              label="Ciudad"
-              name="ciudad"
-              placeholder="Ubicación geográfica"
-              defaultValue={orden?.ciudad ?? ""}
-            />
-            <FormField
-              label="Agencia"
-              name="agencia"
-              placeholder="Agencia aliada"
-              defaultValue={orden?.agencia ?? ""}
+            <CatalogOrderFields
+              emisoras={emisoras}
+              agencias={agencias}
+              defaultEmisora={orden?.emisora}
+              defaultCiudad={orden?.ciudad ?? ""}
+              defaultAgencia={orden?.agencia ?? ""}
+              catalogError={catalogError}
             />
           </div>
         </SectionCard>
