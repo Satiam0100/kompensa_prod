@@ -3,14 +3,28 @@
 import { type ReactNode, useEffect, useRef } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
+const MAX_WIDTH_CLASS = {
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+} as const;
+
 interface EditModalProps {
   open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  maxWidth?: keyof typeof MAX_WIDTH_CLASS;
 }
 
-export function EditModal({ open, title, onClose, children }: EditModalProps) {
+export function EditModal({
+  open,
+  title,
+  onClose,
+  children,
+  maxWidth = "lg",
+}: EditModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -28,7 +42,7 @@ export function EditModal({ open, title, onClose, children }: EditModalProps) {
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] max-w-lg max-h-[90vh] shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 overflow-hidden"
+      className={`backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} max-h-[90vh] shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 overflow-hidden`}
     >
       <div className="p-5 border-b border-outline-variant flex items-center justify-between shrink-0">
         <h3 className="text-title-md">{title}</h3>

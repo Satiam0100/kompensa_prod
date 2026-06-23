@@ -2,10 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  actualizarOrdenTransmision,
-  crearOrdenTransmision,
-} from "@/app/actions/ordenes";
+import { crearOrdenTransmision } from "@/app/actions/ordenes";
 import { FormDateField } from "@/components/ui/FormDateField";
 import {
   FormField,
@@ -17,28 +14,24 @@ import {
   parseOrdenFormData,
   validateOrdenForm,
 } from "@/lib/parse-orden-form";
-import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
+import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
 import { CatalogOrderFields } from "./CatalogOrderFields";
-import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
 interface TransmissionOrderFormProps {
-  orden?: OrdenTransmisionRow;
   emisoras?: EmisoraRow[];
   agencias?: AgenciaRow[];
   catalogError?: string | null;
 }
 
 export function TransmissionOrderForm({
-  orden,
   emisoras = [],
   agencias = [],
   catalogError = null,
 }: TransmissionOrderFormProps) {
   const router = useRouter();
-  const isEdit = Boolean(orden);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -59,9 +52,7 @@ export function TransmissionOrderForm({
       setSubmitState("loading");
       setErrorMessage(null);
 
-      const result = isEdit
-        ? await actualizarOrdenTransmision(orden!.id, data)
-        : await crearOrdenTransmision(data);
+      const result = await crearOrdenTransmision(data);
 
       if (result.success) {
         setSubmitState("success");
@@ -74,7 +65,7 @@ export function TransmissionOrderForm({
         setErrorMessage(result.error);
       }
     },
-    [isEdit, orden, router],
+    [router],
   );
 
   return (
@@ -95,21 +86,16 @@ export function TransmissionOrderForm({
               name="cliente"
               required
               placeholder="Ej. Corporación Global"
-              defaultValue={orden?.cliente}
             />
             <FormField
               label="Campaña"
               name="campana"
               required
               placeholder="Nombre del proyecto"
-              defaultValue={orden?.campaña}
             />
             <CatalogOrderFields
               emisoras={emisoras}
               agencias={agencias}
-              defaultEmisora={orden?.emisora}
-              defaultCiudad={orden?.ciudad ?? ""}
-              defaultAgencia={orden?.agencia ?? ""}
               catalogError={catalogError}
             />
           </div>
@@ -126,7 +112,7 @@ export function TransmissionOrderForm({
             <FormSelect
               label="Estado"
               name="estado"
-              defaultValue={orden?.estado ?? "activa"}
+              defaultValue="activa"
               options={[
                 { value: "activa", label: "Activa" },
                 { value: "pausada", label: "Pausada" },
@@ -139,7 +125,6 @@ export function TransmissionOrderForm({
               type="email"
               required
               placeholder="email@dominio.com"
-              defaultValue={orden?.email_cliente}
             />
           </div>
         </SectionCard>
@@ -160,7 +145,6 @@ export function TransmissionOrderForm({
               min={1}
               icon="repeat"
               placeholder="0"
-              defaultValue={orden?.cuñas_diarias}
             />
             <FormField
               label="Total Contratadas"
@@ -170,19 +154,16 @@ export function TransmissionOrderForm({
               min={1}
               icon="functions"
               placeholder="0"
-              defaultValue={orden?.total_contratadas}
             />
             <FormDateField
               label="Periodo Inicio"
               name="periodo_inicio"
               required
-              defaultValue={orden?.periodo_inicio}
             />
             <FormDateField
               label="Periodo Fin"
               name="periodo_fin"
               required
-              defaultValue={orden?.periodo_fin}
             />
           </div>
           <div className="mt-6">
@@ -191,7 +172,6 @@ export function TransmissionOrderForm({
               name="horario"
               icon="schedule"
               placeholder="Ej. 06:00 - 12:00, 18:00 - 22:00"
-              defaultValue={orden?.horario ?? ""}
             />
           </div>
           <p className="mt-4 text-body-sm text-on-surface-variant">
@@ -200,11 +180,7 @@ export function TransmissionOrderForm({
           </p>
         </SectionCard>
 
-        <AdvancedParamsSection
-          defaultSpotId={orden?.spot_id ?? ""}
-          defaultSpotName={orden?.spot_name ?? ""}
-          defaultDuracionSeg={orden?.duracion_seg}
-        />
+        <AdvancedParamsSection />
 
         {errorMessage && (
           <p className="md:col-span-12 text-error text-body-sm px-2">
@@ -217,10 +193,6 @@ export function TransmissionOrderForm({
             type="button"
             className="w-full sm:w-auto px-8 py-3 text-body-md font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all rounded-lg"
             onClick={() => {
-              if (isEdit) {
-                router.push("/ordenes");
-                return;
-              }
               const form = document.getElementById(
                 "transmission-form",
               ) as HTMLFormElement | null;
@@ -231,21 +203,14 @@ export function TransmissionOrderForm({
           >
             Cancelar
           </button>
-          <SubmitButton state={submitState} isEdit={isEdit} />
+          <SubmitButton state={submitState} />
         </div>
       </form>
     </>
   );
 }
 
-function SubmitButton({
-  state,
-  isEdit,
-}: {
-  state: SubmitState;
-  isEdit: boolean;
-}) {
-  const label = isEdit ? "Guardar cambios" : "Guardar Orden";
+function SubmitButton({ state }: { state: SubmitState }) {
 
   if (state === "loading") {
     return (
@@ -279,7 +244,7 @@ function SubmitButton({
       className="w-full sm:w-auto px-10 py-3 bg-tertiary text-on-tertiary text-body-md font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
     >
       <MaterialIcon name="save" filled />
-      {label}
+      Guardar Orden
     </button>
   );
 }

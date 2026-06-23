@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { EditOrdenModal } from "@/components/ordenes/EditOrdenModal";
 import { ORDENES_GRID_CLASS, OrdenCard } from "@/components/ordenes/OrdenCard";
 import {
   FORM_FIELD_CONTROL_PLAIN,
@@ -9,14 +10,30 @@ import {
 } from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import type { BulkSelection } from "@/hooks/useBulkSelection";
+import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
 interface OrdenesListProps {
   ordenes: OrdenTransmisionRow[];
   bulk: BulkSelection;
+  emisoras: EmisoraRow[];
+  agencias: AgenciaRow[];
+  catalogError?: string | null;
+  editing: OrdenTransmisionRow | null;
+  onEdit: (orden: OrdenTransmisionRow) => void;
+  onCloseModal: () => void;
 }
 
-export function OrdenesList({ ordenes, bulk }: OrdenesListProps) {
+export function OrdenesList({
+  ordenes,
+  bulk,
+  emisoras,
+  agencias,
+  catalogError = null,
+  editing,
+  onEdit,
+  onCloseModal,
+}: OrdenesListProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -86,10 +103,18 @@ export function OrdenesList({ ordenes, bulk }: OrdenesListProps) {
       ) : (
         <div className={ORDENES_GRID_CLASS}>
           {filtered.map((orden) => (
-            <OrdenCard key={orden.id} orden={orden} bulk={bulk} />
+            <OrdenCard key={orden.id} orden={orden} bulk={bulk} onEdit={onEdit} />
           ))}
         </div>
       )}
+
+      <EditOrdenModal
+        orden={editing}
+        emisoras={emisoras}
+        agencias={agencias}
+        catalogError={catalogError}
+        onClose={onCloseModal}
+      />
     </div>
   );
 }

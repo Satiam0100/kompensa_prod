@@ -8,17 +8,21 @@ interface AdvancedParamsSectionProps {
   defaultSpotId?: string;
   defaultSpotName?: string;
   defaultDuracionSeg?: number | null;
+  wrapperClassName?: string;
 }
 
 export function AdvancedParamsSection({
   defaultSpotId = "",
   defaultSpotName = "",
   defaultDuracionSeg,
+  wrapperClassName = "md:col-span-12",
 }: AdvancedParamsSectionProps) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:col-span-12 border border-outline-variant rounded-lg overflow-hidden bg-surface-container-low transition-colors hover:border-outline hover:bg-surface-container">
+    <div
+      className={`${wrapperClassName} border border-outline-variant rounded-lg overflow-hidden bg-surface-container-low transition-colors hover:border-outline hover:bg-surface-container`}
+    >
       <button
         type="button"
         className="w-full flex items-center justify-between p-4 hover:bg-surface-variant transition-colors group"

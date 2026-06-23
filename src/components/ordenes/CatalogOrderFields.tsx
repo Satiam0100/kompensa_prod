@@ -18,6 +18,8 @@ interface CatalogOrderFieldsProps {
   defaultCiudad?: string;
   defaultAgencia?: string;
   catalogError?: string | null;
+  formId?: string;
+  catalogErrorClassName?: string;
 }
 
 export function CatalogOrderFields({
@@ -27,6 +29,8 @@ export function CatalogOrderFields({
   defaultCiudad = "",
   defaultAgencia = "",
   catalogError,
+  formId = "transmission-form",
+  catalogErrorClassName = "sm:col-span-2",
 }: CatalogOrderFieldsProps) {
   const [emisora, setEmisora] = useState(defaultEmisora);
   const [ciudad, setCiudad] = useState(defaultCiudad);
@@ -71,7 +75,7 @@ export function CatalogOrderFields({
   );
 
   useEffect(() => {
-    const form = document.getElementById("transmission-form");
+    const form = document.getElementById(formId);
     if (!form) return;
 
     const handleReset = () => {
@@ -82,14 +86,16 @@ export function CatalogOrderFields({
 
     form.addEventListener("reset", handleReset);
     return () => form.removeEventListener("reset", handleReset);
-  }, []);
+  }, [formId]);
 
   const ciudadDisabled = !emisora.trim() || ciudadOptions.length === 0;
 
   return (
     <>
       {catalogError && (
-        <p className="sm:col-span-2 text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2">
+        <p
+          className={`${catalogErrorClassName} text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2`}
+        >
           {catalogError}
         </p>
       )}

@@ -8,16 +8,28 @@ import { BulkDeleteBar } from "@/components/ui/BulkDeleteBar";
 import { CatalogHeaderActions } from "@/components/ui/CatalogHeaderActions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useBulkSelection } from "@/hooks/useBulkSelection";
+import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
 interface OrdenesCatalogProps {
   ordenes: OrdenTransmisionRow[];
+  emisoras: EmisoraRow[];
+  agencias: AgenciaRow[];
+  catalogError?: string | null;
 }
 
-export function OrdenesCatalog({ ordenes }: OrdenesCatalogProps) {
+export function OrdenesCatalog({
+  ordenes,
+  emisoras,
+  agencias,
+  catalogError = null,
+}: OrdenesCatalogProps) {
   const router = useRouter();
   const bulk = useBulkSelection();
+  const [editing, setEditing] = useState<OrdenTransmisionRow | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const closeModal = () => setEditing(null);
 
   const handleConfirmDelete = useCallback(async () => {
     bulk.setDeleting(true);
@@ -71,7 +83,16 @@ export function OrdenesCatalog({ ordenes }: OrdenesCatalogProps) {
         </div>
       )}
 
-      <OrdenesList ordenes={ordenes} bulk={bulk} />
+      <OrdenesList
+        ordenes={ordenes}
+        bulk={bulk}
+        emisoras={emisoras}
+        agencias={agencias}
+        catalogError={catalogError}
+        editing={editing}
+        onEdit={setEditing}
+        onCloseModal={closeModal}
+      />
 
       <ConfirmDialog
         open={bulk.confirmOpen}

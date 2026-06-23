@@ -11,9 +11,10 @@ export { RESPONSIVE_CARD_GRID_CLASS as ORDENES_GRID_CLASS } from "@/components/u
 interface OrdenCardProps {
   orden: OrdenTransmisionRow;
   bulk: BulkSelection;
+  onEdit: (orden: OrdenTransmisionRow) => void;
 }
 
-export function OrdenCard({ orden, bulk }: OrdenCardProps) {
+export function OrdenCard({ orden, bulk, onEdit }: OrdenCardProps) {
   const { selecting, selectedIds, toggleSelect } = bulk;
   const selected = selecting && selectedIds.has(orden.id);
 
@@ -47,7 +48,7 @@ export function OrdenCard({ orden, bulk }: OrdenCardProps) {
           <EstadoBadge estado={orden.estado} />
           {!selecting && (
             <EditRowButton
-              href={`/ordenes/${orden.id}/editar`}
+              onClick={() => onEdit(orden)}
               label={`Editar ${orden.cliente}`}
             />
           )}
