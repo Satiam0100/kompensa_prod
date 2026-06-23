@@ -1,16 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { actualizarOrdenTransmision } from "@/app/actions/ordenes";
 import { AdvancedParamsSection } from "@/components/ordenes/AdvancedParamsSection";
 import { CatalogOrderFields } from "@/components/ordenes/CatalogOrderFields";
+import { OrderEstadoField } from "@/components/ordenes/OrderEstadoField";
 import { EditModal } from "@/components/ui/EditModal";
 import { FormDateField } from "@/components/ui/FormDateField";
 import { FormField } from "@/components/ui/FormField";
-import { FormSelect } from "@/components/ui/FormSelect";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import {
+  applyEstadoSpotRules,
   parseOrdenFormData,
   validateOrdenForm,
 } from "@/lib/parse-orden-form";
@@ -55,6 +57,18 @@ export function EditOrdenModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const open = Boolean(orden);
+  const {
+    spotId,
+    setSpotId,
+    estado,
+    setEstado,
+    resetFrom,
+  } = useOrderEstadoSpot("", "pausada");
+
+  useEffect(() => {
+    if (!orden) return;
+    resetFrom(orden.spot_id ?? "", orden.estado);
+  }, [orden, resetFrom]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,7 +76,7 @@ export function EditOrdenModal({
       if (!orden) return;
 
       const formData = new FormData(e.currentTarget);
-      const data = parseOrdenFormData(formData);
+      const data = applyEstadoSpotRules(parseOrdenFormData(formData));
       const validationError = validateOrdenForm(data, formData);
 
       if (validationError) {
@@ -134,15 +148,10 @@ export function EditOrdenModal({
 
           <FormSection title="Operación">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormSelect
-                label="Estado"
-                name="estado"
-                defaultValue={orden.estado}
-                options={[
-                  { value: "activa", label: "Activa" },
-                  { value: "pausada", label: "Pausada" },
-                  { value: "finalizada", label: "Finalizada" },
-                ]}
+              <OrderEstadoField
+                spotId={spotId}
+                estado={estado}
+                onEstadoChange={setEstado}
               />
               <FormField
                 label="Email Cliente"
@@ -195,10 +204,12 @@ export function EditOrdenModal({
           </FormSection>
 
           <AdvancedParamsSection
+            key={orden.id}
             defaultSpotId={orden.spot_id ?? ""}
             defaultSpotName={orden.spot_name ?? ""}
             defaultDuracionSeg={orden.duracion_seg}
             wrapperClassName=""
+            onSpotIdChange={setSpotId}
           />
 
           {error && <p className="text-error text-body-sm">{error}</p>}

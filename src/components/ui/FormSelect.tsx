@@ -20,12 +20,15 @@ import { usePortalRoot } from "./portal-root-context";
 export interface SelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
 interface FormSelectProps {
   label: string;
   name: string;
   defaultValue?: string;
+  value?: string;
+  onChange?: (value: string) => void;
   required?: boolean;
   options: SelectOption[];
   className?: string;
@@ -39,6 +42,8 @@ export function FormSelect({
   label,
   name,
   defaultValue = "",
+  value: controlledValue,
+  onChange,
   required,
   options,
   className = "",
@@ -48,10 +53,12 @@ export function FormSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
+  const isControlled = controlledValue !== undefined;
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(
-    () => defaultValue || options[0]?.value || "",
+  const [internalValue, setInternalValue] = useState(
+    () => controlledValue ?? (defaultValue || options[0]?.value || ""),
   );
+  const value = isControlled ? controlledValue : internalValue;
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
   const [menuPlacement, setMenuPlacement] = useState<"above" | "below">(
     "below",
@@ -75,10 +82,20 @@ export function FormSelect({
     setMenuStyle(style);
   }, [menuHeight, portalRoot]);
 
-  const commitValue = useCallback((nextValue: string) => {
-    setValue(nextValue);
-    if (hiddenRef.current) hiddenRef.current.value = nextValue;
-  }, []);
+  const commitValue = useCallback(
+    (nextValue: string) => {
+      if (!isControlled) {
+        setInternalValue(nextValue);
+      }
+      onChange?.(nextValue);
+      if (hiddenRef.current) hiddenRef.current.value = nextValue;
+    },
+    [isControlled, onChange],
+  );
+
+  useEffect(() => {
+    if (hiddenRef.current) hiddenRef.current.value = value;
+  }, [value]);
 
   useEffect(() => {
     if (!open) return;
@@ -137,6 +154,8 @@ export function FormSelect({
   };
 
   const handleSelect = (nextValue: string) => {
+    const option = options.find((item) => item.value === nextValue);
+    if (option?.disabled) return;
     commitValue(nextValue);
     setOpen(false);
   };
@@ -188,19 +207,24 @@ export function FormSelect({
             >
               {options.map((option) => {
                 const isSelected = option.value === value;
+                const isDisabled = Boolean(option.disabled);
                 return (
                   <li key={option.value} role="presentation">
                     <button
                       type="button"
                       role="option"
                       aria-selected={isSelected}
+                      aria-disabled={isDisabled}
+                      disabled={isDisabled}
                       onMouseDown={(event) => event.preventDefault()}
                       onClick={() => handleSelect(option.value)}
                       className={[
                         "form-select-option",
-                        isSelected
-                          ? "bg-tertiary text-on-tertiary"
-                          : "text-on-surface hover:bg-surface-container-high",
+                        isDisabled
+                          ? "text-on-surface-variant/50 cursor-not-allowed"
+                          : isSelected
+                            ? "bg-tertiary text-on-tertiary"
+                            : "text-on-surface hover:bg-surface-container-high",
                       ].join(" ")}
                     >
                       {option.label}

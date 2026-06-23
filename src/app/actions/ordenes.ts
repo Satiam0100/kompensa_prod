@@ -5,7 +5,7 @@ import type {
   OrdenTransmisionForm,
   OrdenTransmisionRow,
 } from "@/lib/types/orden-transmision";
-import { ordenFormToPayload } from "@/lib/parse-orden-form";
+import { ordenFormToPayload, applyEstadoSpotRules } from "@/lib/parse-orden-form";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 const ORDENES_CACHE_TAG = "ordenes-transmision";
@@ -95,7 +95,7 @@ export async function crearOrdenTransmision(
   try {
     const supabase = createSupabaseServerClient();
 
-    const payload = ordenFormToPayload(data);
+    const payload = ordenFormToPayload(applyEstadoSpotRules(data));
 
     const { data: row, error } = await supabase
       .from("ordenes_transmision")
@@ -124,7 +124,7 @@ export async function actualizarOrdenTransmision(
 ): Promise<ActualizarOrdenResult> {
   try {
     const supabase = createSupabaseServerClient();
-    const payload = ordenFormToPayload(data);
+    const payload = ordenFormToPayload(applyEstadoSpotRules(data));
 
     const { error } = await supabase
       .from("ordenes_transmision")

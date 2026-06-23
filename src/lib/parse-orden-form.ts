@@ -3,6 +3,10 @@ import type {
   OrdenTransmisionForm,
 } from "@/lib/types/orden-transmision";
 import { parseMaskedDate } from "@/components/ui/date-picker-utils";
+import {
+  applyEstadoSpotRules,
+  validateEstadoSpotRule,
+} from "@/lib/orden-estado-spot";
 
 /** Nombres ASCII en el HTML (evita problemas con ñ en FormData en algunos navegadores). */
 export const ORDEN_FORM_NAMES = {
@@ -62,7 +66,7 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
     campaña: readString(formData, n.campana),
     emisora: readString(formData, n.emisora),
     ciudad: readString(formData, n.ciudad) || undefined,
-    estado: (readString(formData, n.estado) || "activa") as EstadoOrden,
+    estado: (readString(formData, n.estado) || "pausada") as EstadoOrden,
     agencia: readString(formData, n.agencia) || undefined,
     email_cliente: readString(formData, n.email_cliente),
     cuñas_diarias: readNumber(formData, n.cunias_diarias),
@@ -121,8 +125,13 @@ export function validateOrdenForm(
     return "La fecha fin no puede ser anterior al inicio.";
   }
 
+  const spotRuleError = validateEstadoSpotRule(data);
+  if (spotRuleError) return spotRuleError;
+
   return null;
 }
+
+export { applyEstadoSpotRules };
 
 export function ordenFormToPayload(data: OrdenTransmisionForm) {
   return {

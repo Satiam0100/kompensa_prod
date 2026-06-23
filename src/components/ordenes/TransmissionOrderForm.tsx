@@ -8,15 +8,17 @@ import {
   FormField,
   SectionCard,
 } from "@/components/ui/FormField";
-import { FormSelect } from "@/components/ui/FormSelect";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import {
+  applyEstadoSpotRules,
   parseOrdenFormData,
   validateOrdenForm,
 } from "@/lib/parse-orden-form";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
 import { CatalogOrderFields } from "./CatalogOrderFields";
+import { OrderEstadoField } from "./OrderEstadoField";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
 
@@ -34,13 +36,20 @@ export function TransmissionOrderForm({
   const router = useRouter();
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    spotId,
+    setSpotId,
+    estado,
+    setEstado,
+    resetFrom,
+  } = useOrderEstadoSpot("", "pausada");
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const form = e.currentTarget;
       const formData = new FormData(form);
-      const data = parseOrdenFormData(formData);
+      const data = applyEstadoSpotRules(parseOrdenFormData(formData));
       const validationError = validateOrdenForm(data, formData);
 
       if (validationError) {
@@ -109,15 +118,10 @@ export function TransmissionOrderForm({
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col gap-4">
-            <FormSelect
-              label="Estado"
-              name="estado"
-              defaultValue="activa"
-              options={[
-                { value: "activa", label: "Activa" },
-                { value: "pausada", label: "Pausada" },
-                { value: "finalizada", label: "Finalizada" },
-              ]}
+            <OrderEstadoField
+              spotId={spotId}
+              estado={estado}
+              onEstadoChange={setEstado}
             />
             <FormField
               label="Email Cliente"
@@ -180,7 +184,7 @@ export function TransmissionOrderForm({
           </p>
         </SectionCard>
 
-        <AdvancedParamsSection />
+        <AdvancedParamsSection onSpotIdChange={setSpotId} />
 
         {errorMessage && (
           <p className="md:col-span-12 text-error text-body-sm px-2">
@@ -197,6 +201,7 @@ export function TransmissionOrderForm({
                 "transmission-form",
               ) as HTMLFormElement | null;
               form?.reset();
+              resetFrom("", "pausada");
               setSubmitState("idle");
               setErrorMessage(null);
             }}

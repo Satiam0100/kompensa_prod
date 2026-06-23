@@ -9,6 +9,7 @@ interface AdvancedParamsSectionProps {
   defaultSpotName?: string;
   defaultDuracionSeg?: number | null;
   wrapperClassName?: string;
+  onSpotIdChange?: (spotId: string) => void;
 }
 
 export function AdvancedParamsSection({
@@ -16,6 +17,7 @@ export function AdvancedParamsSection({
   defaultSpotName = "",
   defaultDuracionSeg,
   wrapperClassName = "md:col-span-12",
+  onSpotIdChange,
 }: AdvancedParamsSectionProps) {
   const [open, setOpen] = useState(false);
 
@@ -57,6 +59,7 @@ export function AdvancedParamsSection({
               placeholder="UID-000000"
               className="font-label-mono"
               defaultValue={defaultSpotId}
+              onChange={(event) => onSpotIdChange?.(event.target.value)}
             />
             <FormField
               label="Spot Name"
