@@ -85,7 +85,7 @@ export const DatePickerPopover = forwardRef<HTMLDivElement, DatePickerPopoverPro
         aria-label="Seleccionar fecha"
         data-date-picker-popover
         style={style}
-        className={`date-picker-popover date-picker-popover--${placement} fixed z-[100] rounded-lg border border-outline-variant bg-surface-container-low p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.3)]`}
+        className={`date-picker-popover date-picker-popover--${placement} pointer-events-auto z-[100] rounded-lg border border-outline-variant bg-surface-container-low p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.3)]`}
       >
         <div className="mb-2 grid grid-cols-[28px_minmax(0,1fr)_28px] items-center gap-0.5">
           <button

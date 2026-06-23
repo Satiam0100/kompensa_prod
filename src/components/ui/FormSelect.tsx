@@ -10,6 +10,10 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { FORM_FIELD_CONTROL_PLAIN } from "./form-field-classes";
+import {
+  computeFloatingMenuPosition,
+  FLOATING_SELECT_MENU_CLASS,
+} from "./floating-menu-position";
 import { MaterialIcon } from "./MaterialIcon";
 import { usePortalRoot } from "./portal-root-context";
 
@@ -60,26 +64,16 @@ export function FormSelect({
   const updateMenuPosition = useCallback(() => {
     if (!triggerRef.current) return;
 
-    const rect = triggerRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const left = rect.left;
+    const { placement, style } = computeFloatingMenuPosition(
+      triggerRef.current,
+      portalRoot,
+      menuHeight,
+      MENU_GAP,
+    );
 
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const openBelow =
-      spaceBelow >= menuHeight || spaceBelow >= spaceAbove;
-
-    let top = openBelow
-      ? rect.bottom + MENU_GAP
-      : rect.top - menuHeight - MENU_GAP;
-
-    if (!openBelow) {
-      top = Math.max(8, top);
-    }
-
-    setMenuPlacement(openBelow ? "below" : "above");
-    setMenuStyle({ top, left, width });
-  }, [menuHeight]);
+    setMenuPlacement(placement);
+    setMenuStyle(style);
+  }, [menuHeight, portalRoot]);
 
   const commitValue = useCallback((nextValue: string) => {
     setValue(nextValue);
@@ -190,7 +184,7 @@ export function FormSelect({
               role="listbox"
               aria-label={label}
               style={menuStyle}
-              className={`form-select-menu form-select-menu--${menuPlacement} fixed z-[100]`}
+              className={`${FLOATING_SELECT_MENU_CLASS} form-select-menu--${menuPlacement}`}
             >
               {options.map((option) => {
                 const isSelected = option.value === value;

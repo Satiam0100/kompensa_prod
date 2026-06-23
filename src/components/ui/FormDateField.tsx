@@ -23,6 +23,7 @@ import {
   toISODate,
 } from "./date-picker-utils";
 import { FORM_FIELD_CONTROL, FORM_FIELD_INPUT } from "./form-field-classes";
+import { computeFloatingPopoverPosition } from "./floating-menu-position";
 import { MaterialIcon } from "./MaterialIcon";
 import { usePortalRoot } from "./portal-root-context";
 
@@ -100,30 +101,19 @@ export function FormDateField({
   const updatePopoverPosition = useCallback(() => {
     if (!triggerRef.current) return;
 
-    const rect = triggerRef.current.getBoundingClientRect();
     const popoverHeight =
       popoverRef.current?.getBoundingClientRect().height ?? POPOVER_HEIGHT;
 
-    const width = rect.width;
-    let left = rect.left;
-    if (left + width > window.innerWidth - 16) {
-      left = window.innerWidth - width - 16;
-    }
-    left = Math.max(16, left);
-
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    const openBelow =
-      spaceBelow >= popoverHeight || spaceBelow >= spaceAbove;
-    const nextPlacement: DatePickerPlacement = openBelow ? "below" : "above";
-
-    const top = openBelow
-      ? rect.bottom + POPOVER_GAP
-      : Math.max(8, rect.top - popoverHeight - POPOVER_GAP);
+    const { placement: nextPlacement, style } = computeFloatingPopoverPosition(
+      triggerRef.current,
+      portalRoot,
+      popoverHeight,
+      POPOVER_GAP,
+    );
 
     setPlacement(nextPlacement);
-    setPopoverStyle({ top, left, width });
-  }, []);
+    setPopoverStyle(style);
+  }, [portalRoot]);
 
   useEffect(() => {
     if (!open) return;
