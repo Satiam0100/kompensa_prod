@@ -13,7 +13,7 @@ export const navItems = [
   },
   {
     href: "/campanas",
-    icon: "monitoring",
+    icon: "search",
     label: "Monitoreo",
     match: (path: string) => path.startsWith("/campanas"),
   },

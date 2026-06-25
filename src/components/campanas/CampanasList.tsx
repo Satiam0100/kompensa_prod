@@ -65,7 +65,7 @@ export function CampanasList({ campanas }: CampanasListProps) {
     return (
       <div className="bg-surface-container border border-outline-variant rounded-lg p-12 text-center">
         <MaterialIcon
-          name="monitoring"
+          name="search"
           className="text-5xl text-outline-variant mb-4"
         />
         <h3 className="text-title-md text-on-surface mb-2">
