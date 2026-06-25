@@ -5,6 +5,7 @@ const baseClasses =
 
 const variantClasses = {
   success: "bg-tertiary-container text-on-tertiary-container",
+  warning: "bg-error-container/40 text-on-error-container",
   neutral: "bg-surface-container-highest text-on-surface-variant",
   primary: "bg-primary-container text-on-primary-container",
 } as const;

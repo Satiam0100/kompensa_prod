@@ -53,7 +53,9 @@ Tras importar, verifica que n8n resuelva todas las credenciales Google/Gmail com
 En el nodo **Code: Calcular Fechas**, `FECHA_EJECUCION_PRUEBA`:
 
 - `null` → fecha real (producción)
-- `'2026-03-15'` → simular un día concreto
+- `'2026-06-25'` → simular un día dentro de la campaña (las órdenes Mavesa empiezan `2026-06-01`)
+
+**Importante:** si `hoy < periodo_inicio`, el `end_date` de la API debe ser `periodo_inicio` (no `hoy`). Si `end_date` queda antes que `start_date`, la API responde `total_records: 0`.
 
 ## Métricas de campaña
 
@@ -79,8 +81,8 @@ Actualiza manualmente en n8n (o vía API) estos nodos:
 
 | Nodo | Cambio |
 |------|--------|
-| **HTTP Request: API Detecciones - Página** | `start_date` = `periodo_inicio` de la orden; `end_date` = `min(hoy, periodo_fin)` |
-| **Code: Calcular Métricas1** | Pegar código de `scripts/flujo-b-calcular-metricas-prod.js` |
+| **HTTP Request: API Detecciones - Página** | `start_date` = `periodo_inicio`; `end_date` = si `hoy < periodo_inicio` → `periodo_inicio`, si no → `min(hoy, periodo_fin)` |
+| **Code: Calcular Métricas1** | Pegar **todo** el contenido de `scripts/flujo-b-calcular-metricas-prod.js` (reemplazar el código anterior, no añadir encima) |
 | **Gmail: Send Email1** | Asunto: "Periodo" en lugar de "Semana" |
 
 ## Dependencias

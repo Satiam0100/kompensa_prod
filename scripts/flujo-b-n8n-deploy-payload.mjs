@@ -25,6 +25,6 @@ export function buildApiDateExpressions(suffix = "") {
 
   return {
     start_date: `={{ ${batch}.item.json.periodo_inicio }}`,
-    end_date: `={{ (() => { const orden = ${batch}.item.json; const h = ${fechas}.first().json.fecha_hoy; return h < orden.periodo_fin ? h : orden.periodo_fin; })() }}`,
+    end_date: `={{ (() => { const orden = ${batch}.item.json; const h = ${fechas}.first().json.fecha_hoy; if (h < orden.periodo_inicio) return orden.periodo_inicio; return h < orden.periodo_fin ? h : orden.periodo_fin; })() }}`,
   };
 }

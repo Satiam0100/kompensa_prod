@@ -12,6 +12,12 @@ export const navItems = [
     match: (path: string) => path === "/ordenes",
   },
   {
+    href: "/campanas",
+    icon: "monitoring",
+    label: "Monitoreo",
+    match: (path: string) => path.startsWith("/campanas"),
+  },
+  {
     href: "/agencias",
     icon: "business",
     label: "Agencias",

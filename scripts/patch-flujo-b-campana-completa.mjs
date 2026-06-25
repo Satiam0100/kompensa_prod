@@ -15,7 +15,7 @@ const API_START_DATE =
   "={{ $('Split In Batches - Por Campaña').item.json.periodo_inicio }}";
 
 const API_END_DATE =
-  "={{ (() => { const orden = $('Split In Batches - Por Campaña').item.json; const h = $('Code: Calcular Fechas').first().json.fecha_hoy; return h < orden.periodo_fin ? h : orden.periodo_fin; })() }}";
+  "={{ (() => { const orden = $('Split In Batches - Por Campaña').item.json; const h = $('Code: Calcular Fechas').first().json.fecha_hoy; if (h < orden.periodo_inicio) return orden.periodo_inicio; return h < orden.periodo_fin ? h : orden.periodo_fin; })() }}";
 
 export function patchFlujoBCampanaCompleta(
   patchedPath = DEFAULT_PATCHED,
