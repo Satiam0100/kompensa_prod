@@ -1,4 +1,5 @@
 import { type InputHTMLAttributes, type ReactNode } from "react";
+import { CARD_HOVER_EFFECT } from "./card-classes";
 import {
   FORM_FIELD_CONTROL,
   FORM_FIELD_CONTROL_PLAIN,
@@ -135,7 +136,7 @@ export function SectionCard({
 
   return (
     <div
-      className={`${colSpan} group ${surface} p-6 rounded-lg border border-outline-variant relative overflow-hidden transition-colors hover:border-outline ${className}`}
+      className={`${colSpan} group ${surface} p-6 rounded-lg border border-outline-variant relative overflow-hidden ${CARD_HOVER_EFFECT} ${className}`}
     >
       {decorationIcon && (
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">

@@ -1,3 +1,4 @@
+import { listCardClass } from "@/components/ui/card-classes";
 import Link from "next/link";
 import { CumplimientoBadge } from "@/components/campanas/CumplimientoBadge";
 import { ProgresoCampana } from "@/components/campanas/ProgresoCampana";
@@ -19,7 +20,7 @@ export function CampanaCard({ campana }: CampanaCardProps) {
   return (
     <Link
       href={`/campanas/${campana.id}`}
-      className="block bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3 hover:bg-surface-container-high/50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary"
+      className={`block ${listCardClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary`}
     >
       <div className="flex justify-between items-start gap-2">
         <div className="min-w-0">

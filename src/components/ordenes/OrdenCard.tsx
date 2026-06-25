@@ -1,3 +1,4 @@
+import { listCardClass } from "@/components/ui/card-classes";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
 import { EditRowButton } from "@/components/ui/EditRowButton";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
@@ -19,13 +20,7 @@ export function OrdenCard({ orden, bulk, onEdit }: OrdenCardProps) {
   const selected = selecting && selectedIds.has(orden.id);
 
   return (
-    <article
-      className={`bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3 transition-colors ${
-        selected
-          ? "bg-error-container/20 ring-1 ring-inset ring-error/30"
-          : "hover:bg-surface-container-high/50"
-      }`}
-    >
+    <article className={listCardClass(selected)}>
       <div className="flex justify-between items-start gap-2">
         <div className="flex items-start gap-3 min-w-0">
           {selecting && (

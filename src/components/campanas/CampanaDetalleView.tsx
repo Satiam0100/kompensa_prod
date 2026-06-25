@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { panelCardClass } from "@/components/ui/card-classes";
 import { CumplimientoBadge } from "@/components/campanas/CumplimientoBadge";
 import { ProgresoCampana } from "@/components/campanas/ProgresoCampana";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
@@ -77,7 +78,7 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
         />
       </div>
 
-      <section className="bg-surface-container border border-outline-variant rounded-lg p-5 space-y-4">
+      <section className={panelCardClass("p-5 space-y-4")}>
         <h3 className="text-title-md text-on-surface">Progreso de campaña</h3>
         <ProgresoCampana
           transmitidas={metricas.transmitidas_acumuladas}
@@ -189,7 +190,7 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
                 return (
                   <div
                     key={row.id}
-                    className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-2"
+                    className={panelCardClass("p-4 space-y-2")}
                   >
                     <div className="flex justify-between items-center">
                       <span className="text-body-sm font-medium">
@@ -206,7 +207,7 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
               })}
             </div>
 
-            <div className="bg-surface-container border border-outline-variant rounded-lg p-5">
+            <div className={panelCardClass("p-5")}>
               <p className="text-label-sm text-on-surface-variant mb-4">
                 Evolución del acumulado (% del total contratado)
               </p>
@@ -249,7 +250,7 @@ function KpiCard({
   sub: string;
 }) {
   return (
-    <div className="bg-surface-container border border-outline-variant rounded-lg p-4">
+    <div className={panelCardClass("p-4")}>
       <p className="text-label-sm text-on-surface-variant mb-1">{label}</p>
       <p className="text-headline-lg-mobile text-on-surface tabular-nums">
         {value}
