@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS ordenes_transmision (
   periodo_fin DATE NOT NULL,
   estado TEXT DEFAULT 'activa' CHECK (estado IN ('activa', 'pausada', 'finalizada')),
   email_cliente TEXT,
+  telefono_cliente TEXT,
+  channel_id TEXT,
   agencia TEXT,
   duracion_seg INTEGER,
   horario TEXT,

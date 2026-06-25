@@ -8,6 +8,8 @@ export interface OrdenTransmisionForm {
   estado: EstadoOrden;
   agencia?: string;
   email_cliente: string;
+  telefono_cliente: string;
+  channel_id?: string;
   cuñas_diarias: number;
   total_contratadas: number;
   periodo_inicio: string;
@@ -18,7 +20,12 @@ export interface OrdenTransmisionForm {
   duracion_seg?: number;
 }
 
-export interface OrdenTransmisionRow extends OrdenTransmisionForm {
+export interface OrdenTransmisionRow extends Omit<
+  OrdenTransmisionForm,
+  "telefono_cliente" | "channel_id"
+> {
+  telefono_cliente: string | null;
+  channel_id: string | null;
   id: string;
   created_at: string;
   updated_at: string;

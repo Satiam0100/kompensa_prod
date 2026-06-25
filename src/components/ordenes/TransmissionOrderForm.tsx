@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
+import { useOrderChannelId } from "@/hooks/useOrderChannelId";
 import {
   applyEstadoSpotRules,
   parseOrdenFormData,
@@ -43,6 +44,12 @@ export function TransmissionOrderForm({
     setEstado,
     resetFrom,
   } = useOrderEstadoSpot("", "pausada");
+  const {
+    channelId,
+    setChannelIdManual,
+    syncFromCatalog,
+    reset: resetChannelId,
+  } = useOrderChannelId(emisoras);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,6 +113,7 @@ export function TransmissionOrderForm({
               emisoras={emisoras}
               agencias={agencias}
               catalogError={catalogError}
+              onEmisoraCiudadChange={syncFromCatalog}
             />
           </div>
         </SectionCard>
@@ -129,6 +137,14 @@ export function TransmissionOrderForm({
               type="email"
               required
               placeholder="email@dominio.com"
+            />
+            <FormField
+              label="Teléfono Cliente (WhatsApp)"
+              name="telefono_cliente"
+              type="tel"
+              required
+              icon="phone"
+              placeholder="5841412345678"
             />
           </div>
         </SectionCard>
@@ -184,7 +200,11 @@ export function TransmissionOrderForm({
           </p>
         </SectionCard>
 
-        <AdvancedParamsSection onSpotIdChange={setSpotId} />
+        <AdvancedParamsSection
+          channelId={channelId}
+          onChannelIdChange={setChannelIdManual}
+          onSpotIdChange={setSpotId}
+        />
 
         {errorMessage && (
           <p className="md:col-span-12 text-error text-body-sm px-2">
@@ -202,6 +222,7 @@ export function TransmissionOrderForm({
               ) as HTMLFormElement | null;
               form?.reset();
               resetFrom("", "pausada");
+              resetChannelId();
               setSubmitState("idle");
               setErrorMessage(null);
             }}

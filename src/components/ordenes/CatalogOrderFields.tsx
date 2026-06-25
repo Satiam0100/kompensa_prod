@@ -20,6 +20,7 @@ interface CatalogOrderFieldsProps {
   catalogError?: string | null;
   formId?: string;
   catalogErrorClassName?: string;
+  onEmisoraCiudadChange?: (emisora: string, ciudad: string) => void;
 }
 
 export function CatalogOrderFields({
@@ -31,6 +32,7 @@ export function CatalogOrderFields({
   catalogError,
   formId = "transmission-form",
   catalogErrorClassName = "sm:col-span-2",
+  onEmisoraCiudadChange,
 }: CatalogOrderFieldsProps) {
   const [emisora, setEmisora] = useState(defaultEmisora);
   const [ciudad, setCiudad] = useState(defaultCiudad);
@@ -67,6 +69,10 @@ export function CatalogOrderFields({
       ),
     [agencias, defaultAgencia],
   );
+
+  useEffect(() => {
+    onEmisoraCiudadChange?.(emisora, ciudad);
+  }, [emisora, ciudad, onEmisoraCiudadChange]);
 
   const handleEmisoraChange = useCallback(
     (nextEmisora: string) => {

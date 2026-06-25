@@ -11,6 +11,7 @@ import { FormDateField } from "@/components/ui/FormDateField";
 import { FormField } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
+import { useOrderChannelId } from "@/hooks/useOrderChannelId";
 import {
   applyEstadoSpotRules,
   parseOrdenFormData,
@@ -64,6 +65,11 @@ export function EditOrdenModal({
     setEstado,
     resetFrom,
   } = useOrderEstadoSpot("", "pausada");
+  const {
+    channelId,
+    setChannelIdManual,
+    syncFromCatalog,
+  } = useOrderChannelId(emisoras, orden?.channel_id ?? "");
 
   useEffect(() => {
     if (!orden) return;
@@ -142,6 +148,7 @@ export function EditOrdenModal({
                 catalogError={catalogError}
                 formId={FORM_ID}
                 catalogErrorClassName="sm:col-span-2"
+                onEmisoraCiudadChange={syncFromCatalog}
               />
             </div>
           </FormSection>
@@ -159,6 +166,14 @@ export function EditOrdenModal({
                 type="email"
                 required
                 defaultValue={orden.email_cliente}
+              />
+              <FormField
+                label="Teléfono Cliente (WhatsApp)"
+                name="telefono_cliente"
+                type="tel"
+                required
+                defaultValue={orden.telefono_cliente ?? ""}
+                placeholder="5841412345678"
               />
             </div>
           </FormSection>
@@ -208,6 +223,8 @@ export function EditOrdenModal({
             defaultSpotId={orden.spot_id ?? ""}
             defaultSpotName={orden.spot_name ?? ""}
             defaultDuracionSeg={orden.duracion_seg}
+            channelId={channelId}
+            onChannelIdChange={setChannelIdManual}
             wrapperClassName=""
             onSpotIdChange={setSpotId}
           />

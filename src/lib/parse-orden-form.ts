@@ -7,6 +7,10 @@ import {
   applyEstadoSpotRules,
   validateEstadoSpotRule,
 } from "@/lib/orden-estado-spot";
+import {
+  normalizeTelefonoCliente,
+  validateTelefonoCliente,
+} from "@/lib/normalize-telefono";
 
 /** Nombres ASCII en el HTML (evita problemas con ñ en FormData en algunos navegadores). */
 export const ORDEN_FORM_NAMES = {
@@ -17,6 +21,8 @@ export const ORDEN_FORM_NAMES = {
   estado: "estado",
   agencia: "agencia",
   email_cliente: "email_cliente",
+  telefono_cliente: "telefono_cliente",
+  channel_id: "channel_id",
   cunias_diarias: "cunias_diarias",
   total_contratadas: "total_contratadas",
   periodo_inicio: "periodo_inicio",
@@ -69,6 +75,10 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
     estado: (readString(formData, n.estado) || "pausada") as EstadoOrden,
     agencia: readString(formData, n.agencia) || undefined,
     email_cliente: readString(formData, n.email_cliente),
+    telefono_cliente: normalizeTelefonoCliente(
+      readString(formData, n.telefono_cliente),
+    ),
+    channel_id: readString(formData, n.channel_id) || undefined,
     cuñas_diarias: readNumber(formData, n.cunias_diarias),
     total_contratadas: readNumber(formData, n.total_contratadas),
     periodo_inicio: readDateField(formData, n.periodo_inicio),
@@ -90,6 +100,7 @@ export function validateOrdenForm(
   if (!data.emisora) missing.push("Emisora");
   if (!data.ciudad?.trim()) missing.push("Ciudad");
   if (!data.email_cliente) missing.push("Email Cliente");
+  if (!data.telefono_cliente) missing.push("Teléfono Cliente");
   if (!data.periodo_inicio) missing.push("Periodo Inicio");
   if (!data.periodo_fin) missing.push("Periodo Fin");
 
@@ -125,6 +136,9 @@ export function validateOrdenForm(
     return "La fecha fin no puede ser anterior al inicio.";
   }
 
+  const telefonoError = validateTelefonoCliente(data.telefono_cliente);
+  if (telefonoError) return telefonoError;
+
   const spotRuleError = validateEstadoSpotRule(data);
   if (spotRuleError) return spotRuleError;
 
@@ -142,6 +156,8 @@ export function ordenFormToPayload(data: OrdenTransmisionForm) {
     estado: data.estado,
     agencia: data.agencia?.trim() || null,
     email_cliente: data.email_cliente.trim(),
+    telefono_cliente: data.telefono_cliente,
+    channel_id: data.channel_id?.trim() || null,
     cuñas_diarias: data.cuñas_diarias,
     total_contratadas: data.total_contratadas,
     periodo_inicio: data.periodo_inicio,

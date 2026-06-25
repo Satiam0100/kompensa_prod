@@ -17,6 +17,28 @@ export function getUniqueEmisoraNames(emisoras: EmisoraRow[]): string[] {
   return [...names].sort((a, b) => a.localeCompare(b, "es"));
 }
 
+/** channel_id del catálogo para emisora + ciudad (si existe y es único). */
+export function getChannelIdForEmisoraCiudad(
+  emisoras: EmisoraRow[],
+  emisoraNombre: string,
+  ciudad: string,
+): string | undefined {
+  const nombre = emisoraNombre.trim();
+  const ciudadNorm = ciudad.trim();
+  if (!nombre || !ciudadNorm) return undefined;
+
+  const ids = new Set<string>();
+  for (const emisora of getActiveEmisoras(emisoras)) {
+    if (emisora.nombre.trim() !== nombre) continue;
+    if (emisora.ciudad?.trim() !== ciudadNorm) continue;
+    const channelId = emisora.channel_id?.trim();
+    if (channelId) ids.add(channelId);
+  }
+
+  if (ids.size !== 1) return undefined;
+  return [...ids][0];
+}
+
 export function getCiudadesForEmisora(
   emisoras: EmisoraRow[],
   emisoraNombre: string,

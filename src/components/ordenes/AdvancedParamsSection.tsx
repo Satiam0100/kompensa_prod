@@ -8,6 +8,8 @@ interface AdvancedParamsSectionProps {
   defaultSpotId?: string;
   defaultSpotName?: string;
   defaultDuracionSeg?: number | null;
+  channelId?: string;
+  onChannelIdChange?: (channelId: string) => void;
   wrapperClassName?: string;
   onSpotIdChange?: (spotId: string) => void;
 }
@@ -16,6 +18,8 @@ export function AdvancedParamsSection({
   defaultSpotId = "",
   defaultSpotName = "",
   defaultDuracionSeg,
+  channelId = "",
+  onChannelIdChange,
   wrapperClassName = "md:col-span-12",
   onSpotIdChange,
 }: AdvancedParamsSectionProps) {
@@ -52,32 +56,40 @@ export function AdvancedParamsSection({
         }`}
         hidden={!open}
       >
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6 bg-surface-container-lowest/50">
-            <FormField
-              label="Spot ID"
-              name="spot_id"
-              placeholder="UID-000000"
-              className="font-label-mono"
-              defaultValue={defaultSpotId}
-              onChange={(event) => onSpotIdChange?.(event.target.value)}
-            />
-            <FormField
-              label="Spot Name"
-              name="spot_name"
-              placeholder="Nombre de archivo .mp3"
-              defaultValue={defaultSpotName}
-            />
-            <FormField
-              label="Duración (seg)"
-              name="duracion_seg"
-              type="number"
-              placeholder="20"
-              min={0}
-              defaultValue={
-                defaultDuracionSeg != null ? String(defaultDuracionSeg) : ""
-              }
-            />
-          </div>
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-surface-container-lowest/50">
+          <FormField
+            label="Spot ID"
+            name="spot_id"
+            placeholder="UID-000000"
+            className="font-label-mono"
+            defaultValue={defaultSpotId}
+            onChange={(event) => onSpotIdChange?.(event.target.value)}
+          />
+          <FormField
+            label="Spot Name"
+            name="spot_name"
+            placeholder="Nombre de archivo .mp3"
+            defaultValue={defaultSpotName}
+          />
+          <FormField
+            label="Channel ID"
+            name="channel_id"
+            placeholder="232808"
+            className="font-label-mono"
+            value={channelId}
+            onChange={(event) => onChannelIdChange?.(event.target.value)}
+          />
+          <FormField
+            label="Duración (seg)"
+            name="duracion_seg"
+            type="number"
+            placeholder="20"
+            min={0}
+            defaultValue={
+              defaultDuracionSeg != null ? String(defaultDuracionSeg) : ""
+            }
+          />
+        </div>
       </div>
     </div>
   );
