@@ -70,8 +70,16 @@ export function TransmissionOrderForm({
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
       const form = e.currentTarget;
+
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        form.reportValidity();
+        return;
+      }
+
+      e.preventDefault();
+
       const formData = new FormData(form);
       const compartido = applyEstadoSpotRules(
         parseOrdenFormDataCompartido(formData),

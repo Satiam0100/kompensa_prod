@@ -21,13 +21,32 @@ export function FormField({
   icon,
   wrapperClassName = "",
   className = "",
+  id,
+  name,
   ...inputProps
 }: FormFieldProps) {
+  const inputId = id ?? name;
+  const inputElementProps = {
+    id: inputId,
+    name,
+    required,
+    "aria-required": required ? true : undefined,
+    className: `${FORM_FIELD_INPUT} ${className}`,
+    ...inputProps,
+  };
+
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-label-sm text-on-surface-variant px-1">
+      <label
+        htmlFor={inputId}
+        className="text-label-sm text-on-surface-variant px-1"
+      >
         {label}{" "}
-        {required && <span className="text-tertiary">*</span>}
+        {required && (
+          <span className="text-tertiary" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
       <div
         className={`${icon ? FORM_FIELD_CONTROL : FORM_FIELD_CONTROL_PLAIN} ${wrapperClassName}`}
@@ -38,10 +57,7 @@ export function FormField({
             className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary group-focus-within:text-tertiary"
           />
         )}
-        <input
-          className={`${FORM_FIELD_INPUT} ${className}`}
-          {...inputProps}
-        />
+        <input {...inputElementProps} />
       </div>
     </div>
   );

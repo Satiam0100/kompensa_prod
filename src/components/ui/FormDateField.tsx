@@ -208,7 +208,11 @@ export function FormDateField({
     <div className="flex flex-col gap-1.5" ref={containerRef}>
       <label htmlFor={fieldId} className="text-label-sm text-on-surface-variant px-1">
         {label}{" "}
-        {required && <span className="text-tertiary">*</span>}
+        {required && (
+          <span className="text-tertiary" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
       <div
         ref={triggerRef}
@@ -223,6 +227,7 @@ export function FormDateField({
           placeholder="dd/mm/aaaa"
           maxLength={10}
           required={required}
+          aria-required={required ? true : undefined}
           className={`${FORM_FIELD_INPUT} form-date-display ${selectedISO ? "text-on-surface" : "text-on-surface-variant"}`}
           value={textValue}
           onChange={(event) => handleTextChange(event.target.value)}
