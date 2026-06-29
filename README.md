@@ -182,6 +182,7 @@ Crear las siguientes carpetas en Google Drive:
    - `{{Estado}}`
    - `{{Porcentaje_Cumplimiento}}`
    - `{{FechaEmision_Certificado}}`
+   - `{{NumeroCertificado}}` — valor de `ordenes_transmision.numero_certificado` (panel)
 
 3. Obtener el ID del documento y actualizar en el nodo "Google Drive: Copy Template"
 

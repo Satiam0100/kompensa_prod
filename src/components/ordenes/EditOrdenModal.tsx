@@ -150,16 +150,6 @@ export function EditOrdenModal({
                 catalogErrorClassName="sm:col-span-2"
                 onEmisoraCiudadChange={syncFromCatalog}
               />
-            </div>
-          </FormSection>
-
-          <FormSection title="Operación">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <OrderEstadoField
-                spotId={spotId}
-                estado={estado}
-                onEstadoChange={setEstado}
-              />
               <FormField
                 label="Email Cliente"
                 name="email_cliente"
@@ -173,7 +163,24 @@ export function EditOrdenModal({
                 type="tel"
                 required
                 defaultValue={orden.telefono_cliente ?? ""}
-                placeholder="5841412345678"
+                placeholder="58"
+              />
+            </div>
+          </FormSection>
+
+          <FormSection title="Operación">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <OrderEstadoField
+                spotId={spotId}
+                estado={estado}
+                onEstadoChange={setEstado}
+              />
+              <FormField
+                label="N.º de certificado"
+                name="numero_certificado"
+                defaultValue={orden.numero_certificado ?? ""}
+                placeholder="Ej. CERT-2026-001"
+                className="font-label-mono"
               />
             </div>
           </FormSection>

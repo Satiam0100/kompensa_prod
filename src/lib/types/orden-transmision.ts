@@ -18,14 +18,16 @@ export interface OrdenTransmisionForm {
   spot_id?: string;
   spot_name?: string;
   duracion_seg?: number;
+  numero_certificado?: string;
 }
 
 export interface OrdenTransmisionRow extends Omit<
   OrdenTransmisionForm,
-  "telefono_cliente" | "channel_id"
+  "telefono_cliente" | "channel_id" | "numero_certificado"
 > {
   telefono_cliente: string | null;
   channel_id: string | null;
+  numero_certificado: string | null;
   id: string;
   created_at: string;
   updated_at: string;

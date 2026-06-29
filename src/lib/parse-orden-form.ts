@@ -31,6 +31,7 @@ export const ORDEN_FORM_NAMES = {
   spot_id: "spot_id",
   spot_name: "spot_name",
   duracion_seg: "duracion_seg",
+  numero_certificado: "numero_certificado",
 } as const;
 
 function readString(formData: FormData, key: string): string {
@@ -87,6 +88,8 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
     spot_id: readString(formData, n.spot_id) || undefined,
     spot_name: readString(formData, n.spot_name) || undefined,
     duracion_seg: duracionRaw ? readNumber(formData, n.duracion_seg) : undefined,
+    numero_certificado:
+      readString(formData, n.numero_certificado) || undefined,
   };
 }
 
@@ -166,5 +169,6 @@ export function ordenFormToPayload(data: OrdenTransmisionForm) {
     spot_id: data.spot_id?.trim() || null,
     spot_name: data.spot_name?.trim() || null,
     duracion_seg: data.duracion_seg ?? null,
+    numero_certificado: data.numero_certificado?.trim() || null,
   };
 }

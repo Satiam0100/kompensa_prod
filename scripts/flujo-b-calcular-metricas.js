@@ -1,5 +1,5 @@
 // Flujo B — REEMPLAZAR TODO el código del nodo (no pegar encima del anterior).
-// Métricas acumuladas de campaña: periodo_inicio → min(hoy, periodo_fin)
+// Métricas acumuladas: periodo_inicio → fin de evaluación (ver abajo).
 const data = $input.first().json;
 const detecciones = data.detecciones_filtradas || [];
 const orden = data.orden;
@@ -7,11 +7,28 @@ const orden = data.orden;
 const fechas = $('Code: Calcular Fechas').first().json || {};
 const fechaHoy = fechas.fecha_hoy || new Date().toISOString().split('T')[0];
 
-const cierre = fechaHoy >= orden.periodo_fin;
+const addDaysUtc = (dateStr, days) => {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().split('T')[0];
+};
+
+// Certificado / cierre final: al día siguiente de periodo_fin (cron 8:00 del 26 si vence el 25).
+const cierre = fechaHoy > orden.periodo_fin;
 
 const periodoInicioEvaluacion = orden.periodo_inicio;
-const periodoFinEvaluacion =
-  fechaHoy < orden.periodo_fin ? fechaHoy : orden.periodo_fin;
+
+const resolverFinEvaluacion = () => {
+  if (fechaHoy < orden.periodo_inicio) return orden.periodo_inicio;
+  if (fechaHoy > orden.periodo_fin) return orden.periodo_fin;
+  if (fechaHoy === orden.periodo_fin) {
+    const prev = addDaysUtc(orden.periodo_fin, -1);
+    return prev < orden.periodo_inicio ? null : prev;
+  }
+  return fechaHoy;
+};
+
+const periodoFinEvaluacion = resolverFinEvaluacion();
 
 const parsearFechaRFC2822 = (fechaStr) => {
   if (!fechaStr) return null;
@@ -25,13 +42,13 @@ const parsearFechaRFC2822 = (fechaStr) => {
 
 const porDia = {};
 
-if (fechaHoy < orden.periodo_inicio) {
+if (fechaHoy < orden.periodo_inicio || periodoFinEvaluacion === null) {
   return [{
     json: {
       orden,
       fecha_hoy: fechaHoy,
       periodo_inicio_evaluacion: periodoInicioEvaluacion,
-      periodo_fin_evaluacion: periodoFinEvaluacion,
+      periodo_fin_evaluacion: orden.periodo_fin,
       dias_evaluacion: 0,
       total_contratadas_periodo: 0,
       transmitidas_dia: 0,

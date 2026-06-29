@@ -46,7 +46,8 @@ export function OrdenesList({
         o.campaña.toLowerCase().includes(q) ||
         o.emisora.toLowerCase().includes(q) ||
         (o.ciudad?.toLowerCase().includes(q) ?? false) ||
-        (o.spot_name?.toLowerCase().includes(q) ?? false),
+        (o.spot_name?.toLowerCase().includes(q) ?? false) ||
+        (o.numero_certificado?.toLowerCase().includes(q) ?? false),
     );
   }, [ordenes, query]);
 
@@ -87,7 +88,7 @@ export function OrdenesList({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por cliente, campaña, emisora..."
+            placeholder="Buscar por cliente, campaña, emisora, n.º certificado..."
             className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>

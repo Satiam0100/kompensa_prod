@@ -35,4 +35,6 @@ export interface CampanaConEstado extends OrdenTransmisionRow {
 export interface CampanaDetalle extends CampanaConEstado {
   historial: ResumenCampanaRow[];
   certificado_pdf_url: string | null;
+  certificado_numero: string | null;
+  certificado_codigo: string | null;
 }

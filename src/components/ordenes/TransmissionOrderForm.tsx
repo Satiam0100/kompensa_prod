@@ -115,6 +115,21 @@ export function TransmissionOrderForm({
               catalogError={catalogError}
               onEmisoraCiudadChange={syncFromCatalog}
             />
+            <FormField
+              label="Email Cliente"
+              name="email_cliente"
+              type="email"
+              required
+              placeholder="email@dominio.com"
+            />
+            <FormField
+              label="Teléfono Cliente (WhatsApp)"
+              name="telefono_cliente"
+              type="tel"
+              required
+              icon="phone"
+              placeholder="58"
+            />
           </div>
         </SectionCard>
 
@@ -132,19 +147,11 @@ export function TransmissionOrderForm({
               onEstadoChange={setEstado}
             />
             <FormField
-              label="Email Cliente"
-              name="email_cliente"
-              type="email"
-              required
-              placeholder="email@dominio.com"
-            />
-            <FormField
-              label="Teléfono Cliente (WhatsApp)"
-              name="telefono_cliente"
-              type="tel"
-              required
-              icon="phone"
-              placeholder="5841412345678"
+              label="N.º de certificado"
+              name="numero_certificado"
+              icon="verified"
+              placeholder="Ej. CERT-2026-001"
+              className="font-label-mono"
             />
           </div>
         </SectionCard>

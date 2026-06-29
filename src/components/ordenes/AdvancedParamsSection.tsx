@@ -66,9 +66,9 @@ export function AdvancedParamsSection({
             onChange={(event) => onSpotIdChange?.(event.target.value)}
           />
           <FormField
-            label="Spot Name"
+            label="Nombre del spot"
             name="spot_name"
-            placeholder="Nombre de archivo .mp3"
+            placeholder="Ej. Cliente | Marca | Nombre de la cuña"
             defaultValue={defaultSpotName}
           />
           <FormField

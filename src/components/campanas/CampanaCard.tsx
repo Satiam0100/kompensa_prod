@@ -52,6 +52,11 @@ export function CampanaCard({ campana }: CampanaCardProps) {
           )}
         </p>
         <p>{formatPeriodo(campana.periodo_inicio, campana.periodo_fin)}</p>
+        {campana.numero_certificado && (
+          <p className="text-label-mono text-on-surface">
+            Cert. {campana.numero_certificado}
+          </p>
+        )}
       </div>
 
       <ProgresoCampana

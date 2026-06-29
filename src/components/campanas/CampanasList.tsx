@@ -44,7 +44,8 @@ export function CampanasList({ campanas }: CampanasListProps) {
           c.cliente.toLowerCase().includes(q) ||
           c.campaña.toLowerCase().includes(q) ||
           c.emisora.toLowerCase().includes(q) ||
-          (c.ciudad?.toLowerCase().includes(q) ?? false),
+          (c.ciudad?.toLowerCase().includes(q) ?? false) ||
+          (c.numero_certificado?.toLowerCase().includes(q) ?? false),
       );
     }
 
@@ -91,7 +92,7 @@ export function CampanasList({ campanas }: CampanasListProps) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por cliente, campaña, emisora..."
+            placeholder="Buscar por cliente, campaña, emisora, n.º certificado..."
             className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>

@@ -103,6 +103,14 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
               {formatPeriodo(campana.periodo_inicio, campana.periodo_fin)}
             </dd>
           </div>
+          {campana.numero_certificado && (
+            <div>
+              <dt className="text-on-surface-variant">N.º certificado</dt>
+              <dd className="text-label-mono text-on-surface">
+                {campana.numero_certificado}
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="text-on-surface-variant">Ritmo contratado</dt>
             <dd className="text-on-surface">
@@ -119,15 +127,23 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
           )}
         </dl>
         {campana.certificado_pdf_url && (
-          <a
-            href={campana.certificado_pdf_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-label-sm text-tertiary hover:brightness-110"
-          >
-            <MaterialIcon name="picture_as_pdf" className="text-sm" />
-            Ver certificado PDF
-          </a>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-1">
+            {(campana.certificado_numero ?? campana.numero_certificado) && (
+              <span className="text-label-mono text-label-sm text-on-surface">
+                N.º{" "}
+                {campana.certificado_numero ?? campana.numero_certificado}
+              </span>
+            )}
+            <a
+              href={campana.certificado_pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-label-sm text-tertiary hover:brightness-110"
+            >
+              <MaterialIcon name="picture_as_pdf" className="text-sm" />
+              Ver certificado PDF
+            </a>
+          </div>
         )}
       </section>
 

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS ordenes_transmision (
   duracion_seg INTEGER,
   horario TEXT,
   ciudad TEXT,
+  numero_certificado TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS ordenes_transmision (
 CREATE INDEX IF NOT EXISTS idx_ordenes_estado ON ordenes_transmision(estado);
 CREATE INDEX IF NOT EXISTS idx_ordenes_periodo ON ordenes_transmision(periodo_inicio, periodo_fin);
 CREATE INDEX IF NOT EXISTS idx_ordenes_spot ON ordenes_transmision(spot_id, spot_name);
+CREATE INDEX IF NOT EXISTS idx_ordenes_numero_certificado ON ordenes_transmision(numero_certificado) WHERE numero_certificado IS NOT NULL;
 
 -- Tabla: resumen_campaña
 CREATE TABLE IF NOT EXISTS resumen_campaña (
@@ -59,6 +61,8 @@ CREATE TABLE IF NOT EXISTS certificados_emitidos (
   estado TEXT NOT NULL,
   pdf_url TEXT,
   fecha_envio TIMESTAMP,
+  codigo_certificado TEXT,
+  numero_certificado TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(campaña_id, semana)
 );
@@ -66,6 +70,7 @@ CREATE TABLE IF NOT EXISTS certificados_emitidos (
 -- Índices para certificados_emitidos
 CREATE INDEX IF NOT EXISTS idx_certificados_campaña_id ON certificados_emitidos(campaña_id);
 CREATE INDEX IF NOT EXISTS idx_certificados_semana ON certificados_emitidos(semana);
+CREATE INDEX IF NOT EXISTS idx_certificados_numero_certificado ON certificados_emitidos(numero_certificado) WHERE numero_certificado IS NOT NULL;
 
 -- Función para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()

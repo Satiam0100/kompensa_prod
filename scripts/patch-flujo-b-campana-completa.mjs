@@ -1,8 +1,13 @@
 /**
- * Parchea Flujo B: API y métricas usan campaña completa (inicio → hoy).
+ * Parchea Flujo B: API y métricas usan campaña completa (inicio → fin evaluación).
+ * Cierre (certificado/email): al día siguiente de periodo_fin.
  */
 import fs from "node:fs";
 import path from "node:path";
+import {
+  API_END_DATE_BODY,
+  buildCertificadoIfExpression,
+} from "./flujo-b-n8n-deploy-payload.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const DEFAULT_PATCHED = path.join(ROOT, "flujo-b-live-patched.json");
@@ -14,8 +19,12 @@ const METRICAS_JS = fs.readFileSync(
 const API_START_DATE =
   "={{ $('Split In Batches - Por Campaña').item.json.periodo_inicio }}";
 
-const API_END_DATE =
-  "={{ (() => { const orden = $('Split In Batches - Por Campaña').item.json; const h = $('Code: Calcular Fechas').first().json.fecha_hoy; if (h < orden.periodo_inicio) return orden.periodo_inicio; return h < orden.periodo_fin ? h : orden.periodo_fin; })() }}";
+const API_END_DATE = `={{ ${API_END_DATE_BODY.replace(
+  /BATCH/g,
+  "$('Split In Batches - Por Campaña')",
+).replace(/FECHAS/g, "$('Code: Calcular Fechas')")} }}`;
+
+const CERTIFICADO_IF = buildCertificadoIfExpression("");
 
 export function patchFlujoBCampanaCompleta(
   patchedPath = DEFAULT_PATCHED,
@@ -42,6 +51,13 @@ export function patchFlujoBCampanaCompleta(
   );
   if (!metricas) throw new Error("Nodo Code: Calcular Métricas no encontrado");
   metricas.parameters.jsCode = METRICAS_JS;
+
+  const certIf = workflow.nodes.find(
+    (n) => n.name === "IF: Generar Certificado",
+  );
+  if (certIf?.parameters?.conditions?.conditions?.[0]) {
+    certIf.parameters.conditions.conditions[0].leftValue = CERTIFICADO_IF;
+  }
 
   const fechas = workflow.nodes.find((n) => n.name === "Code: Calcular Fechas");
   if (fechas) {

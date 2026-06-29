@@ -65,6 +65,11 @@ export function OrdenCard({ orden, bulk, onEdit }: OrdenCardProps) {
           {orden.cuñas_diarias}/día · {orden.total_contratadas} total
         </p>
         <p>{formatPeriodo(orden.periodo_inicio, orden.periodo_fin)}</p>
+        {orden.numero_certificado && (
+          <p className="text-label-mono text-on-surface">
+            Cert. {orden.numero_certificado}
+          </p>
+        )}
       </div>
 
       <p className="text-label-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">

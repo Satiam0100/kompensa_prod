@@ -130,7 +130,7 @@ export async function obtenerCampanaDetalle(
         .order("fecha", { ascending: true }),
       supabase
         .from("certificados_emitidos")
-        .select("pdf_url")
+        .select("pdf_url, numero_certificado, codigo_certificado")
         .eq("campaña_id", id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -153,6 +153,8 @@ export async function obtenerCampanaDetalle(
         ...base,
         historial,
         certificado_pdf_url: certificadoResult.data?.pdf_url ?? null,
+        certificado_numero: certificadoResult.data?.numero_certificado ?? null,
+        certificado_codigo: certificadoResult.data?.codigo_certificado ?? null,
       },
     };
   } catch (err) {

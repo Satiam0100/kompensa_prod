@@ -2,12 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   buildApiDateExpressions,
+  buildCertificadoIfExpression,
   buildMetricasJs,
 } from "./flujo-b-n8n-deploy-payload.mjs";
 
 const SUFFIX = "1";
 const { start_date, end_date } = buildApiDateExpressions(SUFFIX);
 const js = buildMetricasJs(SUFFIX);
+const certIf = buildCertificadoIfExpression(SUFFIX);
 
 const gmailSubject =
   `=Certificado de Transmisión - {{ $('Code: Calcular Métricas${SUFFIX}').first().json.orden.campaña }} - Periodo {{ $('Code: Calcular Métricas${SUFFIX}').first().json.periodo_inicio_evaluacion }} a {{ $('Code: Calcular Métricas${SUFFIX}').first().json.periodo_fin_evaluacion }}`;
@@ -31,6 +33,12 @@ const payload = {
       type: "updateNodeParameters",
       nodeName: `Code: Calcular Métricas${SUFFIX}`,
       parameters: { jsCode: js },
+    },
+    {
+      type: "setNodeParameter",
+      nodeName: "IF: Generar Certificado1",
+      path: "/conditions/conditions/0/leftValue",
+      value: certIf,
     },
     {
       type: "setNodeParameter",

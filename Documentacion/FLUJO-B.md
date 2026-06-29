@@ -19,7 +19,7 @@ node scripts/sync-flujo-b.mjs
 1. **Cron diario** (8:00) o **Manual Trigger**
 2. Lee órdenes `estado = activa` en Supabase
 3. Por cada campaña: API detecciones (**periodo_inicio → hoy**) → métricas acumuladas → `resumen_campaña`
-4. Si `fecha_hoy >= periodo_fin` **y** hay métricas → certificado final:
+4. Si `fecha_hoy > periodo_fin` **y** hay métricas → certificado final (día **siguiente** al cierre; si vence el 25, el cron del 26 a las 8:00):
    - Google Docs → PDF → Drive
    - `certificados_emitidos`
    - Email a `email_cliente` (campo obligatorio en `/ordenes/nueva`)
@@ -40,8 +40,9 @@ Tras importar, verifica que n8n resuelva todas las credenciales Google/Gmail com
 
 ## Prueba manual (cierre)
 
-1. Crear orden en el panel con `periodo_fin` = hoy o ayer y `email_cliente` válido
-2. Ejecutar **Manual Trigger - Ejecutar Flujo B**
+1. Crear orden en el panel con `periodo_fin` = **ayer** (el certificado se emite al día siguiente del fin de campaña)
+2. En **Code: Calcular Fechas**, simular `FECHA_EJECUCION_PRUEBA` = hoy (día posterior a `periodo_fin`)
+3. Ejecutar **Manual Trigger - Ejecutar Flujo B**
 3. Verificar:
    - Fila en `certificados_emitidos`
    - PDF en Drive
@@ -59,7 +60,14 @@ En el nodo **Code: Calcular Fechas**, `FECHA_EJECUCION_PRUEBA`:
 
 ## Métricas de campaña
 
-El monitoreo diario consulta la API desde **`periodo_inicio`** de la orden hasta **`min(hoy, periodo_fin)`** y calcula:
+El monitoreo diario consulta la API desde **`periodo_inicio`** hasta el **fin de evaluación**:
+
+- En curso: hasta **ayer** si hoy es el último día de campaña (el cron a las 8:00 no incluye cuñas del día en curso).
+- Tras el fin: hasta **`periodo_fin`** completo (desde el día siguiente al cierre).
+
+**Cierre (PDF, email, finalizar orden):** solo cuando `fecha_hoy > periodo_fin` (p. ej. vence 25/06 → certificado el 26/06 a las 8:00).
+
+Calcula:
 
 - `transmitidas_acumuladas` — total desde el inicio de la campaña
 - `total_contratadas_periodo` — `min(cuñas_diarias × días transcurridos, total_contratadas)`; en cierre, el total contratado
@@ -81,9 +89,31 @@ Actualiza manualmente en n8n (o vía API) estos nodos:
 
 | Nodo | Cambio |
 |------|--------|
-| **HTTP Request: API Detecciones - Página** | `start_date` = `periodo_inicio`; `end_date` = si `hoy < periodo_inicio` → `periodo_inicio`, si no → `min(hoy, periodo_fin)` |
-| **Code: Calcular Métricas1** | Pegar **todo** el contenido de `scripts/flujo-b-calcular-metricas-prod.js` (reemplazar el código anterior, no añadir encima) |
+| **HTTP Request: API Detecciones - Página** | `end_date` alineado con fin de evaluación (excluye último día en curso; post-cierre usa `periodo_fin`) |
+| **Code: Calcular Métricas1** | `cierre` = `fecha_hoy > periodo_fin`; pegar `scripts/flujo-b-calcular-metricas-prod.js` |
+| **IF: Generar Certificado1** | Usa `m.cierre` del nodo de métricas (no `fecha_hoy >= periodo_fin`) |
 | **Gmail: Send Email1** | Asunto: "Periodo" en lugar de "Semana" |
+| **Google Docs: Update Document1** | Reemplazo `{{NumeroCertificado}}` desde `orden.numero_certificado` |
+| **Supabase: Insert Certificado1** | Campo `numero_certificado` = snapshot del número al emitir |
+
+### N.º de certificado (`{{NumeroCertificado}}`)
+
+El panel guarda el valor en `ordenes_transmision.numero_certificado`. Al emitir, n8n copia ese valor a `certificados_emitidos.numero_certificado` (histórico). El `codigo_certificado` interno lo sigue generando el trigger de BD si no se envía.
+
+En n8n prod, nodo **Google Docs: Update Document1** → **Add action** → **Replace all**:
+
+| Campo | Valor |
+|-------|--------|
+| **text** | `{{NumeroCertificado}}` |
+| **replaceText** | `={{ $('Code: Calcular Métricas1').first().json.orden.numero_certificado \|\| '—' }}` |
+
+En **Supabase: Insert Certificado1** → añadir campo:
+
+| fieldId | fieldValue |
+|---------|------------|
+| `numero_certificado` | `={{ $('Code: Calcular Métricas1').first().json.orden.numero_certificado \|\| null }}` |
+
+No mapees `codigo_certificado` en n8n: el trigger `generar_codigo_certificado()` crea `cert-{id}-{fecha}` cuando queda null.
 
 ## Dependencias
 
