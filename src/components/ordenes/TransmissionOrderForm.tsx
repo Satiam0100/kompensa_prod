@@ -46,25 +46,20 @@ export function TransmissionOrderForm() {
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
+      const form = e.currentTarget;
+
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        form.reportValidity();
+        return;
+      }
+
       e.preventDefault();
       setSubmitState("loading");
       setErrorMessage(null);
 
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData(form);
       const data = parseFormData(formData);
-
-      if (
-        !data.cliente ||
-        !data.campaña ||
-        !data.emisora ||
-        !data.email_cliente ||
-        !data.periodo_inicio ||
-        !data.periodo_fin
-      ) {
-        setSubmitState("error");
-        setErrorMessage("Completa todos los campos obligatorios.");
-        return;
-      }
 
       const result = await crearOrdenTransmision(data);
 
@@ -72,7 +67,7 @@ export function TransmissionOrderForm() {
         setSubmitState("success");
         setTimeout(() => {
           setSubmitState("idle");
-          e.currentTarget.reset();
+          form.reset();
           router.refresh();
         }, 2000);
       } else {
