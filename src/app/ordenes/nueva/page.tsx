@@ -30,8 +30,8 @@ export default async function NuevaOrdenPage() {
             Nueva Orden de Transmisión
           </h2>
           <p className="text-body-lg text-on-surface-variant">
-            Completa los datos para registrar un nuevo contrato publicitario en
-            el motor de verificación.
+            Completa los datos de la campaña y añade una o más emisoras. Se
+            registrará una orden por cada emisora.
           </p>
         </div>
 

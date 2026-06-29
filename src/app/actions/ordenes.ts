@@ -2,10 +2,16 @@
 
 import { createSupabaseServerClient, deleteRowsByIds } from "@/lib/supabase/server";
 import type {
+  OrdenEmisoraLinea,
   OrdenTransmisionForm,
+  OrdenTransmisionFormCompartido,
   OrdenTransmisionRow,
 } from "@/lib/types/orden-transmision";
-import { ordenFormToPayload, applyEstadoSpotRules } from "@/lib/parse-orden-form";
+import {
+  applyEstadoSpotRules,
+  mergeOrdenForm,
+  ordenFormToPayload,
+} from "@/lib/parse-orden-form";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 const ORDENES_CACHE_TAG = "ordenes-transmision";
@@ -33,6 +39,10 @@ const getOrdenesCached = unstable_cache(
 
 export type CrearOrdenResult =
   | { success: true; id: string }
+  | { success: false; error: string };
+
+export type CrearOrdenesResult =
+  | { success: true; ids: string[]; count: number }
   | { success: false; error: string };
 
 export type ListarOrdenesResult =
@@ -111,6 +121,44 @@ export async function crearOrdenTransmision(
     revalidatePath("/ordenes");
     revalidateTag(ORDENES_CACHE_TAG, "max");
     return { success: true, id: row.id as string };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Error desconocido al guardar";
+    return { success: false, error: message };
+  }
+}
+
+export async function crearOrdenesTransmision(
+  compartido: OrdenTransmisionFormCompartido,
+  lineas: OrdenEmisoraLinea[],
+): Promise<CrearOrdenesResult> {
+  try {
+    if (lineas.length === 0) {
+      return { success: false, error: "Añade al menos una emisora." };
+    }
+
+    const supabase = createSupabaseServerClient();
+    const payloads = lineas.map((linea) =>
+      ordenFormToPayload(
+        applyEstadoSpotRules(mergeOrdenForm(compartido, linea)),
+      ),
+    );
+
+    const { data, error } = await supabase
+      .from("ordenes_transmision")
+      .insert(payloads)
+      .select("id");
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    const ids = (data ?? []).map((row) => row.id as string);
+
+    revalidatePath("/ordenes/nueva");
+    revalidatePath("/ordenes");
+    revalidateTag(ORDENES_CACHE_TAG, "max");
+    return { success: true, ids, count: ids.length };
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Error desconocido al guardar";

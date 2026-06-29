@@ -10,6 +10,7 @@ interface AdvancedParamsSectionProps {
   defaultDuracionSeg?: number | null;
   channelId?: string;
   onChannelIdChange?: (channelId: string) => void;
+  showChannelId?: boolean;
   wrapperClassName?: string;
   onSpotIdChange?: (spotId: string) => void;
 }
@@ -20,6 +21,7 @@ export function AdvancedParamsSection({
   defaultDuracionSeg,
   channelId = "",
   onChannelIdChange,
+  showChannelId = true,
   wrapperClassName = "md:col-span-12",
   onSpotIdChange,
 }: AdvancedParamsSectionProps) {
@@ -71,14 +73,16 @@ export function AdvancedParamsSection({
             placeholder="Ej. Cliente | Marca | Nombre de la cuña"
             defaultValue={defaultSpotName}
           />
-          <FormField
-            label="Channel ID"
-            name="channel_id"
-            placeholder="232808"
-            className="font-label-mono"
-            value={channelId}
-            onChange={(event) => onChannelIdChange?.(event.target.value)}
-          />
+          {showChannelId && (
+            <FormField
+              label="Channel ID"
+              name="channel_id"
+              placeholder="232808"
+              className="font-label-mono"
+              value={channelId}
+              onChange={(event) => onChannelIdChange?.(event.target.value)}
+            />
+          )}
           <FormField
             label="Duración (seg)"
             name="duracion_seg"

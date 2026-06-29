@@ -1,24 +1,29 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { crearOrdenTransmision } from "@/app/actions/ordenes";
+import { crearOrdenesTransmision } from "@/app/actions/ordenes";
 import { FormDateField } from "@/components/ui/FormDateField";
+import { FormCombobox } from "@/components/ui/FormCombobox";
 import {
   FormField,
   SectionCard,
 } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
-import { useOrderChannelId } from "@/hooks/useOrderChannelId";
+import {
+  getAgenciaNames,
+  toSelectOptions,
+} from "@/lib/catalog-form-utils";
 import {
   applyEstadoSpotRules,
-  parseOrdenFormData,
-  validateOrdenForm,
+  parseEmisoraLineas,
+  parseOrdenFormDataCompartido,
+  validateOrdenFormMulti,
 } from "@/lib/parse-orden-form";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
-import { CatalogOrderFields } from "./CatalogOrderFields";
+import { EmisorasOrderLines } from "./EmisorasOrderLines";
 import { OrderEstadoField } from "./OrderEstadoField";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
@@ -37,6 +42,7 @@ export function TransmissionOrderForm({
   const router = useRouter();
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [agencia, setAgencia] = useState("");
   const {
     spotId,
     setSpotId,
@@ -44,20 +50,38 @@ export function TransmissionOrderForm({
     setEstado,
     resetFrom,
   } = useOrderEstadoSpot("", "pausada");
-  const {
-    channelId,
-    setChannelIdManual,
-    syncFromCatalog,
-    reset: resetChannelId,
-  } = useOrderChannelId(emisoras);
+
+  const agenciaOptions = useMemo(
+    () => toSelectOptions(getAgenciaNames(agencias)),
+    [agencias],
+  );
+
+  useEffect(() => {
+    const form = document.getElementById("transmission-form");
+    if (!form) return;
+
+    const handleReset = () => {
+      setAgencia("");
+    };
+
+    form.addEventListener("reset", handleReset);
+    return () => form.removeEventListener("reset", handleReset);
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const form = e.currentTarget;
       const formData = new FormData(form);
-      const data = applyEstadoSpotRules(parseOrdenFormData(formData));
-      const validationError = validateOrdenForm(data, formData);
+      const compartido = applyEstadoSpotRules(
+        parseOrdenFormDataCompartido(formData),
+      );
+      const lineas = parseEmisoraLineas(formData);
+      const validationError = validateOrdenFormMulti(
+        compartido,
+        lineas,
+        formData,
+      );
 
       if (validationError) {
         setSubmitState("error");
@@ -68,7 +92,7 @@ export function TransmissionOrderForm({
       setSubmitState("loading");
       setErrorMessage(null);
 
-      const result = await crearOrdenTransmision(data);
+      const result = await crearOrdenesTransmision(compartido, lineas);
 
       if (result.success) {
         setSubmitState("success");
@@ -84,6 +108,17 @@ export function TransmissionOrderForm({
     [router],
   );
 
+  const handleReset = useCallback(() => {
+    const form = document.getElementById(
+      "transmission-form",
+    ) as HTMLFormElement | null;
+    form?.reset();
+    setAgencia("");
+    resetFrom("", "pausada");
+    setSubmitState("idle");
+    setErrorMessage(null);
+  }, [resetFrom]);
+
   return (
     <>
       <form
@@ -97,6 +132,12 @@ export function TransmissionOrderForm({
           colSpan="md:col-span-8"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            {catalogError && (
+              <p className="sm:col-span-2 text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2">
+                {catalogError}
+              </p>
+            )}
+
             <FormField
               label="Cliente"
               name="cliente"
@@ -109,11 +150,14 @@ export function TransmissionOrderForm({
               required
               placeholder="Nombre del proyecto"
             />
-            <CatalogOrderFields
-              emisoras={emisoras}
-              agencias={agencias}
-              catalogError={catalogError}
-              onEmisoraCiudadChange={syncFromCatalog}
+            <FormCombobox
+              label="Agencia"
+              name="agencia"
+              value={agencia}
+              onChange={setAgencia}
+              options={agenciaOptions}
+              placeholder="Buscar agencia (opcional)…"
+              emptyMessage="No hay agencias que coincidan"
             />
             <FormField
               label="Email Cliente"
@@ -207,9 +251,21 @@ export function TransmissionOrderForm({
           </p>
         </SectionCard>
 
+        <SectionCard
+          title="Emisoras"
+          icon="radio"
+          colSpan="md:col-span-12"
+          className="mb-0"
+        >
+          <p className="text-body-sm text-on-surface-variant mb-4">
+            Añade una o más emisoras. Se creará una orden por cada fila con los
+            mismos datos de campaña.
+          </p>
+          <EmisorasOrderLines emisoras={emisoras} />
+        </SectionCard>
+
         <AdvancedParamsSection
-          channelId={channelId}
-          onChannelIdChange={setChannelIdManual}
+          showChannelId={false}
           onSpotIdChange={setSpotId}
         />
 
@@ -223,16 +279,7 @@ export function TransmissionOrderForm({
           <button
             type="button"
             className="w-full sm:w-auto px-8 py-3 text-body-md font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all rounded-lg"
-            onClick={() => {
-              const form = document.getElementById(
-                "transmission-form",
-              ) as HTMLFormElement | null;
-              form?.reset();
-              resetFrom("", "pausada");
-              resetChannelId();
-              setSubmitState("idle");
-              setErrorMessage(null);
-            }}
+            onClick={handleReset}
           >
             Cancelar
           </button>
@@ -244,7 +291,6 @@ export function TransmissionOrderForm({
 }
 
 function SubmitButton({ state }: { state: SubmitState }) {
-
   if (state === "loading") {
     return (
       <button
@@ -266,7 +312,7 @@ function SubmitButton({ state }: { state: SubmitState }) {
         className="w-full sm:w-auto px-10 py-3 bg-green-600 text-white text-body-md font-bold rounded-lg flex items-center justify-center gap-2"
       >
         <MaterialIcon name="check_circle" />
-        Éxito
+        Órdenes creadas
       </button>
     );
   }
@@ -277,7 +323,7 @@ function SubmitButton({ state }: { state: SubmitState }) {
       className="w-full sm:w-auto px-10 py-3 bg-tertiary text-on-tertiary text-body-md font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
     >
       <MaterialIcon name="save" filled />
-      Guardar Orden
+      Guardar órdenes
     </button>
   );
 }

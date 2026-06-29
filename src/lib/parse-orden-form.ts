@@ -1,6 +1,8 @@
 import type {
   EstadoOrden,
+  OrdenEmisoraLinea,
   OrdenTransmisionForm,
+  OrdenTransmisionFormCompartido,
 } from "@/lib/types/orden-transmision";
 import { parseMaskedDate } from "@/components/ui/date-picker-utils";
 import {
@@ -32,7 +34,15 @@ export const ORDEN_FORM_NAMES = {
   spot_name: "spot_name",
   duracion_seg: "duracion_seg",
   numero_certificado: "numero_certificado",
+  emisora_line_count: "emisora_line_count",
 } as const;
+
+export function emisoraLineFieldName(
+  index: number,
+  field: "emisora" | "ciudad" | "channel_id",
+): string {
+  return `emisora_line_${index}_${field}`;
+}
 
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -65,21 +75,29 @@ function readDateField(formData: FormData, key: string): string {
 }
 
 export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
+  return {
+    ...parseOrdenFormDataCompartido(formData),
+    emisora: readString(formData, ORDEN_FORM_NAMES.emisora),
+    ciudad: readString(formData, ORDEN_FORM_NAMES.ciudad) || undefined,
+    channel_id: readString(formData, ORDEN_FORM_NAMES.channel_id) || undefined,
+  };
+}
+
+export function parseOrdenFormDataCompartido(
+  formData: FormData,
+): OrdenTransmisionFormCompartido {
   const n = ORDEN_FORM_NAMES;
   const duracionRaw = readString(formData, n.duracion_seg);
 
   return {
     cliente: readString(formData, n.cliente),
     campaña: readString(formData, n.campana),
-    emisora: readString(formData, n.emisora),
-    ciudad: readString(formData, n.ciudad) || undefined,
     estado: (readString(formData, n.estado) || "pausada") as EstadoOrden,
     agencia: readString(formData, n.agencia) || undefined,
     email_cliente: readString(formData, n.email_cliente),
     telefono_cliente: normalizeTelefonoCliente(
       readString(formData, n.telefono_cliente),
     ),
-    channel_id: readString(formData, n.channel_id) || undefined,
     cuñas_diarias: readNumber(formData, n.cunias_diarias),
     total_contratadas: readNumber(formData, n.total_contratadas),
     periodo_inicio: readDateField(formData, n.periodo_inicio),
@@ -93,15 +111,94 @@ export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
   };
 }
 
+export function parseEmisoraLineas(formData: FormData): OrdenEmisoraLinea[] {
+  const rawCount = readString(formData, ORDEN_FORM_NAMES.emisora_line_count);
+  const count = Math.max(1, Number.parseInt(rawCount || "1", 10) || 1);
+  const lineas: OrdenEmisoraLinea[] = [];
+
+  for (let i = 0; i < count; i++) {
+    lineas.push({
+      emisora: readString(formData, emisoraLineFieldName(i, "emisora")),
+      ciudad: readString(formData, emisoraLineFieldName(i, "ciudad")),
+      channel_id:
+        readString(formData, emisoraLineFieldName(i, "channel_id")) ||
+        undefined,
+    });
+  }
+
+  return lineas;
+}
+
+export function mergeOrdenForm(
+  compartido: OrdenTransmisionFormCompartido,
+  linea: OrdenEmisoraLinea,
+): OrdenTransmisionForm {
+  return {
+    ...compartido,
+    emisora: linea.emisora,
+    ciudad: linea.ciudad || undefined,
+    channel_id: linea.channel_id,
+  };
+}
+
 export function validateOrdenForm(
   data: OrdenTransmisionForm,
+  formData?: FormData,
+): string | null {
+  const compartidoError = validateOrdenFormCompartido(data, formData);
+  if (compartidoError) return compartidoError;
+
+  if (!data.emisora) return "Completa los campos obligatorios: Emisora.";
+  if (!data.ciudad?.trim()) return "Completa los campos obligatorios: Ciudad.";
+
+  const spotRuleError = validateEstadoSpotRule(data);
+  if (spotRuleError) return spotRuleError;
+
+  return null;
+}
+
+export function validateOrdenFormMulti(
+  compartido: OrdenTransmisionFormCompartido,
+  lineas: OrdenEmisoraLinea[],
+  formData?: FormData,
+): string | null {
+  const compartidoError = validateOrdenFormCompartido(compartido, formData);
+  if (compartidoError) return compartidoError;
+
+  if (lineas.length === 0) {
+    return "Añade al menos una emisora.";
+  }
+
+  const seen = new Set<string>();
+  for (let i = 0; i < lineas.length; i++) {
+    const linea = lineas[i];
+    if (!linea.emisora.trim()) {
+      return `Emisora obligatoria en la fila ${i + 1}.`;
+    }
+    if (!linea.ciudad?.trim()) {
+      return `Ciudad obligatoria en la fila ${i + 1}.`;
+    }
+    const key = `${linea.emisora.trim().toLowerCase()}|${linea.ciudad.trim().toLowerCase()}`;
+    if (seen.has(key)) {
+      return "No repitas la misma emisora y ciudad.";
+    }
+    seen.add(key);
+
+    const merged = mergeOrdenForm(compartido, linea);
+    const spotRuleError = validateEstadoSpotRule(merged);
+    if (spotRuleError) return spotRuleError;
+  }
+
+  return null;
+}
+
+function validateOrdenFormCompartido(
+  data: OrdenTransmisionFormCompartido,
   formData?: FormData,
 ): string | null {
   const missing: string[] = [];
   if (!data.cliente) missing.push("Cliente");
   if (!data.campaña) missing.push("Campaña");
-  if (!data.emisora) missing.push("Emisora");
-  if (!data.ciudad?.trim()) missing.push("Ciudad");
   if (!data.email_cliente) missing.push("Email Cliente");
   if (!data.telefono_cliente) missing.push("Teléfono Cliente");
   if (!data.periodo_inicio) missing.push("Periodo Inicio");
@@ -141,9 +238,6 @@ export function validateOrdenForm(
 
   const telefonoError = validateTelefonoCliente(data.telefono_cliente);
   if (telefonoError) return telefonoError;
-
-  const spotRuleError = validateEstadoSpotRule(data);
-  if (spotRuleError) return spotRuleError;
 
   return null;
 }

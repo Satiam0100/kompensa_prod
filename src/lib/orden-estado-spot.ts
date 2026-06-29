@@ -19,9 +19,9 @@ export function resolveEstadoForSpot(
   return preferred;
 }
 
-export function applyEstadoSpotRules(
-  data: OrdenTransmisionForm,
-): OrdenTransmisionForm {
+export function applyEstadoSpotRules<
+  T extends Pick<OrdenTransmisionForm, "estado" | "spot_id">,
+>(data: T): T {
   return {
     ...data,
     estado: resolveEstadoForSpot(data.spot_id ?? "", data.estado),

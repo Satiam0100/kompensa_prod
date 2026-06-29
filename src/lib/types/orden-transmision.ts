@@ -1,5 +1,16 @@
 export type EstadoOrden = "activa" | "pausada" | "finalizada";
 
+export interface OrdenEmisoraLinea {
+  emisora: string;
+  ciudad: string;
+  channel_id?: string;
+}
+
+export type OrdenTransmisionFormCompartido = Omit<
+  OrdenTransmisionForm,
+  "emisora" | "ciudad" | "channel_id"
+>;
+
 export interface OrdenTransmisionForm {
   cliente: string;
   campaña: string;
