@@ -1,4 +1,11 @@
 import { type InputHTMLAttributes, type ReactNode } from "react";
+import { CARD_HOVER_EFFECT } from "./card-classes";
+import {
+  FORM_FIELD_CONTROL,
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+  FORM_FIELD_TEXTAREA_CONTROL,
+} from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
 
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -55,40 +62,78 @@ export function FormField({
           </span>
         )}
       </label>
-      {field}
+      <div
+        className={`${icon ? FORM_FIELD_CONTROL : FORM_FIELD_CONTROL_PLAIN} ${wrapperClassName}`}
+      >
+        {icon && (
+          <MaterialIcon
+            name={icon}
+            className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary group-focus-within:text-tertiary"
+          />
+        )}
+        <input
+          className={`${FORM_FIELD_INPUT} ${className}`}
+          {...inputProps}
+        />
+      </div>
     </div>
   );
 }
 
-interface FormSelectProps {
+interface FormCheckboxProps {
+  label: string;
+  name: string;
+  defaultChecked?: boolean;
+}
+
+export function FormCheckbox({
+  label,
+  name,
+  defaultChecked = false,
+}: FormCheckboxProps) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer px-1">
+      <input
+        type="checkbox"
+        name={name}
+        defaultChecked={defaultChecked}
+        value="true"
+        className="w-4 h-4 rounded border-outline-variant text-tertiary focus:ring-tertiary"
+      />
+      <span className="text-body-sm text-on-surface">{label}</span>
+    </label>
+  );
+}
+
+interface FormTextareaProps {
   label: string;
   name: string;
   defaultValue?: string;
-  options: { value: string; label: string }[];
+  placeholder?: string;
+  rows?: number;
 }
 
-export function FormSelect({
+export function FormTextarea({
   label,
   name,
   defaultValue,
-  options,
-}: FormSelectProps) {
+  placeholder,
+  rows = 3,
+}: FormTextareaProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-label-sm text-on-surface-variant px-1">
         {label}
       </label>
-      <select
-        name={name}
-        defaultValue={defaultValue}
-        className="bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus appearance-none"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <div className={FORM_FIELD_TEXTAREA_CONTROL}>
+        <textarea
+          name={name}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          rows={rows}
+          className={`${FORM_FIELD_INPUT} block w-full resize-y min-h-[80px] py-3`}
+        />
+      </div>
     </div>
   );
 }
@@ -114,17 +159,17 @@ export function SectionCard({
 }: SectionCardProps) {
   const iconBox =
     iconVariant === "tertiary"
-      ? "bg-tertiary-container border border-on-tertiary-container text-tertiary"
+      ? "bg-tertiary-container border border-on-tertiary-container text-tertiary group-hover:brightness-110 transition-colors"
       : "bg-primary-container border border-outline-variant text-primary group-hover:bg-primary group-hover:text-surface transition-colors";
 
-  const bg =
+  const surface =
     iconVariant === "tertiary"
-      ? "bg-surface-container-low"
-      : "bg-surface-container group hover:border-outline transition-colors";
+      ? "bg-surface-container-low hover:bg-surface-container"
+      : "bg-surface-container hover:bg-surface-container-high";
 
   return (
     <div
-      className={`${colSpan} ${bg} p-6 rounded-lg border border-outline-variant relative overflow-hidden ${className}`}
+      className={`${colSpan} group ${surface} p-6 rounded-lg border border-outline-variant relative overflow-hidden ${CARD_HOVER_EFFECT} ${className}`}
     >
       {decorationIcon && (
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">

@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# n8n deploy artifacts
+scripts/.flujo-b-n8n-deploy.json
+scripts/.deploy-ops.json

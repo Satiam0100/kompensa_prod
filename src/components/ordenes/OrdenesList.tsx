@@ -2,16 +2,38 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
+import { EditOrdenModal } from "@/components/ordenes/EditOrdenModal";
+import { ORDENES_GRID_CLASS, OrdenCard } from "@/components/ordenes/OrdenCard";
+import {
+  FORM_FIELD_CONTROL_PLAIN,
+  FORM_FIELD_INPUT,
+} from "@/components/ui/form-field-classes";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
-import { formatFecha, formatPeriodo } from "@/lib/format";
+import type { BulkSelection } from "@/hooks/useBulkSelection";
+import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
 interface OrdenesListProps {
   ordenes: OrdenTransmisionRow[];
+  bulk: BulkSelection;
+  emisoras: EmisoraRow[];
+  agencias: AgenciaRow[];
+  catalogError?: string | null;
+  editing: OrdenTransmisionRow | null;
+  onEdit: (orden: OrdenTransmisionRow) => void;
+  onCloseModal: () => void;
 }
 
-export function OrdenesList({ ordenes }: OrdenesListProps) {
+export function OrdenesList({
+  ordenes,
+  bulk,
+  emisoras,
+  agencias,
+  catalogError = null,
+  editing,
+  onEdit,
+  onCloseModal,
+}: OrdenesListProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -24,7 +46,8 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
         o.campaña.toLowerCase().includes(q) ||
         o.emisora.toLowerCase().includes(q) ||
         (o.ciudad?.toLowerCase().includes(q) ?? false) ||
-        (o.spot_name?.toLowerCase().includes(q) ?? false),
+        (o.spot_name?.toLowerCase().includes(q) ?? false) ||
+        (o.numero_certificado?.toLowerCase().includes(q) ?? false),
     );
   }, [ordenes, query]);
 
@@ -56,14 +79,17 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-lg flex-1 max-w-md">
-          <MaterialIcon name="search" className="text-outline-variant text-sm" />
+        <div className={`${FORM_FIELD_CONTROL_PLAIN} flex-1 max-w-md`}>
+          <MaterialIcon
+            name="search"
+            className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary"
+          />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por cliente, campaña, emisora..."
-            className="w-full bg-transparent border-none text-body-sm text-on-surface focus:ring-0"
+            placeholder="Buscar por cliente, campaña, emisora, n.º certificado..."
+            className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>
         <p className="text-label-sm text-on-surface-variant">
@@ -71,115 +97,25 @@ export function OrdenesList({ ordenes }: OrdenesListProps) {
         </p>
       </div>
 
-      <div className="hidden lg:block bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-outline-variant bg-surface-container-low">
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Cliente / Campaña
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Emisora
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Cuñas
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Periodo
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Estado
-              </th>
-              <th className="px-4 py-3 text-label-sm text-on-surface-variant font-medium">
-                Registro
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((orden) => (
-              <tr
-                key={orden.id}
-                className="border-b border-outline-variant/60 hover:bg-surface-container-high/50 transition-colors"
-              >
-                <td className="px-4 py-4">
-                  <p className="text-body-md text-on-surface font-medium">
-                    {orden.cliente}
-                  </p>
-                  <p className="text-body-sm text-on-surface-variant">
-                    {orden.campaña}
-                  </p>
-                </td>
-                <td className="px-4 py-4 text-body-sm text-on-surface">
-                  {orden.emisora}
-                  {orden.ciudad && (
-                    <span className="block text-on-surface-variant text-label-sm">
-                      {orden.ciudad}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-4">
-                  <span className="text-label-mono text-on-surface">
-                    {orden.cuñas_diarias}/día
-                  </span>
-                  <span className="block text-label-sm text-on-surface-variant">
-                    {orden.total_contratadas} total
-                  </span>
-                </td>
-                <td className="px-4 py-4 text-body-sm text-on-surface-variant">
-                  {formatPeriodo(orden.periodo_inicio, orden.periodo_fin)}
-                </td>
-                <td className="px-4 py-4">
-                  <EstadoBadge estado={orden.estado} />
-                </td>
-                <td className="px-4 py-4 text-label-sm text-on-surface-variant">
-                  {formatFecha(orden.created_at)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && (
-          <p className="p-8 text-center text-body-sm text-on-surface-variant">
-            Ningún resultado para &quot;{query}&quot;
-          </p>
-        )}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="p-8 text-center text-body-sm text-on-surface-variant bg-surface-container border border-outline-variant rounded-lg">
+          Ningún resultado para &quot;{query}&quot;
+        </p>
+      ) : (
+        <div className={ORDENES_GRID_CLASS}>
+          {filtered.map((orden) => (
+            <OrdenCard key={orden.id} orden={orden} bulk={bulk} onEdit={onEdit} />
+          ))}
+        </div>
+      )}
 
-      <div className="lg:hidden grid gap-3">
-        {filtered.map((orden) => (
-          <article
-            key={orden.id}
-            className="bg-surface-container border border-outline-variant rounded-lg p-4 space-y-3"
-          >
-            <div className="flex justify-between items-start gap-2">
-              <div>
-                <p className="text-body-md font-medium text-on-surface">
-                  {orden.cliente}
-                </p>
-                <p className="text-body-sm text-on-surface-variant">
-                  {orden.campaña}
-                </p>
-              </div>
-              <EstadoBadge estado={orden.estado} />
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-label-sm text-on-surface-variant">
-              <span>
-                <MaterialIcon
-                  name="radio"
-                  className="text-sm mr-1 text-outline-variant"
-                />
-                {orden.emisora}
-              </span>
-              <span className="text-right text-label-mono text-on-surface">
-                {orden.cuñas_diarias}/día · {orden.total_contratadas} total
-              </span>
-            </div>
-            <p className="text-label-sm text-on-surface-variant">
-              {formatPeriodo(orden.periodo_inicio, orden.periodo_fin)}
-            </p>
-          </article>
-        ))}
-      </div>
+      <EditOrdenModal
+        orden={editing}
+        emisoras={emisoras}
+        agencias={agencias}
+        catalogError={catalogError}
+        onClose={onCloseModal}
+      />
     </div>
   );
 }
