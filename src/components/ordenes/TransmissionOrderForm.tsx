@@ -79,19 +79,33 @@ export function TransmissionOrderForm({
       }
 
       e.preventDefault();
+
+      const formData = new FormData(form);
+      const compartido = applyEstadoSpotRules(
+        parseOrdenFormDataCompartido(formData),
+      );
+      const lineas = parseEmisoraLineas(formData);
+      const validationError = validateOrdenFormMulti(
+        compartido,
+        lineas,
+        formData,
+      );
+
+      if (validationError) {
+        setSubmitState("error");
+        setErrorMessage(validationError);
+        return;
+      }
+
       setSubmitState("loading");
       setErrorMessage(null);
 
-      const formData = new FormData(form);
-      const data = parseFormData(formData);
-
-      const result = await crearOrdenTransmision(data);
+      const result = await crearOrdenesTransmision(compartido, lineas);
 
       if (result.success) {
         setSubmitState("success");
         setTimeout(() => {
-          setSubmitState("idle");
-          form.reset();
+          router.push("/ordenes");
           router.refresh();
         }, 1200);
       } else {

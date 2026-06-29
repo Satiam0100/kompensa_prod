@@ -26,28 +26,14 @@ export function FormField({
   ...inputProps
 }: FormFieldProps) {
   const inputId = id ?? name;
-  const inputClasses = `w-full bg-transparent border-none py-3 text-body-md text-on-surface focus:ring-0 ${className}`;
   const inputElementProps = {
     id: inputId,
     name,
     required,
     "aria-required": required ? true : undefined,
+    className: `${FORM_FIELD_INPUT} ${className}`,
     ...inputProps,
   };
-
-  const field = icon ? (
-    <div
-      className={`flex items-center gap-2 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 focus-within:border-tertiary transition-all ${wrapperClassName}`}
-    >
-      <MaterialIcon name={icon} className="text-outline-variant text-sm" />
-      <input className={inputClasses} {...inputElementProps} />
-    </div>
-  ) : (
-    <input
-      className={`bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 text-body-md text-on-surface form-input-focus transition-all ${className}`}
-      {...inputElementProps}
-    />
-  );
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -71,10 +57,7 @@ export function FormField({
             className="shrink-0 text-outline-variant text-sm transition-colors group-hover:text-tertiary group-focus-within:text-tertiary"
           />
         )}
-        <input
-          className={`${FORM_FIELD_INPUT} ${className}`}
-          {...inputProps}
-        />
+        <input {...inputElementProps} />
       </div>
     </div>
   );
