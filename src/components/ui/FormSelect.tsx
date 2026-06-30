@@ -13,6 +13,7 @@ import { FORM_FIELD_CONTROL_PLAIN } from "./form-field-classes";
 import {
   computeFloatingMenuPosition,
   FLOATING_SELECT_MENU_CLASS,
+  subscribeFloatingOverlayListeners,
 } from "./floating-menu-position";
 import { MaterialIcon } from "./MaterialIcon";
 import { usePortalRoot } from "./portal-root-context";
@@ -50,6 +51,7 @@ export function FormSelect({
 }: FormSelectProps) {
   const portalRoot = usePortalRoot();
   const generatedId = useId();
+  const labelId = `${generatedId}-label`;
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
@@ -97,18 +99,18 @@ export function FormSelect({
     if (hiddenRef.current) hiddenRef.current.value = value;
   }, [value]);
 
+  const closeMenu = useCallback(() => setOpen(false), []);
+
   useEffect(() => {
     if (!open) return;
 
     updateMenuPosition();
-    window.addEventListener("resize", updateMenuPosition);
-    window.addEventListener("scroll", updateMenuPosition, true);
-
-    return () => {
-      window.removeEventListener("resize", updateMenuPosition);
-      window.removeEventListener("scroll", updateMenuPosition, true);
-    };
-  }, [open, updateMenuPosition]);
+    return subscribeFloatingOverlayListeners({
+      onReposition: updateMenuPosition,
+      onClose: closeMenu,
+      menuSelector: "[data-form-select-menu]",
+    });
+  }, [open, updateMenuPosition, closeMenu]);
 
   useEffect(() => {
     if (!open) return;
@@ -163,7 +165,7 @@ export function FormSelect({
   return (
     <div className={`flex flex-col gap-1.5 ${className}`} ref={containerRef}>
       <label
-        htmlFor={generatedId}
+        id={labelId}
         className="text-label-sm text-on-surface-variant px-1"
       >
         {label}
@@ -185,8 +187,10 @@ export function FormSelect({
           type="button"
           className="form-select-trigger"
           onClick={toggleOpen}
+          aria-labelledby={labelId}
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-required={required || undefined}
         >
           <span className="truncate text-left">
             {selectedOption?.label ?? "Seleccionar"}

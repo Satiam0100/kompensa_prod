@@ -16,7 +16,7 @@ export function CampanasCatalog({ campanas }: CampanasCatalogProps) {
             className="text-tertiary shrink-0"
             fontSize="large"
           />
-          <h2 className="text-display-lg text-on-surface">Monitoreo</h2>
+          <h1 className="text-display-lg text-on-surface">Monitoreo</h1>
         </div>
         <p className="text-body-lg text-on-surface-variant">
           Estado de cumplimiento de las campañas. El porcentaje se calcula sobre

@@ -69,12 +69,11 @@ export function CampanasList({ campanas }: CampanasListProps) {
           name="search"
           className="text-5xl text-outline-variant mb-4"
         />
-        <h3 className="text-title-md text-on-surface mb-2">
+        <h2 className="text-title-md text-on-surface mb-2">
           No hay campañas para monitorear
-        </h3>
+        </h2>
         <p className="text-body-sm text-on-surface-variant max-w-md mx-auto">
-          Registra órdenes de transmisión y ejecuta el Flujo B para ver el
-          cumplimiento aquí.
+          Registra órdenes de transmisión activas para ver el cumplimiento aquí.
         </p>
       </div>
     );

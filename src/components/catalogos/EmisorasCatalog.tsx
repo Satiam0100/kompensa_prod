@@ -47,7 +47,7 @@ export function EmisorasCatalog({ emisoras }: EmisorasCatalogProps) {
     <>
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h2 className="text-display-lg text-on-surface mb-2">Emisoras</h2>
+          <h1 className="text-display-lg text-on-surface mb-2">Emisoras</h1>
           <p className="text-body-lg text-on-surface-variant">
             Catálogo de emisoras y canales de radio disponibles en el sistema.
           </p>

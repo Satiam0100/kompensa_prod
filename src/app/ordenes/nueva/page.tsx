@@ -3,7 +3,7 @@ import { TransmissionOrderForm } from "@/components/ordenes/TransmissionOrderFor
 import { listarAgencias, listarEmisoras } from "@/app/actions/catalogos";
 
 export const metadata = {
-  title: "Nueva Orden de Transmisión | AdCertify Pro",
+  title: "Nueva Orden de Transmisión",
 };
 
 export default async function NuevaOrdenPage() {
@@ -24,14 +24,17 @@ export default async function NuevaOrdenPage() {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto p-8">
+      <div className="max-w-5xl mx-auto p-4 md:p-8">
         <div className="mb-10">
-          <h2 className="text-display-lg text-on-surface mb-2">
+          <h1 className="text-display-lg text-on-surface mb-2">
             Nueva Orden de Transmisión
-          </h2>
+          </h1>
           <p className="text-body-lg text-on-surface-variant">
             Completa los datos de la campaña y añade una o más emisoras. Se
             registrará una orden por cada emisora.
+          </p>
+          <p className="text-label-sm text-on-surface-variant mt-3">
+            <span className="text-tertiary">*</span> Campos obligatorios
           </p>
         </div>
 

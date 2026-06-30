@@ -101,7 +101,48 @@ export function computeFloatingPopoverPosition(
 }
 
 export const FLOATING_MENU_CLASS =
-  "form-select-menu pointer-events-auto z-[100] max-h-80 overflow-y-auto custom-scrollbar";
+  "form-select-menu pointer-events-auto z-[200] max-h-80 overflow-y-auto overscroll-contain custom-scrollbar isolate";
 
 export const FLOATING_SELECT_MENU_CLASS =
-  "form-select-menu pointer-events-auto z-[100]";
+  "form-select-menu pointer-events-auto z-[200] overscroll-contain isolate";
+
+function isEventTargetInside(
+  target: EventTarget | null,
+  selector: string,
+): boolean {
+  return Boolean(
+    target instanceof Element && target.closest(selector),
+  );
+}
+
+/** Reposiciona en resize; cierra al hacer scroll fuera del overlay (evita desfase en móvil). */
+export function subscribeFloatingOverlayListeners(options: {
+  onReposition: () => void;
+  onClose: () => void;
+  menuSelector: string;
+}): () => void {
+  const { onReposition, onClose, menuSelector } = options;
+
+  const handleScroll = (event: Event) => {
+    if (isEventTargetInside(event.target, menuSelector)) return;
+    onClose();
+  };
+
+  const handleTouchMove = (event: TouchEvent) => {
+    if (isEventTargetInside(event.target, menuSelector)) return;
+    onClose();
+  };
+
+  window.addEventListener("resize", onReposition);
+  window.addEventListener("scroll", handleScroll, true);
+  document.addEventListener("touchmove", handleTouchMove, {
+    capture: true,
+    passive: true,
+  });
+
+  return () => {
+    window.removeEventListener("resize", onReposition);
+    window.removeEventListener("scroll", handleScroll, true);
+    document.removeEventListener("touchmove", handleTouchMove, true);
+  };
+}

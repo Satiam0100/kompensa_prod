@@ -7,6 +7,7 @@ import { AdvancedParamsSection } from "@/components/ordenes/AdvancedParamsSectio
 import { CatalogOrderFields } from "@/components/ordenes/CatalogOrderFields";
 import { OrderEstadoField } from "@/components/ordenes/OrderEstadoField";
 import { EditModal } from "@/components/ui/EditModal";
+import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { FormDateField } from "@/components/ui/FormDateField";
 import { FormField } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
@@ -17,6 +18,11 @@ import {
   parseOrdenFormData,
   validateOrdenForm,
 } from "@/lib/parse-orden-form";
+import {
+  formatTelefonoForDisplay,
+  TELEFONO_CLIENTE_HINT,
+  TELEFONO_CLIENTE_PLACEHOLDER,
+} from "@/lib/normalize-telefono";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
@@ -162,8 +168,11 @@ export function EditOrdenModal({
                 name="telefono_cliente"
                 type="tel"
                 required
-                defaultValue={orden.telefono_cliente ?? ""}
-                placeholder="58"
+                defaultValue={formatTelefonoForDisplay(
+                  orden.telefono_cliente ?? "",
+                )}
+                placeholder={TELEFONO_CLIENTE_PLACEHOLDER}
+                hint={TELEFONO_CLIENTE_HINT}
               />
             </div>
           </FormSection>
@@ -237,6 +246,8 @@ export function EditOrdenModal({
           />
 
           {error && <p className="text-error text-body-sm">{error}</p>}
+
+          <PrivacyNotice className="pt-2" />
 
           <div className="flex justify-end gap-3 pt-2">
             <button

@@ -4,7 +4,7 @@ import { CampanasData } from "@/components/campanas/CampanasData";
 import { CampanasListSkeleton } from "@/components/campanas/CampanasListSkeleton";
 
 export const metadata = {
-  title: "Monitoreo | Kompensa",
+  title: "Monitoreo",
 };
 
 export default function CampanasPage() {

@@ -23,7 +23,7 @@ import {
   toISODate,
 } from "./date-picker-utils";
 import { FORM_FIELD_CONTROL, FORM_FIELD_INPUT } from "./form-field-classes";
-import { computeFloatingPopoverPosition } from "./floating-menu-position";
+import { computeFloatingPopoverPosition, subscribeFloatingOverlayListeners } from "./floating-menu-position";
 import { MaterialIcon } from "./MaterialIcon";
 import { usePortalRoot } from "./portal-root-context";
 
@@ -115,21 +115,25 @@ export function FormDateField({
     setPopoverStyle(style);
   }, [portalRoot]);
 
+  const closePopover = useCallback(() => setOpen(false), []);
+
   useEffect(() => {
     if (!open) return;
 
     updatePopoverPosition();
     const frame = requestAnimationFrame(() => updatePopoverPosition());
 
-    window.addEventListener("resize", updatePopoverPosition);
-    window.addEventListener("scroll", updatePopoverPosition, true);
+    const unsubscribe = subscribeFloatingOverlayListeners({
+      onReposition: updatePopoverPosition,
+      onClose: closePopover,
+      menuSelector: "[data-date-picker-popover]",
+    });
 
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updatePopoverPosition);
-      window.removeEventListener("scroll", updatePopoverPosition, true);
+      unsubscribe();
     };
-  }, [open, updatePopoverPosition]);
+  }, [open, updatePopoverPosition, closePopover]);
 
   useEffect(() => {
     if (!open) return;

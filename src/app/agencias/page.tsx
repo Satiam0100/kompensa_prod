@@ -4,7 +4,7 @@ import { AgenciasData } from "@/components/catalogos/AgenciasData";
 import { CatalogListSkeleton } from "@/components/catalogos/CatalogListSkeleton";
 
 export const metadata = {
-  title: "Agencias | Kompensa",
+  title: "Agencias",
 };
 
 export default function AgenciasPage() {

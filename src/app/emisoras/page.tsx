@@ -4,7 +4,7 @@ import { CatalogListSkeleton } from "@/components/catalogos/CatalogListSkeleton"
 import { EmisorasData } from "@/components/catalogos/EmisorasData";
 
 export const metadata = {
-  title: "Emisoras | Kompensa",
+  title: "Emisoras",
 };
 
 export default function EmisorasPage() {

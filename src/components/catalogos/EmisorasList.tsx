@@ -56,9 +56,9 @@ export function EmisorasList({
             name="radio"
             className="text-5xl text-outline-variant mb-4"
           />
-          <h3 className="text-title-md text-on-surface mb-2">
+          <h2 className="text-title-md text-on-surface mb-2">
             No hay emisoras registradas
-          </h3>
+          </h2>
           <p className="text-body-sm text-on-surface-variant mb-6 max-w-md mx-auto">
             Aún no hay emisoras en el catálogo. Agrega la primera desde el
             formulario.

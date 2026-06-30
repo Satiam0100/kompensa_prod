@@ -10,9 +10,13 @@ import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 interface SidebarContentProps {
   onNavigate?: () => void;
+  logoPriority?: boolean;
 }
 
-export function SidebarContent({ onNavigate }: SidebarContentProps) {
+export function SidebarContent({
+  onNavigate,
+  logoPriority = false,
+}: SidebarContentProps) {
   const pathname = usePathname();
 
   return (
@@ -23,11 +27,12 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
           alt="Kompensa Logo"
           width={40}
           height={40}
+          priority={logoPriority}
           className="w-10 h-10 rounded-lg object-cover"
         />
-        <h1 className="text-headline-sm font-extrabold text-primary leading-none">
+        <span className="text-headline-sm font-extrabold text-primary leading-none">
           Kompensa
-        </h1>
+        </span>
       </div>
 
       <nav className="flex flex-col gap-1 flex-grow">

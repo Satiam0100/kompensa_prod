@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { AppFooter } from "./AppFooter";
 import { MobileNav } from "./MobileNav";
 import { Sidebar } from "./Sidebar";
 
@@ -15,6 +16,7 @@ export function AppShell({ children }: AppShellProps) {
         <main className="flex-grow overflow-y-auto custom-scrollbar bg-background min-h-0">
           {children}
         </main>
+        <AppFooter />
       </div>
     </>
   );

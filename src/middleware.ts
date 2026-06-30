@@ -12,7 +12,7 @@ async function isValidSession(token: string) {
   }
 }
 
-const publicPaths = ["/login"];
+const publicPaths = ["/login", "/privacidad"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,6 +41,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|site.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|site.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|txt)$).*)",
   ],
 };

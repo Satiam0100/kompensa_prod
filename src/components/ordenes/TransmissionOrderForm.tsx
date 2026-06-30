@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { crearOrdenesTransmision } from "@/app/actions/ordenes";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { crearOrdenesTransmisionFromForm } from "@/app/actions/ordenes";
+import { CREAR_ORDENES_FORM_INITIAL_STATE } from "@/lib/crear-ordenes-form-state";
 import { FormDateField } from "@/components/ui/FormDateField";
 import { FormCombobox } from "@/components/ui/FormCombobox";
 import {
@@ -11,12 +11,18 @@ import {
 } from "@/components/ui/FormField";
 import { FormLiveRegions } from "@/components/ui/FormLiveRegions";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { FormStatusMessage } from "@/components/ui/FormStatusMessage";
+import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { getFirstInvalidFieldMessage } from "@/lib/form-a11y";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import {
   getAgenciaNames,
   toSelectOptions,
 } from "@/lib/catalog-form-utils";
+import {
+  TELEFONO_CLIENTE_HINT,
+  TELEFONO_CLIENTE_PLACEHOLDER,
+} from "@/lib/normalize-telefono";
 import {
   applyEstadoSpotRules,
   parseEmisoraLineas,
@@ -27,8 +33,6 @@ import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
 import { EmisorasOrderLines } from "./EmisorasOrderLines";
 import { OrderEstadoField } from "./OrderEstadoField";
-
-type SubmitState = "idle" | "loading" | "success" | "error";
 
 interface TransmissionOrderFormProps {
   emisoras?: EmisoraRow[];
@@ -41,10 +45,14 @@ export function TransmissionOrderForm({
   agencias = [],
   catalogError = null,
 }: TransmissionOrderFormProps) {
-  const router = useRouter();
-  const [submitState, setSubmitState] = useState<SubmitState>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [actionState, formAction, isPending] = useActionState(
+    crearOrdenesTransmisionFromForm,
+    CREAR_ORDENES_FORM_INITIAL_STATE,
+  );
+  const [clientError, setClientError] = useState<string | null>(null);
+  const errorMessage = clientError ?? actionState.error;
   const [agencia, setAgencia] = useState("");
+  const errorRef = useRef<HTMLParagraphElement>(null);
   const {
     spotId,
     setSpotId,
@@ -71,21 +79,15 @@ export function TransmissionOrderForm({
   }, []);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
+    (e: React.FormEvent<HTMLFormElement>) => {
       const form = e.currentTarget;
 
       if (!form.checkValidity()) {
         e.preventDefault();
         form.reportValidity();
-        const nativeError = getFirstInvalidFieldMessage(form);
-        if (nativeError) {
-          setSubmitState("error");
-          setErrorMessage(nativeError);
-        }
+        setClientError(getFirstInvalidFieldMessage(form));
         return;
       }
-
-      e.preventDefault();
 
       const formData = new FormData(form);
       const compartido = applyEstadoSpotRules(
@@ -99,28 +101,14 @@ export function TransmissionOrderForm({
       );
 
       if (validationError) {
-        setSubmitState("error");
-        setErrorMessage(validationError);
+        e.preventDefault();
+        setClientError(validationError);
         return;
       }
 
-      setSubmitState("loading");
-      setErrorMessage(null);
-
-      const result = await crearOrdenesTransmision(compartido, lineas);
-
-      if (result.success) {
-        setSubmitState("success");
-        setTimeout(() => {
-          router.push("/ordenes");
-          router.refresh();
-        }, 1200);
-      } else {
-        setSubmitState("error");
-        setErrorMessage(result.error);
-      }
+      setClientError(null);
     },
-    [router],
+    [],
   );
 
   const handleReset = useCallback(() => {
@@ -130,16 +118,22 @@ export function TransmissionOrderForm({
     form?.reset();
     setAgencia("");
     resetFrom("", "pausada");
-    setSubmitState("idle");
-    setErrorMessage(null);
+    setClientError(null);
   }, [resetFrom]);
+
+  useEffect(() => {
+    if (!errorMessage) return;
+    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [errorMessage]);
 
   return (
     <>
       <form
         className="grid grid-cols-1 md:grid-cols-12 gap-6"
         id="transmission-form"
+        action={formAction}
         onSubmit={handleSubmit}
+        aria-busy={isPending}
       >
         <SectionCard
           title="Identificación de Campaña"
@@ -148,9 +142,11 @@ export function TransmissionOrderForm({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
             {catalogError && (
-              <p className="sm:col-span-2 text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2">
-                {catalogError}
-              </p>
+              <FormStatusMessage
+                message={catalogError}
+                variant="error"
+                className="sm:col-span-2 text-body-sm text-on-surface-variant bg-surface-container-high border border-outline-variant rounded-lg px-3 py-2"
+              />
             )}
 
             <FormField
@@ -187,7 +183,8 @@ export function TransmissionOrderForm({
               type="tel"
               required
               icon="phone"
-              placeholder="58"
+              placeholder={TELEFONO_CLIENTE_PLACEHOLDER}
+              hint={TELEFONO_CLIENTE_HINT}
             />
           </div>
         </SectionCard>
@@ -261,8 +258,9 @@ export function TransmissionOrderForm({
             />
           </div>
           <p className="mt-4 text-body-sm text-on-surface-variant">
-            El certificado PDF se envía al email del cliente cuando termina el
-            periodo (fecha fin) y se ejecuta el Flujo B en n8n.
+            Indica las franjas horarias de transmisión. Al finalizar la fecha de
+            fin del contrato, el certificado PDF se enviará automáticamente al
+            email del cliente.
           </p>
         </SectionCard>
 
@@ -287,30 +285,67 @@ export function TransmissionOrderForm({
         <FormLiveRegions
           className="md:col-span-12"
           error={errorMessage}
-          success={
-            submitState === "success"
-              ? "Órdenes guardadas correctamente."
-              : null
-          }
         />
+        <div className="md:col-span-12 h-28 md:hidden" aria-hidden />
 
-        <div className="md:col-span-12 flex flex-col sm:flex-row items-center justify-end gap-4 mt-4 mb-20">
-          <button
-            type="button"
-            className="w-full sm:w-auto px-8 py-3 text-body-md font-bold text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-all rounded-lg"
-            onClick={handleReset}
-          >
-            Cancelar
-          </button>
-          <SubmitButton state={submitState} />
-        </div>
+        <FormActionsBar
+          isPending={isPending}
+          errorMessage={errorMessage}
+          errorRef={errorRef}
+          onCancel={handleReset}
+        />
       </form>
     </>
   );
 }
 
-function SubmitButton({ state }: { state: SubmitState }) {
-  if (state === "loading") {
+const FORM_ACTIONS_BAR =
+  "md:col-span-12 fixed bottom-0 inset-x-0 z-40 md:static md:z-auto border-t border-outline-variant bg-surface-container-low/95 backdrop-blur-sm px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:mt-4 md:mb-20 md:px-0 md:py-0 md:border-0 md:bg-transparent md:backdrop-blur-none";
+
+function FormActionsBar({
+  isPending,
+  errorMessage,
+  errorRef,
+  onCancel,
+}: {
+  isPending: boolean;
+  errorMessage: string | null;
+  errorRef: RefObject<HTMLParagraphElement | null>;
+  onCancel: () => void;
+}) {
+  return (
+    <div className={FORM_ACTIONS_BAR}>
+      <FormStatusMessage
+        ref={errorRef}
+        message={errorMessage}
+        variant="error"
+        className="text-error text-label-sm mb-3 px-1 w-full max-w-5xl mx-auto md:max-w-none"
+      />
+      {isPending && (
+        <FormStatusMessage
+          message="Guardando órdenes, por favor espera."
+          variant="status"
+          className="sr-only"
+        />
+      )}
+      <PrivacyNotice className="mb-3 px-1 w-full max-w-5xl mx-auto md:max-w-none" />
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 max-w-5xl mx-auto md:max-w-none">
+        <button
+          type="button"
+          className="w-full sm:w-auto px-8 py-3 text-body-md font-medium text-on-surface border border-outline-variant bg-transparent rounded-lg hover:bg-surface-container-high hover:border-outline transition-all disabled:opacity-60"
+          onClick={onCancel}
+          disabled={isPending}
+        >
+          Cancelar
+        </button>
+        <SubmitButton isPending={isPending} />
+      </div>
+    </div>
+  );
+}
+
+function SubmitButton({ isPending }: { isPending: boolean }) {
+  if (isPending) {
     return (
       <button
         type="submit"
@@ -319,19 +354,6 @@ function SubmitButton({ state }: { state: SubmitState }) {
       >
         <MaterialIcon name="sync" className="animate-spin" />
         Procesando...
-      </button>
-    );
-  }
-
-  if (state === "success") {
-    return (
-      <button
-        type="button"
-        disabled
-        className="w-full sm:w-auto px-10 py-3 bg-green-600 text-white text-body-md font-bold rounded-lg flex items-center justify-center gap-2"
-      >
-        <MaterialIcon name="check_circle" />
-        Órdenes creadas
       </button>
     );
   }

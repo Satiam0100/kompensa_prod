@@ -14,6 +14,7 @@ import { FORM_FIELD_CONTROL_PLAIN } from "./form-field-classes";
 import {
   computeFloatingMenuPosition,
   FLOATING_MENU_CLASS,
+  subscribeFloatingOverlayListeners,
 } from "./floating-menu-position";
 import { MaterialIcon } from "./MaterialIcon";
 import { usePortalRoot } from "./portal-root-context";
@@ -111,18 +112,21 @@ export function FormCombobox({
     if (hiddenRef.current) hiddenRef.current.value = value;
   }, [value]);
 
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    setQuery("");
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
     updateMenuPosition();
-    window.addEventListener("resize", updateMenuPosition);
-    window.addEventListener("scroll", updateMenuPosition, true);
-
-    return () => {
-      window.removeEventListener("resize", updateMenuPosition);
-      window.removeEventListener("scroll", updateMenuPosition, true);
-    };
-  }, [open, updateMenuPosition, filteredOptions.length]);
+    return subscribeFloatingOverlayListeners({
+      onReposition: updateMenuPosition,
+      onClose: closeMenu,
+      menuSelector: "[data-form-combobox-menu]",
+    });
+  }, [open, updateMenuPosition, closeMenu, filteredOptions.length]);
 
   useEffect(() => {
     if (!open) return;

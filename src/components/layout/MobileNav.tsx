@@ -42,6 +42,7 @@ export function MobileNav() {
           alt="Kompensa Logo"
           width={32}
           height={32}
+          priority
           className="w-8 h-8 rounded-lg object-cover"
         />
         <span className="text-headline-sm font-extrabold text-primary leading-none">

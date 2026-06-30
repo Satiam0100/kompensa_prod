@@ -73,7 +73,7 @@ export function CampanaCard({ campana }: CampanaCardProps) {
         {resumen ? (
           <span>Actualizado {formatFecha(resumen.fecha)}</span>
         ) : (
-          <span className="text-on-surface-variant/70">Sin ejecución Flujo B</span>
+          <span className="text-on-surface-variant/70">Sin datos de monitoreo</span>
         )}
       </div>
     </Link>

@@ -32,9 +32,9 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h2 className="text-display-lg text-on-surface mb-1">
+            <h1 className="text-display-lg text-on-surface mb-1">
               {campana.cliente}
-            </h2>
+            </h1>
             <p className="text-body-lg text-on-surface-variant">
               {campana.campaña}
             </p>
@@ -79,7 +79,7 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
       </div>
 
       <section className={panelCardClass("p-5 space-y-4")}>
-        <h3 className="text-title-md text-on-surface">Progreso de campaña</h3>
+        <h2 className="text-title-md text-on-surface">Progreso de campaña</h2>
         <ProgresoCampana
           transmitidas={metricas.transmitidas_acumuladas}
           total={metricas.total_contratadas}
@@ -148,10 +148,10 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
       </section>
 
       <section className="space-y-4">
-        <h3 className="text-title-md text-on-surface">Historial de monitoreo</h3>
+        <h2 className="text-title-md text-on-surface">Historial de monitoreo</h2>
         {historial.length === 0 ? (
           <p className="text-body-sm text-on-surface-variant bg-surface-container border border-outline-variant rounded-lg p-6 text-center">
-            Aún no hay registros del Flujo B para esta campaña.
+            Aún no hay registros de monitoreo para esta campaña.
           </p>
         ) : (
           <>

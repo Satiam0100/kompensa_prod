@@ -55,9 +55,9 @@ export function AgenciasList({
             name="business"
             className="text-5xl text-outline-variant mb-4"
           />
-          <h3 className="text-title-md text-on-surface mb-2">
+          <h2 className="text-title-md text-on-surface mb-2">
             No hay agencias registradas
-          </h3>
+          </h2>
           <p className="text-body-sm text-on-surface-variant mb-6 max-w-md mx-auto">
             Aún no hay agencias en el catálogo. Agrega la primera desde el
             formulario.

@@ -18,9 +18,20 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kompensa | AdCertify Pro",
+  title: {
+    default: "Kompensa",
+    template: "%s | Kompensa",
+  },
   description:
-    "Panel de gestión de órdenes de transmisión y certificación publicitaria",
+    "Kompensa — panel de gestión de órdenes de transmisión y certificación publicitaria",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
   manifest: "/site.webmanifest",
   icons: {
     icon: [

@@ -4,7 +4,7 @@ import { CampanaDetalleData } from "@/components/campanas/CampanaDetalleData";
 import { CampanasListSkeleton } from "@/components/campanas/CampanasListSkeleton";
 
 export const metadata = {
-  title: "Detalle de campaña | Kompensa",
+  title: "Detalle de campaña",
 };
 
 interface CampanaDetallePageProps {

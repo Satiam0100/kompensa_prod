@@ -52,9 +52,9 @@ export function OrdenesCatalog({
     <>
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h2 className="text-display-lg text-on-surface mb-2">
+          <h1 className="text-display-lg text-on-surface mb-2">
             Cuñas registradas
-          </h2>
+          </h1>
           <p className="text-body-lg text-on-surface-variant">
             Consulta todas las órdenes de transmisión guardadas en el sistema.
           </p>

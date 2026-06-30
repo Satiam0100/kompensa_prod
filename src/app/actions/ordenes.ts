@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { createSupabaseServerClient, deleteRowsByIds } from "@/lib/supabase/server";
 import type {
   OrdenEmisoraLinea,
@@ -11,7 +12,11 @@ import {
   applyEstadoSpotRules,
   mergeOrdenForm,
   ordenFormToPayload,
+  parseEmisoraLineas,
+  parseOrdenFormDataCompartido,
+  validateOrdenFormMulti,
 } from "@/lib/parse-orden-form";
+import type { CrearOrdenesFormState } from "@/lib/crear-ordenes-form-state";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 const ORDENES_CACHE_TAG = "ordenes-transmision";
@@ -126,6 +131,33 @@ export async function crearOrdenTransmision(
       err instanceof Error ? err.message : "Error desconocido al guardar";
     return { success: false, error: message };
   }
+}
+
+export async function crearOrdenesTransmisionFromForm(
+  _prevState: CrearOrdenesFormState,
+  formData: FormData,
+): Promise<CrearOrdenesFormState> {
+  const compartido = applyEstadoSpotRules(
+    parseOrdenFormDataCompartido(formData),
+  );
+  const lineas = parseEmisoraLineas(formData);
+  const validationError = validateOrdenFormMulti(
+    compartido,
+    lineas,
+    formData,
+  );
+
+  if (validationError) {
+    return { error: validationError };
+  }
+
+  const result = await crearOrdenesTransmision(compartido, lineas);
+
+  if (!result.success) {
+    return { error: result.error };
+  }
+
+  redirect(`/ordenes?created=${result.count}`);
 }
 
 export async function crearOrdenesTransmision(

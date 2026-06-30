@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
+import {
+  appSecurityHeaders,
+  developmentSecurityHeaders,
+} from "./security-headers";
 
-const securityHeaders = [
-  { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-];
+const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -29,7 +28,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: securityHeaders,
+        headers: isDev ? developmentSecurityHeaders : appSecurityHeaders,
       },
     ];
   },
