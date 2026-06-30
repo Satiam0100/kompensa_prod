@@ -9,7 +9,9 @@ import {
   FormField,
   SectionCard,
 } from "@/components/ui/FormField";
+import { FormLiveRegions } from "@/components/ui/FormLiveRegions";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { getFirstInvalidFieldMessage } from "@/lib/form-a11y";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import {
   getAgenciaNames,
@@ -75,6 +77,11 @@ export function TransmissionOrderForm({
       if (!form.checkValidity()) {
         e.preventDefault();
         form.reportValidity();
+        const nativeError = getFirstInvalidFieldMessage(form);
+        if (nativeError) {
+          setSubmitState("error");
+          setErrorMessage(nativeError);
+        }
         return;
       }
 
@@ -277,11 +284,15 @@ export function TransmissionOrderForm({
           onSpotIdChange={setSpotId}
         />
 
-        {errorMessage && (
-          <p className="md:col-span-12 text-error text-body-sm px-2">
-            {errorMessage}
-          </p>
-        )}
+        <FormLiveRegions
+          className="md:col-span-12"
+          error={errorMessage}
+          success={
+            submitState === "success"
+              ? "Órdenes guardadas correctamente."
+              : null
+          }
+        />
 
         <div className="md:col-span-12 flex flex-col sm:flex-row items-center justify-end gap-4 mt-4 mb-20">
           <button
