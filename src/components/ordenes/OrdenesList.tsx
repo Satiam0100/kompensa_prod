@@ -11,7 +11,9 @@ import {
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import type { BulkSelection } from "@/hooks/useBulkSelection";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
-import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
+import type { OrdenTransmisionRow, EstadoOrden } from "@/lib/types/orden-transmision";
+
+type FiltroEstadoOrden = "todos" | EstadoOrden;
 
 interface OrdenesListProps {
   ordenes: OrdenTransmisionRow[];
@@ -35,21 +37,30 @@ export function OrdenesList({
   onCloseModal,
 }: OrdenesListProps) {
   const [query, setQuery] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<FiltroEstadoOrden>("todos");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return ordenes;
 
-    return ordenes.filter(
-      (o) =>
-        o.cliente.toLowerCase().includes(q) ||
-        o.campaña.toLowerCase().includes(q) ||
-        o.emisora.toLowerCase().includes(q) ||
-        (o.ciudad?.toLowerCase().includes(q) ?? false) ||
-        (o.spot_name?.toLowerCase().includes(q) ?? false) ||
-        (o.numero_certificado?.toLowerCase().includes(q) ?? false),
-    );
-  }, [ordenes, query]);
+    let list = ordenes.filter((o) => {
+      if (filtroEstado === "todos") return true;
+      return o.estado === filtroEstado;
+    });
+
+    if (q) {
+      list = list.filter(
+        (o) =>
+          o.cliente.toLowerCase().includes(q) ||
+          o.campaña.toLowerCase().includes(q) ||
+          o.emisora.toLowerCase().includes(q) ||
+          (o.ciudad?.toLowerCase().includes(q) ?? false) ||
+          (o.spot_name?.toLowerCase().includes(q) ?? false) ||
+          (o.numero_certificado?.toLowerCase().includes(q) ?? false),
+      );
+    }
+
+    return list;
+  }, [ordenes, query, filtroEstado]);
 
   if (ordenes.length === 0) {
     return (
@@ -78,7 +89,7 @@ export function OrdenesList({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+      <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
         <div className={`${FORM_FIELD_CONTROL_PLAIN} flex-1 max-w-md`}>
           <MaterialIcon
             name="search"
@@ -92,14 +103,38 @@ export function OrdenesList({
             className={`${FORM_FIELD_INPUT} text-body-sm`}
           />
         </div>
-        <p className="text-label-sm text-on-surface-variant">
-          {filtered.length} de {ordenes.length} registros
-        </p>
+        <div className="flex flex-wrap gap-2">
+          {(
+            [
+              ["todos", "Todas"],
+              ["activa", "Activas"],
+              ["pausada", "Pausadas"],
+              ["finalizada", "Finalizadas"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFiltroEstado(value)}
+              className={`px-3 py-1.5 rounded-full text-label-sm transition-colors ${
+                filtroEstado === value
+                  ? "bg-tertiary text-on-tertiary font-medium"
+                  : "bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
+
+      <p className="text-label-sm text-on-surface-variant">
+        {filtered.length} de {ordenes.length} registros
+      </p>
 
       {filtered.length === 0 ? (
         <p className="p-8 text-center text-body-sm text-on-surface-variant bg-surface-container border border-outline-variant rounded-lg">
-          Ningún resultado para &quot;{query}&quot;
+          Ningún resultado con los filtros actuales
         </p>
       ) : (
         <div className={ORDENES_GRID_CLASS}>
