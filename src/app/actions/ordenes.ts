@@ -17,9 +17,9 @@ import {
   validateOrdenFormMulti,
 } from "@/lib/parse-orden-form";
 import type { CrearOrdenesFormState } from "@/lib/crear-ordenes-form-state";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-
-const ORDENES_CACHE_TAG = "ordenes-transmision";
+import { ORDENES_CACHE_TAG } from "@/lib/cache-tags";
+import { revalidateOrdenesRelatedData } from "@/lib/revalidate-ordenes-data";
+import { unstable_cache } from "next/cache";
 
 async function fetchOrdenesFromSupabase(): Promise<ListarOrdenesResult> {
   const supabase = createSupabaseServerClient();
@@ -122,9 +122,7 @@ export async function crearOrdenTransmision(
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/ordenes/nueva");
-    revalidatePath("/ordenes");
-    revalidateTag(ORDENES_CACHE_TAG, "max");
+    revalidateOrdenesRelatedData(row.id as string);
     return { success: true, id: row.id as string };
   } catch (err) {
     const message =
@@ -187,9 +185,7 @@ export async function crearOrdenesTransmision(
 
     const ids = (data ?? []).map((row) => row.id as string);
 
-    revalidatePath("/ordenes/nueva");
-    revalidatePath("/ordenes");
-    revalidateTag(ORDENES_CACHE_TAG, "max");
+    revalidateOrdenesRelatedData(ids);
     return { success: true, ids, count: ids.length };
   } catch (err) {
     const message =
@@ -215,9 +211,7 @@ export async function actualizarOrdenTransmision(
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/ordenes");
-    revalidatePath(`/ordenes/${id}/editar`);
-    revalidateTag(ORDENES_CACHE_TAG, "max");
+    revalidateOrdenesRelatedData(id);
     return { success: true };
   } catch (err) {
     const message =
@@ -233,8 +227,7 @@ export async function eliminarOrdenesTransmision(
     const result = await deleteRowsByIds("ordenes_transmision", ids);
     if (!result.success) return result;
 
-    revalidatePath("/ordenes");
-    revalidateTag(ORDENES_CACHE_TAG, "max");
+    revalidateOrdenesRelatedData(ids);
     return { success: true, deleted: result.deleted };
   } catch (err) {
     const message =

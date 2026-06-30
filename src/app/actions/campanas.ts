@@ -11,9 +11,8 @@ import type {
   ResumenCampanaRow,
 } from "@/lib/types/campana-estado";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
+import { CAMPANAS_CACHE_TAG } from "@/lib/cache-tags";
 import { unstable_cache } from "next/cache";
-
-const CAMPANAS_CACHE_TAG = "campanas-estado";
 
 function mapLatestResumen(
   rows: ResumenCampanaRow[],
