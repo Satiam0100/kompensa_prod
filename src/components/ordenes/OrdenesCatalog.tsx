@@ -26,10 +26,19 @@ export function OrdenesCatalog({
 }: OrdenesCatalogProps) {
   const router = useRouter();
   const bulk = useBulkSelection();
-  const [editing, setEditing] = useState<OrdenTransmisionRow | null>(null);
+  const [selected, setSelected] = useState<OrdenTransmisionRow | null>(null);
+  const [editMode, setEditMode] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const closeModal = () => setEditing(null);
+  const closeModal = () => {
+    setSelected(null);
+    setEditMode(false);
+  };
+
+  const openOrden = (orden: OrdenTransmisionRow) => {
+    setSelected(orden);
+    setEditMode(false);
+  };
 
   const handleConfirmDelete = useCallback(async () => {
     bulk.setDeleting(true);
@@ -89,9 +98,12 @@ export function OrdenesCatalog({
         emisoras={emisoras}
         agencias={agencias}
         catalogError={catalogError}
-        editing={editing}
-        onEdit={setEditing}
+        selected={selected}
+        editMode={editMode}
+        onSelect={openOrden}
         onCloseModal={closeModal}
+        onStartEdit={() => setEditMode(true)}
+        onCancelEdit={() => setEditMode(false)}
       />
 
       <ConfirmDialog

@@ -1,6 +1,5 @@
 import { listCardClass } from "@/components/ui/card-classes";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
-import { EditRowButton } from "@/components/ui/EditRowButton";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { RowSelectCheckbox } from "@/components/ui/RowSelectCheckbox";
 import type { BulkSelection } from "@/hooks/useBulkSelection";
@@ -12,42 +11,22 @@ export { RESPONSIVE_CARD_GRID_CLASS as ORDENES_GRID_CLASS } from "@/components/u
 interface OrdenCardProps {
   orden: OrdenTransmisionRow;
   bulk: BulkSelection;
-  onEdit: (orden: OrdenTransmisionRow) => void;
+  onSelect: (orden: OrdenTransmisionRow) => void;
 }
 
-export function OrdenCard({ orden, bulk, onEdit }: OrdenCardProps) {
-  const { selecting, selectedIds, toggleSelect } = bulk;
-  const selected = selecting && selectedIds.has(orden.id);
-
+function OrdenCardContent({ orden }: { orden: OrdenTransmisionRow }) {
   return (
-    <article className={listCardClass(selected)}>
+    <>
       <div className="flex justify-between items-start gap-2">
-        <div className="flex items-start gap-3 min-w-0">
-          {selecting && (
-            <RowSelectCheckbox
-              checked={selectedIds.has(orden.id)}
-              onChange={() => toggleSelect(orden.id)}
-              label={`Seleccionar ${orden.cliente}`}
-            />
-          )}
-          <div className="min-w-0">
-            <p className="text-body-md font-medium text-on-surface truncate">
-              {orden.cliente}
-            </p>
-            <p className="text-body-sm text-on-surface-variant truncate">
-              {orden.campaña}
-            </p>
-          </div>
+        <div className="min-w-0">
+          <p className="text-body-md font-medium text-on-surface truncate">
+            {orden.cliente}
+          </p>
+          <p className="text-body-sm text-on-surface-variant truncate">
+            {orden.campaña}
+          </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <EstadoBadge estado={orden.estado} />
-          {!selecting && (
-            <EditRowButton
-              onClick={() => onEdit(orden)}
-              label={`Editar ${orden.cliente}`}
-            />
-          )}
-        </div>
+        <EstadoBadge estado={orden.estado} />
       </div>
 
       <div className="space-y-1 text-label-sm text-on-surface-variant">
@@ -75,6 +54,38 @@ export function OrdenCard({ orden, bulk, onEdit }: OrdenCardProps) {
       <p className="text-label-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">
         Registro: {formatFecha(orden.created_at)}
       </p>
-    </article>
+    </>
+  );
+}
+
+export function OrdenCard({ orden, bulk, onSelect }: OrdenCardProps) {
+  const { selecting, selectedIds, toggleSelect } = bulk;
+  const selected = selecting && selectedIds.has(orden.id);
+
+  if (selecting) {
+    return (
+      <article className={listCardClass(selected)}>
+        <div className="flex items-start gap-3">
+          <RowSelectCheckbox
+            checked={selectedIds.has(orden.id)}
+            onChange={() => toggleSelect(orden.id)}
+            label={`Seleccionar ${orden.cliente}`}
+          />
+          <div className="min-w-0 flex-1">
+            <OrdenCardContent orden={orden} />
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(orden)}
+      className={`w-full text-left block ${listCardClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary`}
+    >
+      <OrdenCardContent orden={orden} />
+    </button>
   );
 }

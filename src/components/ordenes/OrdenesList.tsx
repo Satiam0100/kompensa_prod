@@ -21,9 +21,12 @@ interface OrdenesListProps {
   emisoras: EmisoraRow[];
   agencias: AgenciaRow[];
   catalogError?: string | null;
-  editing: OrdenTransmisionRow | null;
-  onEdit: (orden: OrdenTransmisionRow) => void;
+  selected: OrdenTransmisionRow | null;
+  editMode: boolean;
+  onSelect: (orden: OrdenTransmisionRow) => void;
   onCloseModal: () => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
 }
 
 export function OrdenesList({
@@ -32,9 +35,12 @@ export function OrdenesList({
   emisoras,
   agencias,
   catalogError = null,
-  editing,
-  onEdit,
+  selected,
+  editMode,
+  onSelect,
   onCloseModal,
+  onStartEdit,
+  onCancelEdit,
 }: OrdenesListProps) {
   const [query, setQuery] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstadoOrden>("todos");
@@ -139,17 +145,25 @@ export function OrdenesList({
       ) : (
         <div className={ORDENES_GRID_CLASS}>
           {filtered.map((orden) => (
-            <OrdenCard key={orden.id} orden={orden} bulk={bulk} onEdit={onEdit} />
+            <OrdenCard
+              key={orden.id}
+              orden={orden}
+              bulk={bulk}
+              onSelect={onSelect}
+            />
           ))}
         </div>
       )}
 
       <EditOrdenModal
-        orden={editing}
+        orden={selected}
+        editMode={editMode}
         emisoras={emisoras}
         agencias={agencias}
         catalogError={catalogError}
         onClose={onCloseModal}
+        onStartEdit={onStartEdit}
+        onCancelEdit={onCancelEdit}
       />
     </div>
   );
