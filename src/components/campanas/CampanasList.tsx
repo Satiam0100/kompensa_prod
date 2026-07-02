@@ -5,6 +5,7 @@ import {
   CAMPANAS_GRID_CLASS,
   CampanaCard,
 } from "@/components/campanas/CampanaCard";
+import { CampanaDetalleModal } from "@/components/campanas/CampanaDetalleModal";
 import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
@@ -28,6 +29,9 @@ interface CampanasListProps {
 export function CampanasList({ campanas }: CampanasListProps) {
   const [query, setQuery] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>("todos");
+  const [selectedCampanaId, setSelectedCampanaId] = useState<string | null>(
+    null,
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -132,10 +136,19 @@ export function CampanasList({ campanas }: CampanasListProps) {
       ) : (
         <div className={CAMPANAS_GRID_CLASS}>
           {filtered.map((campana) => (
-            <CampanaCard key={campana.id} campana={campana} />
+            <CampanaCard
+              key={campana.id}
+              campana={campana}
+              onSelect={(item) => setSelectedCampanaId(item.id)}
+            />
           ))}
         </div>
       )}
+
+      <CampanaDetalleModal
+        campanaId={selectedCampanaId}
+        onClose={() => setSelectedCampanaId(null)}
+      />
     </div>
   );
 }
