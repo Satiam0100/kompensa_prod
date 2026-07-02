@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { actualizarEmisora, crearEmisora } from "@/app/actions/catalogos";
+import { EmisoraDetalleView } from "@/components/catalogos/EmisoraDetalleView";
 import { EditModal } from "@/components/ui/EditModal";
 import {
   FormCheckbox,
@@ -18,7 +19,10 @@ import type { EmisoraRow } from "@/lib/types/catalogo";
 interface EditEmisoraModalProps {
   emisora: EmisoraRow | null;
   creating?: boolean;
+  editMode?: boolean;
   onClose: () => void;
+  onStartEdit?: () => void;
+  onCancelEdit?: () => void;
 }
 
 function readEmisoraForm(formData: FormData) {
@@ -40,7 +44,10 @@ function readEmisoraForm(formData: FormData) {
 export function EditEmisoraModal({
   emisora,
   creating = false,
+  editMode = false,
   onClose,
+  onStartEdit,
+  onCancelEdit,
 }: EditEmisoraModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -84,13 +91,45 @@ export function EditEmisoraModal({
     [creating, emisora, onClose, router],
   );
 
+  const showDetail = open && emisora && !creating && !editMode;
+  const showForm = creating || (Boolean(emisora) && editMode);
+
+  const title = creating
+    ? "Nueva emisora"
+    : editMode
+      ? "Editar emisora"
+      : emisora?.nombre ?? "Detalle de emisora";
+
   return (
     <EditModal
       open={open}
-      title={creating ? "Nueva emisora" : "Editar emisora"}
+      title={title}
+      maxWidth={showDetail ? "4xl" : "lg"}
       onClose={onClose}
     >
-      {open && (
+      {showDetail && emisora && (
+        <>
+          <EmisoraDetalleView emisora={emisora} />
+          <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-outline-variant/40">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={onStartEdit}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-tertiary text-on-tertiary text-body-sm font-bold rounded-lg hover:brightness-110"
+            >
+              <MaterialIcon name="edit" className="text-sm" />
+              Editar
+            </button>
+          </div>
+        </>
+      )}
+      {showForm && (
         <form
           key={creating ? "create" : emisora!.id}
           onSubmit={handleSubmit}
@@ -171,7 +210,7 @@ export function EditEmisoraModal({
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={creating ? onClose : (onCancelEdit ?? onClose)}
               className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
             >
               Cancelar

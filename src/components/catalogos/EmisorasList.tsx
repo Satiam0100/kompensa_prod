@@ -15,21 +15,27 @@ import type { EmisoraRow } from "@/lib/types/catalogo";
 interface EmisorasListProps {
   emisoras: EmisoraRow[];
   creating: boolean;
-  editing: EmisoraRow | null;
+  selected: EmisoraRow | null;
+  editMode: boolean;
   bulk: BulkSelection;
   onCreate: () => void;
-  onEdit: (emisora: EmisoraRow) => void;
+  onSelect: (emisora: EmisoraRow) => void;
   onCloseModal: () => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
 }
 
 export function EmisorasList({
   emisoras,
   creating,
-  editing,
+  selected,
+  editMode,
   bulk,
   onCreate,
-  onEdit,
+  onSelect,
   onCloseModal,
+  onStartEdit,
+  onCancelEdit,
 }: EmisorasListProps) {
   const [query, setQuery] = useState("");
 
@@ -74,8 +80,11 @@ export function EmisorasList({
         </div>
         <EditEmisoraModal
           creating={creating}
-          emisora={editing}
+          emisora={selected}
+          editMode={editMode}
           onClose={onCloseModal}
+          onStartEdit={onStartEdit}
+          onCancelEdit={onCancelEdit}
         />
       </>
     );
@@ -113,7 +122,7 @@ export function EmisorasList({
               key={emisora.id}
               emisora={emisora}
               bulk={bulk}
-              onEdit={onEdit}
+              onSelect={onSelect}
             />
           ))}
         </div>
@@ -121,8 +130,11 @@ export function EmisorasList({
 
       <EditEmisoraModal
         creating={creating}
-        emisora={editing}
+        emisora={selected}
+        editMode={editMode}
         onClose={onCloseModal}
+        onStartEdit={onStartEdit}
+        onCancelEdit={onCancelEdit}
       />
     </div>
   );
