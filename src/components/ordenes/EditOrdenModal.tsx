@@ -12,6 +12,7 @@ import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { FormDateField } from "@/components/ui/FormDateField";
 import { normalizeDateInputValue } from "@/components/ui/date-picker-utils";
 import { FormField } from "@/components/ui/FormField";
+import { FormPhoneField } from "@/components/ui/FormPhoneField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import { useOrderChannelId } from "@/hooks/useOrderChannelId";
@@ -21,10 +22,10 @@ import {
   validateOrdenForm,
 } from "@/lib/parse-orden-form";
 import {
-  formatTelefonoForDisplay,
   TELEFONO_CLIENTE_HINT,
   TELEFONO_CLIENTE_PLACEHOLDER,
 } from "@/lib/normalize-telefono";
+import { sanitizePhoneInput } from "@/lib/validate-phone";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import type { OrdenTransmisionRow } from "@/lib/types/orden-transmision";
 
@@ -198,14 +199,11 @@ export function EditOrdenModal({
                 required
                 defaultValue={orden.email_cliente}
               />
-              <FormField
-                label="Teléfono Cliente (WhatsApp)"
+              <FormPhoneField
+                label="Teléfono Cliente"
                 name="telefono_cliente"
-                type="tel"
                 required
-                defaultValue={formatTelefonoForDisplay(
-                  orden.telefono_cliente ?? "",
-                )}
+                defaultValue={sanitizePhoneInput(orden.telefono_cliente ?? "")}
                 placeholder={TELEFONO_CLIENTE_PLACEHOLDER}
                 hint={TELEFONO_CLIENTE_HINT}
               />

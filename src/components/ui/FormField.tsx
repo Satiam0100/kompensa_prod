@@ -10,7 +10,7 @@ import {
 } from "./form-field-classes";
 import { MaterialIcon } from "./MaterialIcon";
 
-interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   required?: boolean;
   icon?: string;

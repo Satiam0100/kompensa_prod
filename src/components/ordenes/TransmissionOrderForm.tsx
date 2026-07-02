@@ -10,6 +10,7 @@ import {
   FormField,
   SectionCard,
 } from "@/components/ui/FormField";
+import { FormPhoneField } from "@/components/ui/FormPhoneField";
 import { FormLiveRegions } from "@/components/ui/FormLiveRegions";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { FormStatusMessage } from "@/components/ui/FormStatusMessage";
@@ -208,10 +209,9 @@ export function TransmissionOrderForm({
               required
               placeholder="email@dominio.com"
             />
-            <FormField
-              label="Teléfono Cliente (WhatsApp)"
+            <FormPhoneField
+              label="Teléfono Cliente"
               name="telefono_cliente"
-              type="tel"
               required
               icon="phone"
               placeholder={TELEFONO_CLIENTE_PLACEHOLDER}

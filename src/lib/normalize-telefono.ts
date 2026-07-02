@@ -1,7 +1,7 @@
 export const TELEFONO_CLIENTE_PLACEHOLDER = "0414 123 4567";
 
 export const TELEFONO_CLIENTE_HINT =
-  "Móvil venezolano para WhatsApp. Acepta 0414…, 414… o +58 414…";
+  "Móvil venezolano. Acepta 0414…, 414… o +58 414…";
 
 /** Normaliza teléfono a E.164 sin '+' (ej. 584141234567) para WhatsApp. */
 export function normalizeTelefonoCliente(raw: string): string {

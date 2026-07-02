@@ -13,6 +13,7 @@ import {
   normalizeTelefonoCliente,
   validateTelefonoCliente,
 } from "@/lib/normalize-telefono";
+import { validateEmail } from "@/lib/validate-email";
 import { parseTramosCuotas, resolveTramosCuotas, validarHuecosCoberturaTramos, validarTramosDentroPeriodo } from "@/lib/meta-campana";
 import type { TramoCuota } from "@/lib/types/tramo-cuota";
 
@@ -269,6 +270,9 @@ function validateOrdenFormCompartido(
 
   const telefonoError = validateTelefonoCliente(data.telefono_cliente);
   if (telefonoError) return telefonoError;
+
+  const emailError = validateEmail(data.email_cliente);
+  if (emailError) return emailError;
 
   return null;
 }

@@ -9,7 +9,10 @@ import {
   FormField,
   FormTextarea,
 } from "@/components/ui/FormField";
+import { FormPhoneField } from "@/components/ui/FormPhoneField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { validateOptionalEmail } from "@/lib/validate-email";
+import { sanitizePhoneInput, validateOptionalPhone } from "@/lib/validate-phone";
 import type { EmisoraRow } from "@/lib/types/catalogo";
 
 interface EditEmisoraModalProps {
@@ -49,10 +52,22 @@ export function EditEmisoraModal({
       e.preventDefault();
       if (!creating && !emisora) return;
 
-      setLoading(true);
       setError(null);
 
       const data = readEmisoraForm(new FormData(e.currentTarget));
+      const emailError = validateOptionalEmail(data.email ?? "");
+      if (emailError) {
+        setError(emailError);
+        return;
+      }
+      const phoneError = validateOptionalPhone(data.whatsapp ?? "");
+      if (phoneError) {
+        setError(phoneError);
+        return;
+      }
+
+      setLoading(true);
+
       const result = creating
         ? await crearEmisora(data)
         : await actualizarEmisora(emisora!.id, data);
@@ -85,17 +100,20 @@ export function EditEmisoraModal({
             label="Nombre"
             name="nombre"
             required
+            placeholder="Ej. Radio Nacional"
             defaultValue={creating ? "" : emisora!.nombre}
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Ciudad"
               name="ciudad"
+              placeholder="Ej. Caracas"
               defaultValue={creating ? "" : (emisora!.ciudad ?? "")}
             />
             <FormField
               label="Channel ID"
               name="channel_id"
+              placeholder="Ej. CH-001"
               defaultValue={creating ? "" : (emisora!.channel_id ?? "")}
               className="font-label-mono"
             />
@@ -104,34 +122,42 @@ export function EditEmisoraModal({
             <FormField
               label="Circuito"
               name="circuito"
+              placeholder="Ej. Circuito Centro"
               defaultValue={creating ? "" : (emisora!.circuito ?? "")}
             />
             <FormField
               label="Tipo"
               name="tipo"
+              placeholder="Ej. AM / FM"
               defaultValue={creating ? "" : (emisora!.tipo ?? "")}
             />
           </div>
           <FormField
             label="Contacto"
             name="contacto"
+            placeholder="Nombre del contacto"
             defaultValue={creating ? "" : (emisora!.contacto ?? "")}
           />
           <FormField
             label="Email"
             name="email"
             type="email"
+            placeholder="emisora@dominio.com"
             defaultValue={creating ? "" : (emisora!.email ?? "")}
           />
-          <FormField
-            label="WhatsApp"
+          <FormPhoneField
+            label="Teléfono"
             name="whatsapp"
-            defaultValue={creating ? "" : (emisora!.whatsapp ?? "")}
+            placeholder="04141234567"
+            defaultValue={
+              creating ? "" : sanitizePhoneInput(emisora!.whatsapp ?? "")
+            }
             className="font-label-mono"
           />
           <FormTextarea
             label="Notas"
             name="notas"
+            placeholder="Observaciones internas…"
             defaultValue={creating ? "" : (emisora!.notas ?? "")}
           />
           <FormCheckbox
