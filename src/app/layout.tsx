@@ -1,21 +1,8 @@
 import type { Metadata } from "next";
-import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import { MuiProvider } from "@/components/providers/MuiProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { themeInitScript } from "@/lib/theme/apply";
 import "./globals.css";
-
-const hankenGrotesk = Hanken_Grotesk({
-  variable: "--font-hanken",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["500"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -51,7 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${hankenGrotesk.variable} ${jetbrainsMono.variable} h-full`}
+      className="h-full"
       suppressHydrationWarning
     >
       <head>
