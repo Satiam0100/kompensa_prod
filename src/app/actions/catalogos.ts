@@ -7,6 +7,8 @@ import type {
   EmisoraForm,
   EmisoraRow,
 } from "@/lib/types/catalogo";
+import { validateOptionalEmail } from "@/lib/validate-email";
+import { sanitizePhoneInput, validateOptionalPhone } from "@/lib/validate-phone";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 const AGENCIAS_CACHE_TAG = "catalogo-agencias";
@@ -36,7 +38,7 @@ function agenciaToPayload(data: AgenciaForm) {
   return {
     nombre: data.nombre.trim(),
     email: data.email?.trim() || null,
-    telefono: data.telefono?.trim() || null,
+    telefono: data.telefono ? sanitizePhoneInput(data.telefono) || null : null,
     direccion: data.direccion?.trim() || null,
     clientes: data.clientes?.trim() || null,
     activa: data.activa,
@@ -51,12 +53,34 @@ function emisoraToPayload(data: EmisoraForm) {
     channel_id: data.channel_id?.trim() || null,
     contacto: data.contacto?.trim() || null,
     email: data.email?.trim() || null,
-    whatsapp: data.whatsapp?.trim() || null,
+    whatsapp: data.whatsapp ? sanitizePhoneInput(data.whatsapp) || null : null,
     circuito: data.circuito?.trim() || null,
     tipo: data.tipo?.trim() || null,
     activa: data.activa,
     notas: data.notas?.trim() || null,
   };
+}
+
+function validateAgenciaForm(data: AgenciaForm): string | null {
+  if (!data.nombre.trim()) {
+    return "El nombre es obligatorio.";
+  }
+  const emailError = validateOptionalEmail(data.email ?? "");
+  if (emailError) return emailError;
+  const phoneError = validateOptionalPhone(data.telefono ?? "");
+  if (phoneError) return phoneError;
+  return null;
+}
+
+function validateEmisoraForm(data: EmisoraForm): string | null {
+  if (!data.nombre.trim()) {
+    return "El nombre es obligatorio.";
+  }
+  const emailError = validateOptionalEmail(data.email ?? "");
+  if (emailError) return emailError;
+  const phoneError = validateOptionalPhone(data.whatsapp ?? "");
+  if (phoneError) return phoneError;
+  return null;
 }
 
 async function fetchAgenciasFromSupabase(): Promise<ListarAgenciasResult> {
@@ -124,8 +148,9 @@ export async function listarEmisoras(): Promise<ListarEmisorasResult> {
 export async function crearAgencia(
   data: AgenciaForm,
 ): Promise<CrearCatalogoResult> {
-  if (!data.nombre.trim()) {
-    return { success: false, error: "El nombre es obligatorio." };
+  const validationError = validateAgenciaForm(data);
+  if (validationError) {
+    return { success: false, error: validationError };
   }
 
   try {
@@ -153,8 +178,9 @@ export async function crearAgencia(
 export async function crearEmisora(
   data: EmisoraForm,
 ): Promise<CrearCatalogoResult> {
-  if (!data.nombre.trim()) {
-    return { success: false, error: "El nombre es obligatorio." };
+  const validationError = validateEmisoraForm(data);
+  if (validationError) {
+    return { success: false, error: validationError };
   }
 
   try {
@@ -183,8 +209,9 @@ export async function actualizarAgencia(
   id: string,
   data: AgenciaForm,
 ): Promise<ActualizarCatalogoResult> {
-  if (!data.nombre.trim()) {
-    return { success: false, error: "El nombre es obligatorio." };
+  const validationError = validateAgenciaForm(data);
+  if (validationError) {
+    return { success: false, error: validationError };
   }
 
   try {
@@ -212,8 +239,9 @@ export async function actualizarEmisora(
   id: string,
   data: EmisoraForm,
 ): Promise<ActualizarCatalogoResult> {
-  if (!data.nombre.trim()) {
-    return { success: false, error: "El nombre es obligatorio." };
+  const validationError = validateEmisoraForm(data);
+  if (validationError) {
+    return { success: false, error: validationError };
   }
 
   try {

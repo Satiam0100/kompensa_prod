@@ -2,7 +2,6 @@ import Image from "next/image";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { AppFooter } from "@/components/layout/AppFooter";
 import { ThemeSettingsButton } from "@/components/theme/ThemeSettingsButton";
-import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { isAuthConfigured } from "@/lib/auth/config";
 
 export const metadata = {
@@ -18,31 +17,17 @@ export default function LoginPage() {
       <div className="flex-grow flex items-center justify-center">
         <div className="w-full max-w-md">
           <div className="bg-surface-container border border-outline-variant rounded-lg p-8 shadow-2xl">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex justify-center mb-8">
             <Image
               src="/kompensa-logo.jpeg"
               alt="Kompensa"
-              width={48}
-              height={48}
+              width={64}
+              height={64}
               priority
-              className="w-12 h-12 rounded-lg object-cover"
+              className="w-16 h-16 rounded-lg object-cover"
             />
-            <div>
-              <span className="text-headline-sm font-extrabold text-primary leading-none">
-                Kompensa
-              </span>
-              <p className="text-label-sm text-on-surface-variant">
-                Panel de transmisiones
-              </p>
-            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-tertiary mb-2">
-            <MaterialIcon name="lock" className="text-sm" />
-            <span className="text-label-mono uppercase tracking-[0.2em]">
-              Acceso restringido
-            </span>
-          </div>
           <h1 className="text-title-md text-on-surface mb-6">
             Iniciar sesión
           </h1>

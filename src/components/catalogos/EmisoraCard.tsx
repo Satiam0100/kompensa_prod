@@ -69,9 +69,7 @@ export function EmisoraCard({ emisora, bulk, onEdit }: EmisoraCardProps) {
         <div className="space-y-0.5 text-label-sm text-on-surface-variant pt-1 border-t border-outline-variant/40">
           {emisora.contacto && <p>{emisora.contacto}</p>}
           {emisora.email && <p>{emisora.email}</p>}
-          {emisora.whatsapp && (
-            <p className="font-label-mono">WA: {emisora.whatsapp}</p>
-          )}
+          {emisora.whatsapp && <p className="font-label-mono">{emisora.whatsapp}</p>}
         </div>
       )}
     </article>

@@ -51,6 +51,15 @@ export function SidebarContent({
 
       <ThemeSettingsButton />
       <LogoutButton />
+
+      <p className="px-2 pt-1 text-label-sm text-on-surface-variant">
+        <Link
+          href="/privacidad"
+          className="text-primary underline underline-offset-2 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          Política de Privacidad
+        </Link>
+      </p>
     </>
   );
 }

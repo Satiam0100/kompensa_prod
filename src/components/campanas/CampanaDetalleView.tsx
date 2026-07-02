@@ -10,9 +10,13 @@ import type { CampanaDetalle } from "@/lib/types/campana-estado";
 
 interface CampanaDetalleViewProps {
   campana: CampanaDetalle;
+  embedded?: boolean;
 }
 
-export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
+export function CampanaDetalleView({
+  campana,
+  embedded = false,
+}: CampanaDetalleViewProps) {
   const { metricas, historial } = campana;
   const maxBar = Math.max(
     metricas.total_contratadas,
@@ -21,24 +25,32 @@ export function CampanaDetalleView({ campana }: CampanaDetalleViewProps) {
   );
 
   return (
-    <div className="space-y-8">
+    <div className={embedded ? "space-y-6" : "space-y-8"}>
       <div>
-        <Link
-          href="/campanas"
-          className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant hover:text-tertiary transition-colors mb-4"
+        {!embedded && (
+          <Link
+            href="/campanas"
+            className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant hover:text-tertiary transition-colors mb-4"
+          >
+            <MaterialIcon name="arrow_back" className="text-sm" />
+            Volver al monitoreo
+          </Link>
+        )}
+        <div
+          className={`flex flex-col sm:flex-row sm:items-start gap-4 ${
+            embedded ? "sm:justify-start" : "sm:justify-between"
+          }`}
         >
-          <MaterialIcon name="arrow_back" className="text-sm" />
-          Volver al monitoreo
-        </Link>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-display-lg text-on-surface mb-1">
-              {campana.cliente}
-            </h1>
-            <p className="text-body-lg text-on-surface-variant">
-              {campana.campaña}
-            </p>
-          </div>
+          {!embedded && (
+            <div>
+              <h1 className="text-display-lg text-on-surface mb-1">
+                {campana.cliente}
+              </h1>
+              <p className="text-body-lg text-on-surface-variant">
+                {campana.campaña}
+              </p>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             <CumplimientoBadge
               estado={campana.estado_cumplimiento}

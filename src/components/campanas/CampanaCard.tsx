@@ -1,5 +1,4 @@
 import { listCardClass } from "@/components/ui/card-classes";
-import Link from "next/link";
 import { CumplimientoBadge } from "@/components/campanas/CumplimientoBadge";
 import { ProgresoCampana } from "@/components/campanas/ProgresoCampana";
 import { EstadoBadge } from "@/components/ordenes/EstadoBadge";
@@ -12,15 +11,17 @@ export { RESPONSIVE_CARD_GRID_CLASS as CAMPANAS_GRID_CLASS };
 
 interface CampanaCardProps {
   campana: CampanaConEstado;
+  onSelect: (campana: CampanaConEstado) => void;
 }
 
-export function CampanaCard({ campana }: CampanaCardProps) {
+export function CampanaCard({ campana, onSelect }: CampanaCardProps) {
   const { metricas, resumen } = campana;
 
   return (
-    <Link
-      href={`/campanas/${campana.id}`}
-      className={`block ${listCardClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary`}
+    <button
+      type="button"
+      onClick={() => onSelect(campana)}
+      className={`w-full text-left block ${listCardClass()} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary`}
     >
       <div className="flex justify-between items-start gap-2">
         <div className="min-w-0">
@@ -76,6 +77,6 @@ export function CampanaCard({ campana }: CampanaCardProps) {
           <span className="text-on-surface-variant/70">Sin datos de monitoreo</span>
         )}
       </div>
-    </Link>
+    </button>
   );
 }

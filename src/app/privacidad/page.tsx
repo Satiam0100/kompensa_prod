@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { AppFooter } from "@/components/layout/AppFooter";
 import { PrivacyPolicyContent } from "@/components/legal/PrivacyPolicyContent";
 
 export const metadata = {
@@ -39,8 +38,6 @@ export default function PrivacidadPage() {
 
         <PrivacyPolicyContent />
       </div>
-
-      <AppFooter />
     </div>
   );
 }

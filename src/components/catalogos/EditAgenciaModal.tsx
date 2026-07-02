@@ -9,7 +9,11 @@ import {
   FormField,
   FormTextarea,
 } from "@/components/ui/FormField";
+import { FormPhoneField } from "@/components/ui/FormPhoneField";
+import { FormTagInput } from "@/components/ui/FormTagInput";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
+import { validateOptionalEmail } from "@/lib/validate-email";
+import { sanitizePhoneInput, validateOptionalPhone } from "@/lib/validate-phone";
 import type { AgenciaRow } from "@/lib/types/catalogo";
 
 interface EditAgenciaModalProps {
@@ -46,10 +50,22 @@ export function EditAgenciaModal({
       e.preventDefault();
       if (!creating && !agencia) return;
 
-      setLoading(true);
       setError(null);
 
       const data = readAgenciaForm(new FormData(e.currentTarget));
+      const emailError = validateOptionalEmail(data.email ?? "");
+      if (emailError) {
+        setError(emailError);
+        return;
+      }
+      const phoneError = validateOptionalPhone(data.telefono ?? "");
+      if (phoneError) {
+        setError(phoneError);
+        return;
+      }
+
+      setLoading(true);
+
       const result = creating
         ? await crearAgencia(data)
         : await actualizarAgencia(agencia!.id, data);
@@ -82,32 +98,40 @@ export function EditAgenciaModal({
             label="Nombre"
             name="nombre"
             required
+            placeholder="Ej. Agencia Creativa"
             defaultValue={creating ? "" : agencia!.nombre}
           />
           <FormField
             label="Dirección"
             name="direccion"
+            placeholder="Ej. Av. Principal, Caracas"
             defaultValue={creating ? "" : (agencia!.direccion ?? "")}
           />
-          <FormField
+          <FormTagInput
             label="Clientes"
             name="clientes"
+            placeholder="Nombre del cliente"
             defaultValue={creating ? "" : (agencia!.clientes ?? "")}
           />
           <FormField
             label="Email"
             name="email"
             type="email"
+            placeholder="agencia@dominio.com"
             defaultValue={creating ? "" : (agencia!.email ?? "")}
           />
-          <FormField
+          <FormPhoneField
             label="Teléfono"
             name="telefono"
-            defaultValue={creating ? "" : (agencia!.telefono ?? "")}
+            placeholder="04141234567"
+            defaultValue={
+              creating ? "" : sanitizePhoneInput(agencia!.telefono ?? "")
+            }
           />
           <FormTextarea
             label="Notas"
             name="notas"
+            placeholder="Observaciones internas…"
             defaultValue={creating ? "" : (agencia!.notas ?? "")}
           />
           <FormCheckbox
