@@ -4,6 +4,7 @@ import { useActionState, useCallback, useEffect, useMemo, useRef, useState, type
 import { crearOrdenesTransmisionFromForm } from "@/app/actions/ordenes";
 import { CREAR_ORDENES_FORM_INITIAL_STATE } from "@/lib/crear-ordenes-form-state";
 import { FormDateField } from "@/components/ui/FormDateField";
+import { normalizeDateInputValue } from "@/components/ui/date-picker-utils";
 import { FormCombobox } from "@/components/ui/FormCombobox";
 import {
   FormField,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/parse-orden-form";
 import type { AgenciaRow, EmisoraRow } from "@/lib/types/catalogo";
 import { AdvancedParamsSection } from "./AdvancedParamsSection";
+import { ContractTramosSection } from "./ContractTramosSection";
 import { EmisorasOrderLines } from "./EmisorasOrderLines";
 import { OrderEstadoField } from "./OrderEstadoField";
 
@@ -52,6 +54,10 @@ export function TransmissionOrderForm({
   const [clientError, setClientError] = useState<string | null>(null);
   const errorMessage = clientError ?? actionState.error;
   const [agencia, setAgencia] = useState("");
+  const [periodoInicio, setPeriodoInicio] = useState("");
+  const [periodoFin, setPeriodoFin] = useState("");
+  const [cuniasDiarias, setCuniasDiarias] = useState(1);
+  const [totalContratadas, setTotalContratadas] = useState(0);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const {
     spotId,
@@ -76,6 +82,30 @@ export function TransmissionOrderForm({
 
     form.addEventListener("reset", handleReset);
     return () => form.removeEventListener("reset", handleReset);
+  }, []);
+
+  const handleFormChange = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    const pi = normalizeDateInputValue(
+      (form.elements.namedItem("periodo_inicio") as HTMLInputElement | null)
+        ?.value ?? "",
+    );
+    const pf = normalizeDateInputValue(
+      (form.elements.namedItem("periodo_fin") as HTMLInputElement | null)
+        ?.value ?? "",
+    );
+    const cd = Number(
+      (form.elements.namedItem("cunias_diarias") as HTMLInputElement | null)
+        ?.value || 0,
+    );
+    const tc = Number(
+      (form.elements.namedItem("total_contratadas") as HTMLInputElement | null)
+        ?.value || 0,
+    );
+    setPeriodoInicio(pi);
+    setPeriodoFin(pf);
+    if (Number.isFinite(cd) && cd > 0) setCuniasDiarias(cd);
+    if (Number.isFinite(tc) && tc > 0) setTotalContratadas(tc);
   }, []);
 
   const handleSubmit = useCallback(
@@ -132,6 +162,7 @@ export function TransmissionOrderForm({
         className="grid grid-cols-1 md:grid-cols-12 gap-6"
         id="transmission-form"
         action={formAction}
+        onChange={handleFormChange}
         onSubmit={handleSubmit}
         aria-busy={isPending}
       >
@@ -221,7 +252,7 @@ export function TransmissionOrderForm({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <FormField
-              label="Cuñas Diarias"
+              label="Cuñas por día (referencia)"
               name="cunias_diarias"
               type="number"
               required
@@ -242,11 +273,13 @@ export function TransmissionOrderForm({
               label="Periodo Inicio"
               name="periodo_inicio"
               required
+              onISOChange={setPeriodoInicio}
             />
             <FormDateField
               label="Periodo Fin"
               name="periodo_fin"
               required
+              onISOChange={setPeriodoFin}
             />
           </div>
           <div className="mt-6">
@@ -262,6 +295,12 @@ export function TransmissionOrderForm({
             fin del contrato, el certificado PDF se enviará automáticamente al
             email del cliente.
           </p>
+          <ContractTramosSection
+            periodoInicio={periodoInicio}
+            periodoFin={periodoFin}
+            cuniasDiarias={cuniasDiarias}
+            totalContratadas={totalContratadas}
+          />
         </SectionCard>
 
         <SectionCard

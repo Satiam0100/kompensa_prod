@@ -1,5 +1,6 @@
 // Flujo B — REEMPLAZAR TODO el código del nodo (no pegar encima del anterior).
 // Métricas acumuladas: periodo_inicio → fin de evaluación (ver abajo).
+// Incluir al inicio el contenido de scripts/meta-campana.js (misma lógica que Flujo C).
 const data = $input.first().json;
 const detecciones = data.detecciones_filtradas || [];
 const orden = data.orden;
@@ -84,12 +85,11 @@ const transmitidasAcum = Object.values(porDia).reduce((a, b) => a + b, 0);
 
 const milisPorDia = 24 * 60 * 60 * 1000;
 const diasTranscurridos = Math.max(0, Math.floor((fin - inicio) / milisPorDia) + 1);
-const cuniasDiarias = Number(orden.cuñas_diarias || 0);
 const totalContratadasOrden = Number(orden.total_contratadas || 0);
 
 const totalContratadasPeriodo = cierre
   ? totalContratadasOrden
-  : Math.min(cuniasDiarias * diasTranscurridos, totalContratadasOrden);
+  : metaAcumuladaHasta(orden, periodoFinEvaluacion);
 
 const faltantes = Math.max(0, totalContratadasPeriodo - transmitidasAcum);
 const excedentes = Math.max(0, transmitidasAcum - totalContratadasPeriodo);

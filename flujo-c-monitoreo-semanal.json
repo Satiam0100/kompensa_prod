@@ -1,0 +1,980 @@
+{
+  "name": "Kompensa - Flujo C: Monitoreo Semanal",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3ee04f79-5cae-4d2f-b25a-2170606331a1",
+      "name": "Manual Trigger - Ejecutar Flujo C",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        12800,
+        15200
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8,
+              "minute": 0,
+              "weekday": 1
+            }
+          ]
+        }
+      },
+      "id": "23537495-a153-43d5-a87b-db734be3290c",
+      "name": "Cron Trigger - Lunes 8:00",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        12800,
+        15360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Flujo C — REEMPLAZAR TODO el código del nodo Code: Calcular Fechas Semanal.\n// Ejecución: lunes 8:00 → reporte de la semana anterior (lun–dom).\nconst FECHA_EJECUCION_PRUEBA = null;\n\nconst valorPrueba =\n  FECHA_EJECUCION_PRUEBA == null ? \"\" : String(FECHA_EJECUCION_PRUEBA).trim();\nif (valorPrueba && !/^\\d{4}-\\d{2}-\\d{2}$/.test(valorPrueba)) {\n  throw new Error(\"FECHA_EJECUCION_PRUEBA debe ser YYYY-MM-DD o null\");\n}\n\nconst hoyEfectivo = valorPrueba\n  ? new Date(`${valorPrueba}T12:00:00Z`)\n  : new Date();\nif (Number.isNaN(hoyEfectivo.getTime())) {\n  throw new Error(\"Fecha inválida en FECHA_EJECUCION_PRUEBA\");\n}\n\nconst addDaysUtc = (dateStr, days) => {\n  const d = new Date(`${dateStr}T00:00:00Z`);\n  d.setUTCDate(d.getUTCDate() + days);\n  return d.toISOString().split(\"T\")[0];\n};\n\nconst fecha_ejecucion = hoyEfectivo.toISOString().split(\"T\")[0];\nconst semana_fin = addDaysUtc(fecha_ejecucion, -1);\nconst semana_inicio = addDaysUtc(semana_fin, -6);\n\nreturn [\n  {\n    json: {\n      fecha_ejecucion,\n      semana_inicio,\n      semana_fin,\n      fecha_prueba_usada: valorPrueba || null,\n    },\n  },\n];\n"
+      },
+      "id": "ad7feac0-4240-4056-9c5d-3a7c1564fd1d",
+      "name": "Code: Calcular Fechas Semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13024,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "ordenes_transmision",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "estado",
+              "condition": "eq",
+              "keyValue": "activa"
+            }
+          ]
+        }
+      },
+      "id": "1ba743f8-ba6d-4c7d-ad94-8430e3dc522f",
+      "name": "Supabase: Campañas Activas",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        13248,
+        15280
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5155a503-f5f5-4a3e-9651-6c1807b08b26",
+      "name": "Split In Batches - Por Campaña",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        13472,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { flujo_c_completado: true, fecha: new Date().toISOString() } }];"
+      },
+      "id": "b50a0990-a518-41ed-bbdc-02608ecd1403",
+      "name": "Code: Fin de lotes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13696,
+        15088
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Flujo C — nodo Code: Ventana Efectiva Semanal.\n// Intersección semana calendario × periodo de la orden (semana parcial).\nconst orden = $(\"Split In Batches - Por Campaña\").item.json;\nconst fechas = $(\"Code: Calcular Fechas Semanal\").first().json;\n\nconst { semana_inicio, semana_fin, fecha_ejecucion } = fechas;\n\nconst maxDate = (a, b) => (a > b ? a : b);\nconst minDate = (a, b) => (a < b ? a : b);\n\nconst eval_inicio = maxDate(semana_inicio, orden.periodo_inicio);\nconst eval_fin = minDate(semana_fin, orden.periodo_fin);\n\nconst diasInclusivos = (inicio, fin) => {\n  const start = new Date(`${inicio}T00:00:00Z`);\n  const end = new Date(`${fin}T00:00:00Z`);\n  const ms = end.getTime() - start.getTime();\n  if (ms < 0) return 0;\n  return Math.floor(ms / (24 * 60 * 60 * 1000)) + 1;\n};\n\nconst skip = eval_inicio > eval_fin;\nconst dias_efectivos = skip ? 0 : diasInclusivos(eval_inicio, eval_fin);\n\nreturn [\n  {\n    json: {\n      skip,\n      orden,\n      semana_inicio,\n      semana_fin,\n      eval_inicio,\n      eval_fin,\n      dias_efectivos,\n      fecha_ejecucion,\n    },\n  },\n];\n"
+      },
+      "id": "bfc3e453-79e2-4360-93a6-33e2fc8d6bae",
+      "name": "Code: Ventana Efectiva Semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13696,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-skip",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "27c24097-4297-4d06-8275-29ca02c70e7d",
+      "name": "IF: Tiene Ventana Semanal",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        13920,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-api-key",
+              "name": "api_key",
+              "value": "=mduFkpmfvEJv2NAeyd",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9ff85c00-bf56-4b91-97cc-f8f4183742dd",
+      "name": "Set: API Key",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        14144,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://monitoreodigital.net/nueva_app_flask/api/v1/detections",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $json.api_key }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $('Split In Batches - Por Campaña').item.json.periodo_inicio }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $('Code: Ventana Efectiva Semanal').item.json.eval_fin }}"
+            },
+            {
+              "name": "page",
+              "value": "=1"
+            },
+            {
+              "name": "limit",
+              "value": "=10000"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "fe9503ed-3cf4-4773-ab85-dd8d3c94de5a",
+      "name": "HTTP Request: API Detecciones",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        14368,
+        15280
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Flujo C — nodo Code: Filtrar Detecciones (misma lógica que Flujo B).\nconst response = $input.first().json;\nconst detecciones = response.data || [];\nconst orden = $(\"Split In Batches - Por Campaña\").item.json;\nconst ventana = $(\"Code: Ventana Efectiva Semanal\").item.json;\nconst meta = response.meta || {};\n\nconst parsearFechaRFC2822 = (fechaStr) => {\n  if (!fechaStr) return null;\n  try {\n    const fecha = new Date(fechaStr);\n    if (isNaN(fecha.getTime())) return null;\n    const año = fecha.getFullYear();\n    const mes = String(fecha.getMonth() + 1).padStart(2, \"0\");\n    const dia = String(fecha.getDate()).padStart(2, \"0\");\n    return `${año}-${mes}-${dia}`;\n  } catch {\n    return null;\n  }\n};\n\nconst eval_inicio = ventana.eval_inicio;\nconst eval_fin = ventana.eval_fin;\nconst acum_inicio = orden.periodo_inicio;\nconst acum_fin = eval_fin;\n\nconst ordenSinSpot = !orden.spot_id && !orden.spot_name;\nconst matchPorClienteOCampaña = (d) => {\n  if (!d.spot_name) return false;\n  const sn = d.spot_name.toLowerCase();\n  if (orden.cliente && sn.includes(orden.cliente.toLowerCase())) return true;\n  if (orden.campaña && sn.includes(orden.campaña.toLowerCase())) return true;\n  return false;\n};\n\nconst coincideSpot = (d) =>\n  (orden.spot_name &&\n    d.spot_name &&\n    (d.spot_name.toLowerCase().includes(orden.spot_name.toLowerCase()) ||\n      orden.spot_name.toLowerCase().includes(d.spot_name.toLowerCase()))) ||\n  (orden.spot_id && d.spot_id && d.spot_id === orden.spot_id) ||\n  (orden.emisora &&\n    d.channel_name &&\n    (d.channel_name.toLowerCase().includes(orden.emisora.toLowerCase()) ||\n      orden.emisora.toLowerCase().includes(d.channel_name.toLowerCase()))) ||\n  (orden.emisora &&\n    d.channel_id &&\n    orden.channel_id &&\n    d.channel_id === orden.channel_id) ||\n  (ordenSinSpot && matchPorClienteOCampaña(d));\n\nconst filtradas = detecciones.filter((d) => {\n  const fechaStr = parsearFechaRFC2822(d.datetime_utc);\n  if (!fechaStr) return false;\n  const enRangoAcum =\n    fechaStr >= acum_inicio && fechaStr <= acum_fin;\n  if (!enRangoAcum) return false;\n  return coincideSpot(d);\n});\n\nreturn [\n  {\n    json: {\n      detecciones_filtradas: filtradas,\n      total_filtradas: filtradas.length,\n      orden,\n      eval_inicio,\n      eval_fin,\n      acum_inicio,\n      acum_fin,\n      ...ventana,\n    },\n  },\n];\n"
+      },
+      "id": "6367b3fe-9726-457e-865b-00fd87a81bd9",
+      "name": "Code: Filtrar Detecciones",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14592,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compartido: Flujo B/C y scripts de prueba (sin imports en n8n).\n// Mantener alineado con src/lib/meta-campana.ts\n\nconst DATE_ONLY = /^\\d{4}-\\d{2}-\\d{2}$/;\n\nfunction isValidDateOnly(dateStr) {\n  if (!dateStr || !DATE_ONLY.test(dateStr)) return false;\n  const d = new Date(`${dateStr}T00:00:00Z`);\n  return !Number.isNaN(d.getTime());\n}\n\nfunction addDaysUtc(dateStr, days) {\n  if (!isValidDateOnly(dateStr)) return dateStr;\n  const d = new Date(`${dateStr}T00:00:00Z`);\n  d.setUTCDate(d.getUTCDate() + days);\n  const next = d.toISOString().split(\"T\")[0];\n  return isValidDateOnly(next) ? next : dateStr;\n}\n\nfunction isoWeekdayFromDateStr(dateStr) {\n  const d = new Date(`${dateStr}T12:00:00Z`);\n  const js = d.getUTCDay();\n  return js === 0 ? 7 : js;\n}\n\nfunction diasInclusivos(inicio, fin) {\n  const start = new Date(`${inicio}T00:00:00Z`);\n  const end = new Date(`${fin}T00:00:00Z`);\n  const ms = end.getTime() - start.getTime();\n  if (ms < 0) return 0;\n  return Math.floor(ms / (24 * 60 * 60 * 1000)) + 1;\n}\n\nfunction parseTramosCuotas(raw) {\n  if (!Array.isArray(raw) || raw.length === 0) return null;\n  const tramos = [];\n  for (const item of raw) {\n    if (!item || typeof item !== \"object\") continue;\n    const desde = String(item.desde ?? \"\");\n    const hasta = String(item.hasta ?? \"\");\n    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(desde) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(hasta)) {\n      continue;\n    }\n    const dias = Array.isArray(item.dias_semana)\n      ? item.dias_semana\n          .map((d) => Number(d))\n          .filter((d) => d >= 1 && d <= 7)\n      : [];\n    const cuñas = Number(item.cuñas_por_dia ?? item.cunias_por_dia);\n    if (!Number.isFinite(cuñas) || cuñas < 0) continue;\n    tramos.push({\n      desde,\n      hasta,\n      dias_semana: dias,\n      cuñas_por_dia: cuñas,\n    });\n  }\n  return tramos.length > 0 ? tramos : null;\n}\n\nfunction cuniasContratadasDelDia(orden, dateStr) {\n  if (dateStr < orden.periodo_inicio || dateStr > orden.periodo_fin) {\n    return 0;\n  }\n\n  const tramos = parseTramosCuotas(orden.tramos_cuotas);\n  if (tramos) {\n    let sum = 0;\n    for (const tramo of tramos) {\n      if (dateStr >= tramo.desde && dateStr <= tramo.hasta) {\n        const dow = isoWeekdayFromDateStr(dateStr);\n        if (tramo.dias_semana.includes(dow)) {\n          sum += tramo.cuñas_por_dia;\n        }\n      }\n    }\n    return sum;\n  }\n\n  return Number(orden.cuñas_diarias) || 0;\n}\n\nfunction metaAcumuladaHasta(orden, finDate) {\n  if (\n    !isValidDateOnly(orden.periodo_inicio) ||\n    !isValidDateOnly(orden.periodo_fin) ||\n    !finDate ||\n    !isValidDateOnly(finDate) ||\n    finDate < orden.periodo_inicio\n  ) {\n    return 0;\n  }\n  const finEfectivo =\n    finDate > orden.periodo_fin ? orden.periodo_fin : finDate;\n\n  let acum = 0;\n  let d = orden.periodo_inicio;\n  let guard = 0;\n  while (d <= finEfectivo && guard < 4000) {\n    acum += cuniasContratadasDelDia(orden, d);\n    const next = addDaysUtc(d, 1);\n    if (next <= d) break;\n    d = next;\n    guard += 1;\n  }\n\n  const cap = Number(orden.total_contratadas) || 0;\n  if (cap <= 0) return acum;\n  return Math.min(acum, cap);\n}\n\nfunction contratadasEnRango(orden, inicio, fin) {\n  if (\n    !isValidDateOnly(inicio) ||\n    !isValidDateOnly(fin) ||\n    fin < inicio\n  ) {\n    return 0;\n  }\n  let sum = 0;\n  let d = inicio;\n  let guard = 0;\n  while (d <= fin && guard < 4000) {\n    if (d >= orden.periodo_inicio && d <= orden.periodo_fin) {\n      sum += cuniasContratadasDelDia(orden, d);\n    }\n    const next = addDaysUtc(d, 1);\n    if (next <= d) break;\n    d = next;\n    guard += 1;\n  }\n  return sum;\n}\n\nfunction calcularEstadoSemanal(\n  transmitidasSemana,\n  contratadasSemana,\n  cuotaSemanaAgotada,\n) {\n  if (contratadasSemana <= 0) {\n    if (cuotaSemanaAgotada) {\n      return {\n        estado: transmitidasSemana > 0 ? \"en_compensacion\" : \"cumple\",\n        estado_label:\n          transmitidasSemana > 0\n            ? \"En compensación (cuota cumplida)\"\n            : \"Cuota cumplida\",\n        porcentaje_cumplimiento: \"—\",\n        cuota_semana_agotada: true,\n      };\n    }\n    if (transmitidasSemana === 0) {\n      return {\n        estado: \"cumple\",\n        estado_label: \"Sin meta esta semana\",\n        porcentaje_cumplimiento: \"—\",\n        cuota_semana_agotada: false,\n      };\n    }\n    return {\n      estado: \"en_compensacion\",\n      estado_label: \"En compensación\",\n      porcentaje_cumplimiento: \"—\",\n      cuota_semana_agotada: false,\n    };\n  }\n\n  let estado = \"atrasado\";\n  if (transmitidasSemana >= contratadasSemana) {\n    estado =\n      transmitidasSemana > contratadasSemana\n        ? \"en_compensacion\"\n        : \"cumple\";\n  }\n\n  const estadoLabel =\n    estado === \"cumple\"\n      ? \"Cumple\"\n      : estado === \"atrasado\"\n        ? \"Atrasado\"\n        : \"En compensación\";\n\n  const porcentaje = (\n    (transmitidasSemana / contratadasSemana) *\n    100\n  ).toFixed(1);\n\n  return {\n    estado,\n    estado_label: estadoLabel,\n    porcentaje_cumplimiento: porcentaje,\n    cuota_semana_agotada: false,\n  };\n}\n\nfunction totalContratadasCalculado(orden) {\n  if (\n    !isValidDateOnly(orden.periodo_inicio) ||\n    !isValidDateOnly(orden.periodo_fin) ||\n    orden.periodo_fin < orden.periodo_inicio\n  ) {\n    return 0;\n  }\n  return contratadasEnRango(\n    orden,\n    orden.periodo_inicio,\n    orden.periodo_fin,\n  );\n}\n\n// Flujo C — nodo Code: Calcular Métricas Semanal.\n\n// Requiere scripts/meta-campana.js (concatenado en build-flujo-c.mjs).\n\nconst data = $input.first().json;\n\nconst detecciones = data.detecciones_filtradas || [];\n\nconst orden = data.orden;\n\nconst eval_inicio = data.eval_inicio;\n\nconst eval_fin = data.eval_fin;\n\nconst semana_inicio = data.semana_inicio;\n\nconst semana_fin = data.semana_fin;\n\nconst dias_efectivos = data.dias_efectivos;\n\nconst fecha_ejecucion = data.fecha_ejecucion;\n\n\n\nconst parsearFechaRFC2822 = (fechaStr) => {\n\n  if (!fechaStr) return null;\n\n  const fecha = new Date(fechaStr);\n\n  if (isNaN(fecha.getTime())) return null;\n\n  const año = fecha.getUTCFullYear();\n\n  const mes = String(fecha.getUTCMonth() + 1).padStart(2, \"0\");\n\n  const dia = String(fecha.getUTCDate()).padStart(2, \"0\");\n\n  return `${año}-${mes}-${dia}`;\n\n};\n\n\n\nconst totalContratadasOrden = Number(orden.total_contratadas || 0);\n\nconst dayBeforeEvalInicio = addDaysUtc(eval_inicio, -1);\n\nconst metaAntesSemana =\n\n  eval_inicio <= orden.periodo_inicio\n\n    ? 0\n\n    : metaAcumuladaHasta(orden, dayBeforeEvalInicio);\n\nconst contratadas_semana = contratadasEnRango(orden, eval_inicio, eval_fin);\n\nconst cuotaSemanaAgotada =\n\n  contratadas_semana <= 0 &&\n\n  totalContratadasOrden > 0 &&\n\n  metaAntesSemana >= totalContratadasOrden;\n\n\n\nlet transmitidas_semana = 0;\n\nlet transmitidas_acumuladas = 0;\n\n\n\ndetecciones.forEach((d) => {\n\n  const fechaStr = parsearFechaRFC2822(d.datetime_utc);\n\n  if (!fechaStr) return;\n\n  if (fechaStr >= eval_inicio && fechaStr <= eval_fin) {\n\n    transmitidas_semana += 1;\n\n  }\n\n  if (fechaStr >= orden.periodo_inicio && fechaStr <= eval_fin) {\n\n    transmitidas_acumuladas += 1;\n\n  }\n\n});\n\n\n\nconst faltantes_semana = Math.max(0, contratadas_semana - transmitidas_semana);\n\nconst excedentes_semana = Math.max(0, transmitidas_semana - contratadas_semana);\n\n\n\nconst metaAcumuladaCampana = metaAcumuladaHasta(orden, eval_fin);\n\nconst faltantes_acumulados = Math.max(\n\n  0,\n\n  metaAcumuladaCampana - transmitidas_acumuladas,\n\n);\n\n\n\nconst estadoResult = calcularEstadoSemanal(\n\n  transmitidas_semana,\n\n  contratadas_semana,\n\n  cuotaSemanaAgotada,\n\n);\n\n\n\nconst telefono = String(orden.telefono_cliente ?? \"\").trim();\n\nconst email = String(orden.email_cliente ?? \"\").trim();\n\n\n\nreturn [\n\n  {\n\n    json: {\n\n      orden,\n\n      semana_inicio,\n\n      semana_fin,\n\n      eval_inicio,\n\n      eval_fin,\n\n      dias_efectivos,\n\n      fecha_ejecucion,\n\n      transmitidas_semana,\n\n      contratadas_semana,\n\n      transmitidas_acumuladas,\n\n      faltantes_semana,\n\n      excedentes_semana,\n\n      faltantes_acumulados,\n\n      estado: estadoResult.estado,\n\n      estado_label: estadoResult.estado_label,\n\n      porcentaje_cumplimiento: estadoResult.porcentaje_cumplimiento,\n\n      cuota_semana_agotada: estadoResult.cuota_semana_agotada,\n\n      tiene_telefono: telefono.length > 0,\n\n      tiene_email: email.length > 0,\n\n      telefono_destino: telefono || null,\n\n      email_destino: email || null,\n\n      total_contratadas_orden: totalContratadasOrden,\n\n      meta_acumulada_campana: metaAcumuladaCampana,\n\n    },\n\n  },\n\n];\n\n"
+      },
+      "id": "f7ea15f9-7daf-46ba-bd71-d99b3d319b72",
+      "name": "Code: Calcular Métricas Semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14816,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "monitoreo_semanal",
+        "matchType": "allFilters",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "campaña_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.orden.id }}"
+            },
+            {
+              "keyName": "semana_inicio",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_inicio }}"
+            }
+          ]
+        }
+      },
+      "id": "eb532f87-f5c3-429b-862e-17f2d278f00b",
+      "name": "Supabase: Get Monitoreo Semanal",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15040,
+        15280
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      },
+      "alwaysOutputData": true,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-exists",
+              "leftValue": "={{ Boolean($json.id) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7a253ea6-1110-4194-b370-631347d25b61",
+      "name": "IF: Monitoreo Existe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15264,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "monitoreo_semanal",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "campaña_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.orden.id }}"
+            },
+            {
+              "keyName": "semana_inicio",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_inicio }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "semana_fin",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_fin }}"
+            },
+            {
+              "fieldId": "eval_inicio",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.eval_inicio }}"
+            },
+            {
+              "fieldId": "eval_fin",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.eval_fin }}"
+            },
+            {
+              "fieldId": "dias_efectivos",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.dias_efectivos }}"
+            },
+            {
+              "fieldId": "transmitidas_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_semana }}"
+            },
+            {
+              "fieldId": "contratadas_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.contratadas_semana }}"
+            },
+            {
+              "fieldId": "transmitidas_acumuladas",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_acumuladas }}"
+            },
+            {
+              "fieldId": "faltantes_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.faltantes_semana }}"
+            },
+            {
+              "fieldId": "excedentes_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.excedentes_semana }}"
+            },
+            {
+              "fieldId": "faltantes_acumulados",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.faltantes_acumulados }}"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.estado }}"
+            },
+            {
+              "fieldId": "porcentaje_cumplimiento",
+              "fieldValue": "={{ (() => { const v = $('Code: Calcular Métricas Semanal').first().json.porcentaje_cumplimiento; const n = Number(v); return Number.isFinite(n) ? n : null; })() }}"
+            },
+            {
+              "fieldId": "whatsapp_destino",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.telefono_destino }}"
+            },
+            {
+              "fieldId": "email_destino",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.email_destino }}"
+            }
+          ]
+        }
+      },
+      "id": "27df823b-0b81-4675-8e51-f3e39bbb19ec",
+      "name": "Supabase: Update Monitoreo Semanal",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15488,
+        15184
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "monitoreo_semanal",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "campaña_id",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.orden.id }}"
+            },
+            {
+              "fieldId": "semana_inicio",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_inicio }}"
+            },
+            {
+              "fieldId": "semana_fin",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_fin }}"
+            },
+            {
+              "fieldId": "eval_inicio",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.eval_inicio }}"
+            },
+            {
+              "fieldId": "eval_fin",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.eval_fin }}"
+            },
+            {
+              "fieldId": "dias_efectivos",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.dias_efectivos }}"
+            },
+            {
+              "fieldId": "transmitidas_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_semana }}"
+            },
+            {
+              "fieldId": "contratadas_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.contratadas_semana }}"
+            },
+            {
+              "fieldId": "transmitidas_acumuladas",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_acumuladas }}"
+            },
+            {
+              "fieldId": "faltantes_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.faltantes_semana }}"
+            },
+            {
+              "fieldId": "excedentes_semana",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.excedentes_semana }}"
+            },
+            {
+              "fieldId": "faltantes_acumulados",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.faltantes_acumulados }}"
+            },
+            {
+              "fieldId": "estado",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.estado }}"
+            },
+            {
+              "fieldId": "porcentaje_cumplimiento",
+              "fieldValue": "={{ (() => { const v = $('Code: Calcular Métricas Semanal').first().json.porcentaje_cumplimiento; const n = Number(v); return Number.isFinite(n) ? n : null; })() }}"
+            },
+            {
+              "fieldId": "whatsapp_destino",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.telefono_destino }}"
+            },
+            {
+              "fieldId": "email_destino",
+              "fieldValue": "={{ $('Code: Calcular Métricas Semanal').first().json.email_destino }}"
+            }
+          ]
+        }
+      },
+      "id": "914ac96f-2fc4-4495-b00a-a3daa193baed",
+      "name": "Supabase: Create Monitoreo Semanal",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        15488,
+        15376
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-tel",
+              "leftValue": "={{ $('Code: Calcular Métricas Semanal').first().json.tiene_telefono }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1d2c1b9f-2e88-4912-ac63-5eb92d503646",
+      "name": "IF: Tiene Teléfono",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15712,
+        15280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://YOUR_WHATSAPP_PROVIDER/v1/messages",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ to: $('Code: Calcular Métricas Semanal').first().json.telefono_destino, body: `Kompensa – Reporte semanal\\nCliente: ${$('Code: Calcular Métricas Semanal').first().json.orden.cliente}\\nCampaña: ${$('Code: Calcular Métricas Semanal').first().json.orden.campaña} | ${$('Code: Calcular Métricas Semanal').first().json.orden.emisora}\\nSemana: ${$('Code: Calcular Métricas Semanal').first().json.eval_inicio} al ${$('Code: Calcular Métricas Semanal').first().json.eval_fin}\\nTransmitidas: ${$('Code: Calcular Métricas Semanal').first().json.transmitidas_semana} / ${$('Code: Calcular Métricas Semanal').first().json.contratadas_semana} (${$('Code: Calcular Métricas Semanal').first().json.porcentaje_cumplimiento}%)\\nAcumulado: ${$('Code: Calcular Métricas Semanal').first().json.transmitidas_acumuladas} / ${$('Code: Calcular Métricas Semanal').first().json.total_contratadas_orden}\\nEstado: ${$('Code: Calcular Métricas Semanal').first().json.estado_label}` }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "17441151-ec99-4325-a882-531c27a3fce2",
+      "name": "HTTP Request: WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        15936,
+        15184
+      ],
+      "continueOnFail": true,
+      "notes": "Configura URL y auth de tu proveedor WhatsApp (Twilio, Meta, etc.)"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "monitoreo_semanal",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "campaña_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.orden.id }}"
+            },
+            {
+              "keyName": "semana_inicio",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_inicio }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "enviado_whatsapp_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "2e424624-a468-4e9d-8276-5264ddda0b82",
+      "name": "Supabase: Marcar WhatsApp Enviado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        16160,
+        15184
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-email",
+              "leftValue": "={{ $('Code: Calcular Métricas Semanal').first().json.tiene_email }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7ba71f84-27a0-408a-ab2d-164c5e4f1281",
+      "name": "IF: Tiene Email",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        15936,
+        15376
+      ]
+    },
+    {
+      "parameters": {
+        "subject": "=Reporte semanal Kompensa – {{ $('Code: Calcular Métricas Semanal').first().json.orden.campaña }} ({{ $('Code: Calcular Métricas Semanal').first().json.eval_inicio }} – {{ $('Code: Calcular Métricas Semanal').first().json.eval_fin }})",
+        "includeHtml": true,
+        "htmlMessage": "=<p>Hola,</p><p>Reporte semanal de transmisiones para <strong>{{ $('Code: Calcular Métricas Semanal').first().json.orden.cliente }}</strong> — campaña <strong>{{ $('Code: Calcular Métricas Semanal').first().json.orden.campaña }}</strong> ({{ $('Code: Calcular Métricas Semanal').first().json.orden.emisora }}).</p><p><strong>Semana evaluada:</strong> {{ $('Code: Calcular Métricas Semanal').first().json.eval_inicio }} al {{ $('Code: Calcular Métricas Semanal').first().json.eval_fin }}</p><ul><li>Transmitidas (semana): {{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_semana }} / {{ $('Code: Calcular Métricas Semanal').first().json.contratadas_semana }} ({{ $('Code: Calcular Métricas Semanal').first().json.porcentaje_cumplimiento }}%)</li><li>Acumulado campaña: {{ $('Code: Calcular Métricas Semanal').first().json.transmitidas_acumuladas }} / {{ $('Code: Calcular Métricas Semanal').first().json.total_contratadas_orden }}</li><li>Faltantes (semana): {{ $('Code: Calcular Métricas Semanal').first().json.faltantes_semana }}</li><li>Estado: {{ $('Code: Calcular Métricas Semanal').first().json.estado_label }}</li></ul><p>Saludos,<br>Equipo Kompensa</p>",
+        "message": "=Reporte semanal Kompensa. Ver correo HTML.",
+        "additionalFields": {
+          "toList": [
+            "={{ $('Code: Calcular Métricas Semanal').first().json.email_destino }}"
+          ]
+        }
+      },
+      "id": "7883ad27-aaf4-4c5c-bafa-88038aca559f",
+      "name": "Gmail: Reporte Semanal",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        16160,
+        15376
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "yaf6k1RQFW6PBYAa",
+          "name": "Kompensa"
+        }
+      },
+      "settings": {
+        "executeOnce": true
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "monitoreo_semanal",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "campaña_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.orden.id }}"
+            },
+            {
+              "keyName": "semana_inicio",
+              "condition": "eq",
+              "keyValue": "={{ $('Code: Calcular Métricas Semanal').first().json.semana_inicio }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "enviado_email_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "b4e7dc10-7f88-4449-a9de-236dbcad7444",
+      "name": "Supabase: Marcar Email Enviado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        16384,
+        15376
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YtOY3Vn4Tj8wsjNl",
+          "name": "Kompensa"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger - Ejecutar Flujo C": {
+      "main": [
+        [
+          {
+            "node": "Code: Calcular Fechas Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron Trigger - Lunes 8:00": {
+      "main": [
+        [
+          {
+            "node": "Code: Calcular Fechas Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Calcular Fechas Semanal": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Campañas Activas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Campañas Activas": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches - Por Campaña": {
+      "main": [
+        [
+          {
+            "node": "Code: Fin de lotes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code: Ventana Efectiva Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Ventana Efectiva Semanal": {
+      "main": [
+        [
+          {
+            "node": "IF: Tiene Ventana Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Tiene Ventana Semanal": {
+      "main": [
+        [
+          {
+            "node": "Set: API Key",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: API Key": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: API Detecciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: API Detecciones": {
+      "main": [
+        [
+          {
+            "node": "Code: Filtrar Detecciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Filtrar Detecciones": {
+      "main": [
+        [
+          {
+            "node": "Code: Calcular Métricas Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Calcular Métricas Semanal": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Monitoreo Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Monitoreo Semanal": {
+      "main": [
+        [
+          {
+            "node": "IF: Monitoreo Existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Monitoreo Existe": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Update Monitoreo Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase: Create Monitoreo Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Update Monitoreo Semanal": {
+      "main": [
+        [
+          {
+            "node": "IF: Tiene Teléfono",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Create Monitoreo Semanal": {
+      "main": [
+        [
+          {
+            "node": "IF: Tiene Teléfono",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Tiene Teléfono": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF: Tiene Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Marcar WhatsApp Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Marcar WhatsApp Enviado": {
+      "main": [
+        [
+          {
+            "node": "IF: Tiene Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Tiene Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Reporte Semanal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail: Reporte Semanal": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Marcar Email Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Marcar Email Enviado": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches - Por Campaña",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": []
+}

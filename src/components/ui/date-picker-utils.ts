@@ -95,6 +95,15 @@ export function parseTypedDate(value: string): string | null | "" {
   return parseMaskedDate(value);
 }
 
+/** Normaliza valor de input de fecha (ISO o dd/mm/aaaa) a yyyy-mm-dd. */
+export function normalizeDateInputValue(raw: string): string {
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const parsed = parseMaskedDate(raw);
+  if (typeof parsed === "string" && parsed !== "") return parsed;
+  return "";
+}
+
 export function isISOInRange(
   iso: string,
   min?: string,

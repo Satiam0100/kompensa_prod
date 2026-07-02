@@ -20,6 +20,8 @@ kompensa_prod/
 ├── supabase-migrations.sql          # Migraciones SQL para Supabase
 ├── flujo-a-ingesta-ordenes.json     # Flujo n8n: Ingesta de órdenes por correo
 ├── flujo-b-ejecucion-automatica.json # Flujo n8n: Ejecución automática diaria/semanal
+├── flujo-c-monitoreo-semanal.json    # Flujo n8n: Reporte semanal (lun 8:00)
+├── supabase-migrations-monitoreo-semanal.sql
 ├── FRONTEND.md                      # Documentación del panel web
 └── README.md                        # Esta documentación
 ```

@@ -1,3 +1,5 @@
+import type { TramoCuota } from "@/lib/types/tramo-cuota";
+
 export type EstadoOrden = "activa" | "pausada" | "finalizada";
 
 export interface OrdenEmisoraLinea {
@@ -30,6 +32,7 @@ export interface OrdenTransmisionForm {
   spot_name?: string;
   duracion_seg?: number;
   numero_certificado?: string;
+  tramos_cuotas?: TramoCuota[] | null;
 }
 
 export interface OrdenTransmisionRow extends Omit<
@@ -39,6 +42,7 @@ export interface OrdenTransmisionRow extends Omit<
   telefono_cliente: string | null;
   channel_id: string | null;
   numero_certificado: string | null;
+  tramos_cuotas: TramoCuota[] | null;
   id: string;
   created_at: string;
   updated_at: string;

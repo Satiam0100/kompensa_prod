@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS ordenes_transmision (
   horario TEXT,
   ciudad TEXT,
   numero_certificado TEXT,
+  tramos_cuotas JSONB,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -72,6 +73,34 @@ CREATE INDEX IF NOT EXISTS idx_certificados_campaña_id ON certificados_emitidos
 CREATE INDEX IF NOT EXISTS idx_certificados_semana ON certificados_emitidos(semana);
 CREATE INDEX IF NOT EXISTS idx_certificados_numero_certificado ON certificados_emitidos(numero_certificado) WHERE numero_certificado IS NOT NULL;
 
+-- Tabla: monitoreo_semanal (Flujo C — reporte semanal, independiente del resumen diario)
+CREATE TABLE IF NOT EXISTS monitoreo_semanal (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaña_id UUID NOT NULL REFERENCES ordenes_transmision(id) ON DELETE CASCADE,
+  semana_inicio DATE NOT NULL,
+  semana_fin DATE NOT NULL,
+  eval_inicio DATE NOT NULL,
+  eval_fin DATE NOT NULL,
+  dias_efectivos INTEGER NOT NULL DEFAULT 0,
+  transmitidas_semana INTEGER NOT NULL DEFAULT 0,
+  contratadas_semana INTEGER NOT NULL DEFAULT 0,
+  transmitidas_acumuladas INTEGER NOT NULL DEFAULT 0,
+  faltantes_semana INTEGER NOT NULL DEFAULT 0,
+  excedentes_semana INTEGER NOT NULL DEFAULT 0,
+  faltantes_acumulados INTEGER NOT NULL DEFAULT 0,
+  estado TEXT NOT NULL CHECK (estado IN ('cumple', 'atrasado', 'en_compensacion')),
+  porcentaje_cumplimiento NUMERIC(5, 1),
+  whatsapp_destino TEXT,
+  email_destino TEXT,
+  enviado_whatsapp_at TIMESTAMPTZ,
+  enviado_email_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(campaña_id, semana_inicio)
+);
+
+CREATE INDEX IF NOT EXISTS idx_monitoreo_semanal_campaña ON monitoreo_semanal(campaña_id);
+CREATE INDEX IF NOT EXISTS idx_monitoreo_semanal_semana ON monitoreo_semanal(semana_inicio);
+
 -- Función para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -91,4 +120,5 @@ CREATE TRIGGER update_ordenes_updated_at
 COMMENT ON TABLE ordenes_transmision IS 'Almacena las órdenes de transmisión recibidas por correo';
 COMMENT ON TABLE resumen_campaña IS 'Resumen diario de transmisiones por campaña';
 COMMENT ON TABLE certificados_emitidos IS 'Registro de certificados PDF generados semanalmente';
+COMMENT ON TABLE monitoreo_semanal IS 'Reportes semanales Flujo C (WhatsApp/email). Independiente de resumen_campaña';
 
