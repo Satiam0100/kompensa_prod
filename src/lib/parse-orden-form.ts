@@ -4,7 +4,7 @@ import type {
   OrdenTransmisionForm,
   OrdenTransmisionFormCompartido,
 } from "@/lib/types/orden-transmision";
-import { parseMaskedDate } from "@/components/ui/date-picker-utils";
+import { normalizeDateInputValue } from "@/components/ui/date-picker-utils";
 import {
   applyEstadoSpotRules,
   validateEstadoSpotRule,
@@ -13,6 +13,8 @@ import {
   normalizeTelefonoCliente,
   validateTelefonoCliente,
 } from "@/lib/normalize-telefono";
+import { parseTramosCuotas, resolveTramosCuotas, validarHuecosCoberturaTramos, validarTramosDentroPeriodo } from "@/lib/meta-campana";
+import type { TramoCuota } from "@/lib/types/tramo-cuota";
 
 /** Nombres ASCII en el HTML (evita problemas con ñ en FormData en algunos navegadores). */
 export const ORDEN_FORM_NAMES = {
@@ -35,6 +37,7 @@ export const ORDEN_FORM_NAMES = {
   duracion_seg: "duracion_seg",
   numero_certificado: "numero_certificado",
   emisora_line_count: "emisora_line_count",
+  tramos_cuotas: "tramos_cuotas",
 } as const;
 
 export function emisoraLineFieldName(
@@ -58,20 +61,18 @@ function readNumber(formData: FormData, key: string): number {
 }
 
 /** Convierte dd/mm/aaaa o yyyy-mm-dd del formulario a ISO yyyy-mm-dd. */
+function readTramosCuotas(formData: FormData): TramoCuota[] | null {
+  const raw = readString(formData, ORDEN_FORM_NAMES.tramos_cuotas);
+  if (!raw) return null;
+  try {
+    return parseTramosCuotas(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 function readDateField(formData: FormData, key: string): string {
-  const raw = readString(formData, key);
-  if (!raw) return "";
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-    return raw;
-  }
-
-  const parsed = parseMaskedDate(raw);
-  if (typeof parsed === "string" && parsed !== "") {
-    return parsed;
-  }
-
-  return "";
+  return normalizeDateInputValue(readString(formData, key));
 }
 
 export function parseOrdenFormData(formData: FormData): OrdenTransmisionForm {
@@ -108,6 +109,7 @@ export function parseOrdenFormDataCompartido(
     duracion_seg: duracionRaw ? readNumber(formData, n.duracion_seg) : undefined,
     numero_certificado:
       readString(formData, n.numero_certificado) || undefined,
+    tramos_cuotas: readTramosCuotas(formData),
   };
 }
 
@@ -236,6 +238,35 @@ function validateOrdenFormCompartido(
     return "La fecha fin no puede ser anterior al inicio.";
   }
 
+  const tramos = resolveTramosCuotas(data);
+  if (tramos.length === 0) {
+    return "Configura al menos un tramo de cuota válido.";
+  }
+
+  const periodoError = validarTramosDentroPeriodo(
+    data.periodo_inicio,
+    data.periodo_fin,
+    tramos,
+  );
+  if (periodoError) return periodoError;
+
+  for (let i = 0; i < tramos.length; i++) {
+    const t = tramos[i];
+    if (!t.dias_semana.length) {
+      return `Tramo ${i + 1}: selecciona al menos un día de la semana.`;
+    }
+    if (!Number.isFinite(t.cuñas_por_dia) || t.cuñas_por_dia < 0) {
+      return `Tramo ${i + 1}: cuñas por día inválidas.`;
+    }
+  }
+
+  const huecosError = validarHuecosCoberturaTramos(
+    data.periodo_inicio,
+    data.periodo_fin,
+    tramos,
+  );
+  if (huecosError) return huecosError;
+
   const telefonoError = validateTelefonoCliente(data.telefono_cliente);
   if (telefonoError) return telefonoError;
 
@@ -245,6 +276,7 @@ function validateOrdenFormCompartido(
 export { applyEstadoSpotRules };
 
 export function ordenFormToPayload(data: OrdenTransmisionForm) {
+  const tramos = resolveTramosCuotas(data);
   return {
     cliente: data.cliente.trim(),
     campaña: data.campaña.trim(),
@@ -264,5 +296,6 @@ export function ordenFormToPayload(data: OrdenTransmisionForm) {
     spot_name: data.spot_name?.trim() || null,
     duracion_seg: data.duracion_seg ?? null,
     numero_certificado: data.numero_certificado?.trim() || null,
+    tramos_cuotas: tramos.length > 0 ? tramos : null,
   };
 }

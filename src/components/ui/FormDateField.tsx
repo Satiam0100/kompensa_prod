@@ -36,6 +36,8 @@ interface FormDateFieldProps
   name: string;
   required?: boolean;
   defaultValue?: string;
+  /** Se invoca cuando la fecha ISO válida cambia (texto, blur o calendario). */
+  onISOChange?: (iso: string) => void;
 }
 
 export function FormDateField({
@@ -43,6 +45,7 @@ export function FormDateField({
   required,
   name,
   defaultValue = "",
+  onISOChange,
   min,
   max,
   className = "",
@@ -67,12 +70,16 @@ export function FormDateField({
   const minStr = min != null ? String(min) : undefined;
   const maxStr = max != null ? String(max) : undefined;
 
-  const commitISO = useCallback((iso: string) => {
-    setSelectedISO(iso);
-    setTextValue(isoToDisplayInput(iso));
-    const parsed = fromISODate(iso);
-    if (parsed) setViewDate(parsed);
-  }, []);
+  const commitISO = useCallback(
+    (iso: string) => {
+      setSelectedISO(iso);
+      setTextValue(isoToDisplayInput(iso));
+      const parsed = fromISODate(iso);
+      if (parsed) setViewDate(parsed);
+      onISOChange?.(iso);
+    },
+    [onISOChange],
+  );
 
   const normalizeTextValue = useCallback(
     (raw: string): string => {
@@ -183,12 +190,10 @@ export function FormDateField({
     const parsed = parseMaskedDate(masked);
     if (typeof parsed === "string" && parsed !== "") {
       if (isISOInRange(parsed, minStr, maxStr)) {
-        setSelectedISO(parsed);
-        const parsedDate = fromISODate(parsed);
-        if (parsedDate) setViewDate(parsedDate);
+        commitISO(parsed);
       }
     } else if (parsed === "") {
-      setSelectedISO("");
+      commitISO("");
     }
   };
 

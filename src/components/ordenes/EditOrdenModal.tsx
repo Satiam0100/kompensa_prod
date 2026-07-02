@@ -5,10 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import { actualizarOrdenTransmision } from "@/app/actions/ordenes";
 import { AdvancedParamsSection } from "@/components/ordenes/AdvancedParamsSection";
 import { CatalogOrderFields } from "@/components/ordenes/CatalogOrderFields";
+import { ContractTramosSection } from "@/components/ordenes/ContractTramosSection";
 import { OrderEstadoField } from "@/components/ordenes/OrderEstadoField";
 import { EditModal } from "@/components/ui/EditModal";
 import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { FormDateField } from "@/components/ui/FormDateField";
+import { normalizeDateInputValue } from "@/components/ui/date-picker-utils";
 import { FormField } from "@/components/ui/FormField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
@@ -63,6 +65,10 @@ export function EditOrdenModal({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [periodoInicio, setPeriodoInicio] = useState("");
+  const [periodoFin, setPeriodoFin] = useState("");
+  const [cuniasDiarias, setCuniasDiarias] = useState(1);
+  const [totalContratadas, setTotalContratadas] = useState(0);
   const open = Boolean(orden);
   const {
     spotId,
@@ -80,7 +86,35 @@ export function EditOrdenModal({
   useEffect(() => {
     if (!orden) return;
     resetFrom(orden.spot_id ?? "", orden.estado);
+    setPeriodoInicio(orden.periodo_inicio);
+    setPeriodoFin(orden.periodo_fin);
+    setCuniasDiarias(orden.cuñas_diarias);
+    setTotalContratadas(orden.total_contratadas);
   }, [orden, resetFrom]);
+
+  const handleFormChange = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    const form = e.currentTarget;
+    const pi = normalizeDateInputValue(
+      (form.elements.namedItem("periodo_inicio") as HTMLInputElement | null)
+        ?.value ?? "",
+    );
+    const pf = normalizeDateInputValue(
+      (form.elements.namedItem("periodo_fin") as HTMLInputElement | null)
+        ?.value ?? "",
+    );
+    const cd = Number(
+      (form.elements.namedItem("cunias_diarias") as HTMLInputElement | null)
+        ?.value || 0,
+    );
+    const tc = Number(
+      (form.elements.namedItem("total_contratadas") as HTMLInputElement | null)
+        ?.value || 0,
+    );
+    setPeriodoInicio(pi);
+    setPeriodoFin(pf);
+    if (Number.isFinite(cd) && cd > 0) setCuniasDiarias(cd);
+    if (Number.isFinite(tc) && tc > 0) setTotalContratadas(tc);
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -125,6 +159,7 @@ export function EditOrdenModal({
           key={orden.id}
           id={FORM_ID}
           onSubmit={handleSubmit}
+          onChange={handleFormChange}
           className="space-y-6"
         >
           <p className="text-body-sm text-on-surface-variant -mt-1">
@@ -197,7 +232,7 @@ export function EditOrdenModal({
           <FormSection title="Contrato">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
-                label="Cuñas Diarias"
+                label="Cuñas por día (referencia)"
                 name="cunias_diarias"
                 type="number"
                 required
@@ -217,12 +252,14 @@ export function EditOrdenModal({
                 name="periodo_inicio"
                 required
                 defaultValue={orden.periodo_inicio}
+                onISOChange={setPeriodoInicio}
               />
               <FormDateField
                 label="Periodo Fin"
                 name="periodo_fin"
                 required
                 defaultValue={orden.periodo_fin}
+                onISOChange={setPeriodoFin}
               />
               <div className="sm:col-span-2">
                 <FormField
@@ -232,6 +269,20 @@ export function EditOrdenModal({
                 />
               </div>
             </div>
+            <ContractTramosSection
+              key={orden.id}
+              periodoInicio={periodoInicio || orden.periodo_inicio}
+              periodoFin={periodoFin || orden.periodo_fin}
+              cuniasDiarias={
+                cuniasDiarias > 0 ? cuniasDiarias : orden.cuñas_diarias
+              }
+              totalContratadas={
+                totalContratadas > 0
+                  ? totalContratadas
+                  : orden.total_contratadas
+              }
+              initialTramos={orden.tramos_cuotas}
+            />
           </FormSection>
 
           <AdvancedParamsSection
