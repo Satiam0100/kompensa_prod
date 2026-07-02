@@ -7,6 +7,7 @@ import { AdvancedParamsSection } from "@/components/ordenes/AdvancedParamsSectio
 import { CatalogOrderFields } from "@/components/ordenes/CatalogOrderFields";
 import { ContractTramosSection } from "@/components/ordenes/ContractTramosSection";
 import { OrderEstadoField } from "@/components/ordenes/OrderEstadoField";
+import { OrdenDetalleView } from "@/components/ordenes/OrdenDetalleView";
 import { EditModal } from "@/components/ui/EditModal";
 import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
 import { FormDateField } from "@/components/ui/FormDateField";
@@ -33,10 +34,13 @@ const FORM_ID = "edit-orden-form";
 
 interface EditOrdenModalProps {
   orden: OrdenTransmisionRow | null;
+  editMode?: boolean;
   emisoras: EmisoraRow[];
   agencias: AgenciaRow[];
   catalogError?: string | null;
   onClose: () => void;
+  onStartEdit?: () => void;
+  onCancelEdit?: () => void;
 }
 
 function FormSection({
@@ -58,10 +62,13 @@ function FormSection({
 
 export function EditOrdenModal({
   orden,
+  editMode = false,
   emisoras,
   agencias,
   catalogError = null,
   onClose,
+  onStartEdit,
+  onCancelEdit,
 }: EditOrdenModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -151,11 +158,39 @@ export function EditOrdenModal({
   return (
     <EditModal
       open={open}
-      title="Editar cuña"
-      maxWidth="2xl"
+      title={
+        editMode
+          ? "Editar cuña"
+          : orden
+            ? `${orden.cliente} — ${orden.campaña}`
+            : "Detalle de cuña"
+      }
+      maxWidth={editMode ? "2xl" : "6xl"}
       onClose={onClose}
     >
-      {open && orden && (
+      {open && orden && !editMode && (
+        <>
+          <OrdenDetalleView orden={orden} />
+          <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-outline-variant/40">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={onStartEdit}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-tertiary text-on-tertiary text-body-sm font-bold rounded-lg hover:brightness-110"
+            >
+              <MaterialIcon name="edit" className="text-sm" />
+              Editar
+            </button>
+          </div>
+        </>
+      )}
+      {open && orden && editMode && (
         <form
           key={orden.id}
           id={FORM_ID}
@@ -301,7 +336,7 @@ export function EditOrdenModal({
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCancelEdit ?? onClose}
               className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
             >
               Cancelar
