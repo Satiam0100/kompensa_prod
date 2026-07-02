@@ -18,12 +18,20 @@ export function EmisorasCatalog({ emisoras }: EmisorasCatalogProps) {
   const router = useRouter();
   const bulk = useBulkSelection();
   const [creating, setCreating] = useState(false);
-  const [editing, setEditing] = useState<EmisoraRow | null>(null);
+  const [selected, setSelected] = useState<EmisoraRow | null>(null);
+  const [editMode, setEditMode] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const closeModal = () => {
     setCreating(false);
-    setEditing(null);
+    setSelected(null);
+    setEditMode(false);
+  };
+
+  const openEmisora = (emisora: EmisoraRow) => {
+    setCreating(false);
+    setSelected(emisora);
+    setEditMode(false);
   };
 
   const handleConfirmDelete = useCallback(async () => {
@@ -55,7 +63,8 @@ export function EmisorasCatalog({ emisoras }: EmisorasCatalogProps) {
         <CatalogHeaderActions
           addLabel="Agregar emisora"
           onAdd={() => {
-            setEditing(null);
+            setSelected(null);
+            setEditMode(false);
             setCreating(true);
           }}
           selecting={bulk.selecting}
@@ -82,17 +91,18 @@ export function EmisorasCatalog({ emisoras }: EmisorasCatalogProps) {
       <EmisorasList
         emisoras={emisoras}
         creating={creating}
-        editing={editing}
+        selected={selected}
+        editMode={editMode}
         bulk={bulk}
         onCreate={() => {
-          setEditing(null);
+          setSelected(null);
+          setEditMode(false);
           setCreating(true);
         }}
-        onEdit={(emisora) => {
-          setCreating(false);
-          setEditing(emisora);
-        }}
+        onSelect={openEmisora}
         onCloseModal={closeModal}
+        onStartEdit={() => setEditMode(true)}
+        onCancelEdit={() => setEditMode(false)}
       />
 
       <ConfirmDialog
