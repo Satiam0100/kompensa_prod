@@ -19,12 +19,20 @@ export function AgenciasCatalog({ agencias }: AgenciasCatalogProps) {
   const router = useRouter();
   const bulk = useBulkSelection();
   const [creating, setCreating] = useState(false);
-  const [editing, setEditing] = useState<AgenciaRow | null>(null);
+  const [selected, setSelected] = useState<AgenciaRow | null>(null);
+  const [editMode, setEditMode] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const closeModal = () => {
     setCreating(false);
-    setEditing(null);
+    setSelected(null);
+    setEditMode(false);
+  };
+
+  const openAgencia = (agencia: AgenciaRow) => {
+    setCreating(false);
+    setSelected(agencia);
+    setEditMode(false);
   };
 
   const handleConfirmDelete = useCallback(async () => {
@@ -56,7 +64,8 @@ export function AgenciasCatalog({ agencias }: AgenciasCatalogProps) {
         <CatalogHeaderActions
           addLabel="Agregar agencia"
           onAdd={() => {
-            setEditing(null);
+            setSelected(null);
+            setEditMode(false);
             setCreating(true);
           }}
           selecting={bulk.selecting}
@@ -83,17 +92,18 @@ export function AgenciasCatalog({ agencias }: AgenciasCatalogProps) {
       <AgenciasList
         agencias={agencias}
         creating={creating}
-        editing={editing}
+        selected={selected}
+        editMode={editMode}
         bulk={bulk}
         onCreate={() => {
-          setEditing(null);
+          setSelected(null);
+          setEditMode(false);
           setCreating(true);
         }}
-        onEdit={(agencia) => {
-          setCreating(false);
-          setEditing(agencia);
-        }}
+        onSelect={openAgencia}
         onCloseModal={closeModal}
+        onStartEdit={() => setEditMode(true)}
+        onCancelEdit={() => setEditMode(false)}
       />
 
       <ConfirmDialog

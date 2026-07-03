@@ -325,7 +325,6 @@ export function TransmissionOrderForm({
           className="md:col-span-12"
           error={errorMessage}
         />
-        <div className="md:col-span-12 h-28 md:hidden" aria-hidden />
 
         <FormActionsBar
           isPending={isPending}
@@ -339,7 +338,7 @@ export function TransmissionOrderForm({
 }
 
 const FORM_ACTIONS_BAR =
-  "md:col-span-12 fixed bottom-0 inset-x-0 z-40 md:static md:z-auto border-t border-outline-variant bg-surface-container-low/95 backdrop-blur-sm px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:mt-4 md:mb-20 md:px-0 md:py-0 md:border-0 md:bg-transparent md:backdrop-blur-none";
+  "md:col-span-12 mt-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-outline-variant md:mt-4 md:mb-20 md:pt-0 md:pb-0 md:border-0";
 
 function FormActionsBar({
   isPending,
