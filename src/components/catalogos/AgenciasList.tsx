@@ -15,21 +15,27 @@ import type { AgenciaRow } from "@/lib/types/catalogo";
 interface AgenciasListProps {
   agencias: AgenciaRow[];
   creating: boolean;
-  editing: AgenciaRow | null;
+  selected: AgenciaRow | null;
+  editMode: boolean;
   bulk: BulkSelection;
   onCreate: () => void;
-  onEdit: (agencia: AgenciaRow) => void;
+  onSelect: (agencia: AgenciaRow) => void;
   onCloseModal: () => void;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
 }
 
 export function AgenciasList({
   agencias,
   creating,
-  editing,
+  selected,
+  editMode,
   bulk,
   onCreate,
-  onEdit,
+  onSelect,
   onCloseModal,
+  onStartEdit,
+  onCancelEdit,
 }: AgenciasListProps) {
   const [query, setQuery] = useState("");
 
@@ -73,8 +79,11 @@ export function AgenciasList({
         </div>
         <EditAgenciaModal
           creating={creating}
-          agencia={editing}
+          agencia={selected}
+          editMode={editMode}
           onClose={onCloseModal}
+          onStartEdit={onStartEdit}
+          onCancelEdit={onCancelEdit}
         />
       </>
     );
@@ -112,7 +121,7 @@ export function AgenciasList({
               key={agencia.id}
               agencia={agencia}
               bulk={bulk}
-              onEdit={onEdit}
+              onSelect={onSelect}
             />
           ))}
         </div>
@@ -120,8 +129,11 @@ export function AgenciasList({
 
       <EditAgenciaModal
         creating={creating}
-        agencia={editing}
+        agencia={selected}
+        editMode={editMode}
         onClose={onCloseModal}
+        onStartEdit={onStartEdit}
+        onCancelEdit={onCancelEdit}
       />
     </div>
   );

@@ -24,12 +24,12 @@ export default async function NuevaOrdenPage() {
 
   return (
     <AppShell>
-      <div className="max-w-5xl mx-auto p-4 md:p-8">
-        <div className="mb-10">
+      <div className="max-w-5xl mx-auto p-4 md:p-8 pb-8">
+        <div className="mb-6 md:mb-10">
           <h1 className="text-display-lg text-on-surface mb-2">
             Nueva Orden de Transmisión
           </h1>
-          <p className="text-body-lg text-on-surface-variant">
+          <p className="text-body-md md:text-body-lg text-on-surface-variant">
             Completa los datos de la campaña y añade una o más emisoras. Se
             registrará una orden por cada emisora.
           </p>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { actualizarAgencia, crearAgencia } from "@/app/actions/catalogos";
+import { AgenciaDetalleView } from "@/components/catalogos/AgenciaDetalleView";
 import { EditModal } from "@/components/ui/EditModal";
 import {
   FormCheckbox,
@@ -19,7 +20,10 @@ import type { AgenciaRow } from "@/lib/types/catalogo";
 interface EditAgenciaModalProps {
   agencia: AgenciaRow | null;
   creating?: boolean;
+  editMode?: boolean;
   onClose: () => void;
+  onStartEdit?: () => void;
+  onCancelEdit?: () => void;
 }
 
 function readAgenciaForm(formData: FormData) {
@@ -38,7 +42,10 @@ function readAgenciaForm(formData: FormData) {
 export function EditAgenciaModal({
   agencia,
   creating = false,
+  editMode = false,
   onClose,
+  onStartEdit,
+  onCancelEdit,
 }: EditAgenciaModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -82,13 +89,45 @@ export function EditAgenciaModal({
     [agencia, creating, onClose, router],
   );
 
+  const showDetail = open && agencia && !creating && !editMode;
+  const showForm = creating || (Boolean(agencia) && editMode);
+
+  const title = creating
+    ? "Nueva agencia"
+    : editMode
+      ? "Editar agencia"
+      : agencia?.nombre ?? "Detalle de agencia";
+
   return (
     <EditModal
       open={open}
-      title={creating ? "Nueva agencia" : "Editar agencia"}
+      title={title}
+      maxWidth={showDetail ? "4xl" : "lg"}
       onClose={onClose}
     >
-      {open && (
+      {showDetail && agencia && (
+        <>
+          <AgenciaDetalleView agencia={agencia} />
+          <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-outline-variant/40">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
+            >
+              Cerrar
+            </button>
+            <button
+              type="button"
+              onClick={onStartEdit}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-tertiary text-on-tertiary text-body-sm font-bold rounded-lg hover:brightness-110"
+            >
+              <MaterialIcon name="edit" className="text-sm" />
+              Editar
+            </button>
+          </div>
+        </>
+      )}
+      {showForm && (
         <form
           key={creating ? "create" : agencia!.id}
           onSubmit={handleSubmit}
@@ -145,7 +184,7 @@ export function EditAgenciaModal({
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={creating ? onClose : (onCancelEdit ?? onClose)}
               className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
             >
               Cancelar
