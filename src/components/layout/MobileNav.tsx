@@ -43,6 +43,7 @@ export function MobileNav() {
           width={32}
           height={32}
           priority
+          loading="eager"
           className="w-8 h-8 rounded-lg object-cover"
         />
         <span className="text-headline-sm font-extrabold text-primary leading-none">

@@ -27,15 +27,4 @@ export function applyThemeMode(mode: ThemeMode) {
   applyResolvedTheme(resolveTheme(mode));
 }
 
-export const themeInitScript = `
-(function () {
-  try {
-    var key = "${THEME_STORAGE_KEY}";
-    var stored = localStorage.getItem(key);
-    var mode = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
-    var dark = mode === "dark" || (mode === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.classList.toggle("dark", dark);
-    document.documentElement.style.colorScheme = dark ? "dark" : "light";
-  } catch (e) {}
-})();
-`.trim();
+/** Mantener alineado con `public/theme-init.js` (script bloqueante en layout). */

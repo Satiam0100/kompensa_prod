@@ -28,6 +28,7 @@ export function SidebarContent({
           width={40}
           height={40}
           priority={logoPriority}
+          loading={logoPriority ? "eager" : "lazy"}
           className="w-10 h-10 rounded-lg object-cover"
         />
         <span className="text-headline-sm font-extrabold text-primary leading-none">

@@ -52,9 +52,9 @@ function FormSection({
 }) {
   return (
     <section className="space-y-4">
-      <h4 className="text-label-sm uppercase tracking-[0.12em] text-on-surface-variant px-1">
+      <h3 className="text-label-sm uppercase tracking-[0.12em] text-on-surface-variant px-1">
         {title}
-      </h4>
+      </h3>
       {children}
     </section>
   );
@@ -194,6 +194,7 @@ export function EditOrdenModal({
         <form
           key={orden.id}
           id={FORM_ID}
+          method="POST"
           onSubmit={handleSubmit}
           onChange={handleFormChange}
           className="space-y-6"
@@ -228,14 +229,14 @@ export function EditOrdenModal({
                 onEmisoraCiudadChange={syncFromCatalog}
               />
               <FormField
-                label="Email Cliente"
+                label="Correo del coordinador"
                 name="email_cliente"
                 type="email"
                 required
                 defaultValue={orden.email_cliente}
               />
               <FormPhoneField
-                label="Teléfono Cliente"
+                label="Teléfono del coordinador"
                 name="telefono_cliente"
                 required
                 defaultValue={sanitizePhoneInput(orden.telefono_cliente ?? "")}
@@ -315,6 +316,7 @@ export function EditOrdenModal({
                   : orden.total_contratadas
               }
               initialTramos={orden.tramos_cuotas}
+              headingLevel={4}
             />
           </FormSection>
 

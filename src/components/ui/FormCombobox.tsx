@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -26,6 +25,7 @@ interface FormComboboxProps {
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
+  id?: string;
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
@@ -51,6 +51,7 @@ export function FormCombobox({
   value,
   onChange,
   options,
+  id,
   required,
   disabled = false,
   placeholder = "Buscar…",
@@ -58,7 +59,9 @@ export function FormCombobox({
   emptyMessage = "Sin coincidencias",
 }: FormComboboxProps) {
   const portalRoot = usePortalRoot();
-  const generatedId = useId();
+  const fieldId = id ?? `${name}-field`;
+  const labelId = `${fieldId}-label`;
+  const listboxId = `${fieldId}-listbox`;
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,6 +75,7 @@ export function FormCombobox({
 
   const selectedOption = options.find((option) => option.value === value);
   const displayValue = selectedOption?.label ?? value;
+  const isRequired = Boolean(required && !disabled);
 
   const filteredOptions = useMemo(() => {
     const q = normalizeForSearch(query.trim());
@@ -196,11 +200,17 @@ export function FormCombobox({
   return (
     <div className={`flex flex-col gap-1.5 ${className}`} ref={containerRef}>
       <label
-        htmlFor={generatedId}
+        id={labelId}
+        htmlFor={fieldId}
         className="text-label-sm text-on-surface-variant px-1"
       >
         {label}
-        {required && <span className="text-tertiary"> *</span>}
+        {isRequired && (
+          <span className="text-tertiary" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        )}
       </label>
       <div
         ref={triggerRef}
@@ -211,17 +221,23 @@ export function FormCombobox({
           type="hidden"
           name={name}
           value={value}
-          required={required && !disabled}
+          required={isRequired}
+          tabIndex={-1}
+          aria-hidden="true"
         />
         <div className="flex w-full items-center gap-2">
           <input
             ref={inputRef}
-            id={generatedId}
+            id={fieldId}
             type="text"
             role="combobox"
+            aria-labelledby={labelId}
+            aria-haspopup="listbox"
             aria-expanded={open}
             aria-autocomplete="list"
-            aria-controls={`${generatedId}-listbox`}
+            aria-controls={listboxId}
+            aria-required={isRequired || undefined}
+            aria-disabled={disabled || undefined}
             disabled={disabled}
             placeholder={placeholder}
             value={open ? query : displayValue}
@@ -242,7 +258,7 @@ export function FormCombobox({
           !disabled &&
           createPortal(
             <ul
-              id={`${generatedId}-listbox`}
+              id={listboxId}
               data-form-combobox-menu
               role="listbox"
               aria-label={label}

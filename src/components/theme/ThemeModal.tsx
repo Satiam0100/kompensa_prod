@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import type { ThemeMode } from "@/lib/theme/types";
 import { useTheme } from "./ThemeProvider";
@@ -39,6 +39,7 @@ interface ThemeModalProps {
 export function ThemeModal({ open, onClose }: ThemeModalProps) {
   const { mode, setMode } = useTheme();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -55,11 +56,14 @@ export function ThemeModal({ open, onClose }: ThemeModalProps) {
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      aria-labelledby={titleId}
       className="backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] max-w-md shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0"
     >
       <div className="p-6 border-b border-outline-variant flex items-center justify-between">
         <div>
-          <h2 className="text-title-md text-on-surface">Apariencia</h2>
+          <h2 id={titleId} className="text-title-md text-on-surface">
+            Apariencia
+          </h2>
           <p className="text-body-sm text-on-surface-variant mt-1">
             El modo sistema se adapta automáticamente a tu navegador
           </p>

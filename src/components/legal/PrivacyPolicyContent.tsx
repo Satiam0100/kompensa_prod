@@ -68,7 +68,7 @@ export function PrivacyPolicyContent() {
             interés legítimo en la prestación del servicio).
           </li>
           <li>
-            Enviar certificados y notificaciones al email o teléfono del cliente
+            Enviar certificados y notificaciones al correo o teléfono del coordinador
             indicado por el usuario de la plataforma.
           </li>
           <li>

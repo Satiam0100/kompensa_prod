@@ -2,6 +2,10 @@ import { jwtVerify } from "jose";
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthSecretBytes } from "@/lib/auth/config";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
+import {
+  applySecurityHeaders,
+  createSecureRequestContext,
+} from "@/lib/security/apply-response-security";
 
 async function isValidSession(token: string) {
   try {
@@ -15,6 +19,7 @@ async function isValidSession(token: string) {
 const publicPaths = ["/login", "/privacidad"];
 
 export async function middleware(request: NextRequest) {
+  const { csp, requestHeaders } = createSecureRequestContext(request);
   const { pathname } = request.nextUrl;
   const isPublic = publicPaths.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
@@ -25,22 +30,31 @@ export async function middleware(request: NextRequest) {
 
   if (isPublic) {
     if (authenticated && pathname === "/login") {
-      return NextResponse.redirect(new URL("/ordenes/nueva", request.url));
+      return applySecurityHeaders(
+        NextResponse.redirect(new URL("/ordenes/nueva", request.url)),
+        csp,
+      );
     }
-    return NextResponse.next();
+    return applySecurityHeaders(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+      csp,
+    );
   }
 
   if (!authenticated) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("from", pathname);
-    return NextResponse.redirect(loginUrl);
+    return applySecurityHeaders(NextResponse.redirect(loginUrl), csp);
   }
 
-  return NextResponse.next();
+  return applySecurityHeaders(
+    NextResponse.next({ request: { headers: requestHeaders } }),
+    csp,
+  );
 }
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|site.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|txt)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|site.webmanifest|theme-init\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|txt)$).*)",
   ],
 };

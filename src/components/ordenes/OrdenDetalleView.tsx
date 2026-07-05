@@ -70,8 +70,8 @@ export function OrdenDetalleView({ orden }: OrdenDetalleViewProps) {
           <DetalleField label="Cliente" value={orden.cliente} />
           <DetalleField label="Campaña" value={orden.campaña} />
           <DetalleField label="Agencia" value={orden.agencia} />
-          <DetalleField label="Email cliente" value={orden.email_cliente} />
-          <DetalleField label="Teléfono cliente" value={telefono} mono />
+          <DetalleField label="Correo del coordinador" value={orden.email_cliente} />
+          <DetalleField label="Teléfono del coordinador" value={telefono} mono />
         </dl>
       </DetalleSection>
 
