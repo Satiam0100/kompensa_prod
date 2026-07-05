@@ -130,7 +130,6 @@ export function EditAgenciaModal({
       {showForm && (
         <form
           key={creating ? "create" : agencia!.id}
-          method="POST"
           onSubmit={handleSubmit}
           className="space-y-4"
         >

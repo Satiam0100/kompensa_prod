@@ -14,7 +14,7 @@ export function LoginForm() {
   const [state, formAction, pending] = useActionState(login, initialState);
 
   return (
-    <form action={formAction} method="POST" className="space-y-5">
+    <form action={formAction} className="space-y-5">
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="user"

@@ -163,7 +163,6 @@ export function TransmissionOrderForm({
       <form
         className="grid grid-cols-1 md:grid-cols-12 gap-6"
         id="transmission-form"
-        method="POST"
         action={formAction}
         onChange={handleFormChange}
         onSubmit={handleSubmit}

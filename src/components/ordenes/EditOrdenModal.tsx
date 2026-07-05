@@ -194,7 +194,6 @@ export function EditOrdenModal({
         <form
           key={orden.id}
           id={FORM_ID}
-          method="POST"
           onSubmit={handleSubmit}
           onChange={handleFormChange}
           className="space-y-6"

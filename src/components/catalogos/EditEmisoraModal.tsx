@@ -132,7 +132,6 @@ export function EditEmisoraModal({
       {showForm && (
         <form
           key={creating ? "create" : emisora!.id}
-          method="POST"
           onSubmit={handleSubmit}
           className="space-y-4"
         >

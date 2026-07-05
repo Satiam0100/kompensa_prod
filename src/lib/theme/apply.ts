@@ -1,3 +1,4 @@
+import { setResolvedThemeCookie } from "./cookie";
 import { THEME_STORAGE_KEY, type ResolvedTheme, type ThemeMode } from "./types";
 
 export function getStoredThemeMode(): ThemeMode {
@@ -21,10 +22,11 @@ export function resolveTheme(mode: ThemeMode): ResolvedTheme {
 export function applyResolvedTheme(resolved: ResolvedTheme) {
   document.documentElement.classList.toggle("dark", resolved === "dark");
   document.documentElement.style.colorScheme = resolved;
+  setResolvedThemeCookie(resolved);
 }
 
 export function applyThemeMode(mode: ThemeMode) {
   applyResolvedTheme(resolveTheme(mode));
 }
 
-/** Mantener alineado con `public/theme-init.js` (script bloqueante en layout). */
+/** Mantener alineado con `buildThemeInitScript()` en `cookie.ts`. */
