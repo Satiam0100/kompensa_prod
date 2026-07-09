@@ -22,6 +22,7 @@ import {
   FORM_FIELD_CONTROL_PLAIN,
   FORM_FIELD_INPUT,
 } from "@/components/ui/form-field-classes";
+import { FormDateField } from "@/components/ui/FormDateField";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 
 interface ContractTramosSectionProps {
@@ -52,11 +53,16 @@ function TramosHeading({
 
 const ALL_DIAS: DiaSemanaIso[] = [...DIAS_SEMANA_TODOS];
 
-const CHIP =
-  "inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full text-label-sm font-medium transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+type TramoPresetId = "lv-only" | "lv-periodo" | "todos-periodo";
 
-const CHIP_ACTIVE = `${CHIP} bg-tertiary text-on-tertiary shadow-sm`;
-const CHIP_INACTIVE = `${CHIP} bg-surface-container-highest text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface`;
+const PRESET_CHIP_BASE =
+  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-label-sm font-medium transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:opacity-40 disabled:pointer-events-none";
+
+const PRESET_CHIP_ACTIVE =
+  "bg-tertiary text-on-tertiary shadow-sm ring-1 ring-tertiary/30";
+
+const PRESET_CHIP_IDLE =
+  "bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border border-outline-variant/50";
 
 const ADD_TRAMO_BTN =
   "inline-flex items-center gap-2 px-4 py-2 text-label-sm font-medium text-tertiary hover:bg-tertiary/10 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tertiary";
@@ -99,17 +105,28 @@ function diasCoinciden(a: DiaSemanaIso[], b: DiaSemanaIso[]): boolean {
   return sortedA.every((d, i) => d === sortedB[i]);
 }
 
-function tramoEsPreset(
-  tramos: TramoCuota[],
+function tramoPresetActivo(
+  tramo: TramoCuota,
   periodoInicio: string,
   periodoFin: string,
-  preset: "lv" | "todos",
+  preset: TramoPresetId,
 ): boolean {
-  if (tramos.length !== 1) return false;
-  const t = tramos[0];
-  if (t.desde !== periodoInicio || t.hasta !== periodoFin) return false;
-  const esperado = preset === "lv" ? DIAS_SEMANA_LV : DIAS_SEMANA_TODOS;
-  return diasCoinciden(t.dias_semana, esperado);
+  if (!isValidDateOnly(periodoInicio) || !isValidDateOnly(periodoFin)) {
+    return false;
+  }
+  const periodoCompleto =
+    tramo.desde === periodoInicio && tramo.hasta === periodoFin;
+  const diasLv = diasCoinciden(tramo.dias_semana, DIAS_SEMANA_LV);
+  const diasTodos = diasCoinciden(tramo.dias_semana, DIAS_SEMANA_TODOS);
+
+  switch (preset) {
+    case "lv-only":
+      return diasLv && !periodoCompleto;
+    case "lv-periodo":
+      return periodoCompleto && diasLv;
+    case "todos-periodo":
+      return periodoCompleto && diasTodos;
+  }
 }
 
 export function ContractTramosSection({
@@ -147,22 +164,6 @@ export function ContractTramosSection({
       return tramosIguales(prev, ajustados) ? prev : ajustados;
     });
   }, [periodoInicio, periodoFin, cuniasDiarias, periodoValido]);
-
-  const presetLvActivo = useMemo(
-    () =>
-      isValidDateOnly(periodoInicio) &&
-      isValidDateOnly(periodoFin) &&
-      tramoEsPreset(tramos, periodoInicio, periodoFin, "lv"),
-    [tramos, periodoInicio, periodoFin],
-  );
-
-  const presetTodosActivo = useMemo(
-    () =>
-      isValidDateOnly(periodoInicio) &&
-      isValidDateOnly(periodoFin) &&
-      tramoEsPreset(tramos, periodoInicio, periodoFin, "todos"),
-    [tramos, periodoInicio, periodoFin],
-  );
 
   const ordenPreview = useMemo(
     () => ({
@@ -238,27 +239,39 @@ export function ContractTramosSection({
     setTramos((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const presetLunesAViernes = useCallback(() => {
-    if (!isValidDateOnly(periodoInicio) || !isValidDateOnly(periodoFin)) return;
-    setTramos([
-      crearTramoLunesAViernes(
-        periodoInicio,
-        periodoFin,
-        cuniasDiarias || 1,
-      ),
-    ]);
-  }, [periodoInicio, periodoFin, cuniasDiarias]);
+  const applyTramoLvPeriodoCompleto = useCallback(
+    (index: number) => {
+      if (!periodoValido) return;
+      setTramos((prev) =>
+        prev.map((t, i) => {
+          if (i !== index) return t;
+          return crearTramoLunesAViernes(
+            periodoInicio,
+            periodoFin,
+            t.cuñas_por_dia || cuniasDiarias || 1,
+          );
+        }),
+      );
+    },
+    [periodoInicio, periodoFin, cuniasDiarias, periodoValido],
+  );
 
-  const presetTodosLosDias = useCallback(() => {
-    if (!isValidDateOnly(periodoInicio) || !isValidDateOnly(periodoFin)) return;
-    setTramos([
-      crearTramoTodosLosDias(
-        periodoInicio,
-        periodoFin,
-        cuniasDiarias || 1,
-      ),
-    ]);
-  }, [periodoInicio, periodoFin, cuniasDiarias]);
+  const applyTramoTodosLosDiasPeriodo = useCallback(
+    (index: number) => {
+      if (!periodoValido) return;
+      setTramos((prev) =>
+        prev.map((t, i) => {
+          if (i !== index) return t;
+          return crearTramoTodosLosDias(
+            periodoInicio,
+            periodoFin,
+            t.cuñas_por_dia || cuniasDiarias || 1,
+          );
+        }),
+      );
+    },
+    [periodoInicio, periodoFin, cuniasDiarias, periodoValido],
+  );
 
   const hiddenValue = tramos.length > 0 ? JSON.stringify(tramos) : "";
 
@@ -280,34 +293,28 @@ export function ContractTramosSection({
         </div>
       </div>
 
-      <div className="rounded-lg border border-outline-variant/60 bg-surface-container-lowest/50 p-4 space-y-3">
-        <p className="text-label-sm text-on-surface-variant px-1">
-          Plantillas rápidas
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={presetLunesAViernes}
-            disabled={!periodoValido}
-            className={`${presetLvActivo ? CHIP_ACTIVE : CHIP_INACTIVE} disabled:opacity-40 disabled:pointer-events-none`}
-          >
-            <MaterialIcon name="schedule" className="text-base" />
-            L–V todo el periodo
-          </button>
-          <button
-            type="button"
-            onClick={presetTodosLosDias}
-            disabled={!periodoValido}
-            className={`${presetTodosActivo ? CHIP_ACTIVE : CHIP_INACTIVE} disabled:opacity-40 disabled:pointer-events-none`}
-          >
-            <MaterialIcon name="calendar_today" className="text-base" />
-            Todos los días
-          </button>
-        </div>
-      </div>
-
       <div className="space-y-3">
-        {tramos.map((tramo, index) => (
+        {tramos.map((tramo, index) => {
+          const presetLvOnly = tramoPresetActivo(
+            tramo,
+            periodoInicio,
+            periodoFin,
+            "lv-only",
+          );
+          const presetLvPeriodo = tramoPresetActivo(
+            tramo,
+            periodoInicio,
+            periodoFin,
+            "lv-periodo",
+          );
+          const presetTodosPeriodo = tramoPresetActivo(
+            tramo,
+            periodoInicio,
+            periodoFin,
+            "todos-periodo",
+          );
+
+          return (
           <article
             key={index}
             className="rounded-lg border border-outline-variant/60 bg-surface-container-lowest/40 overflow-hidden"
@@ -343,62 +350,34 @@ export function ContractTramosSection({
                 </p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-sm text-on-surface-variant px-1">
-                    Desde
-                  </label>
-                  <div className={FORM_FIELD_CONTROL_PLAIN}>
-                    <MaterialIcon
-                      name="calendar_today"
-                      className="shrink-0 text-outline-variant text-sm"
-                    />
-                    <input
-                      type="date"
-                      value={tramo.desde}
-                      min={periodoValido ? periodoInicio : undefined}
-                      max={
-                        periodoValido
-                          ? tramo.hasta < periodoFin
-                            ? tramo.hasta
-                            : periodoFin
-                          : undefined
-                      }
-                      disabled={!periodoValido}
-                      onChange={(e) =>
-                        updateTramoFecha(index, "desde", e.target.value)
-                      }
-                      className={`${FORM_FIELD_INPUT} text-body-sm disabled:opacity-50`}
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-label-sm text-on-surface-variant px-1">
-                    Hasta
-                  </label>
-                  <div className={FORM_FIELD_CONTROL_PLAIN}>
-                    <MaterialIcon
-                      name="calendar_today"
-                      className="shrink-0 text-outline-variant text-sm"
-                    />
-                    <input
-                      type="date"
-                      value={tramo.hasta}
-                      min={
-                        periodoValido
-                          ? tramo.desde > periodoInicio
-                            ? tramo.desde
-                            : periodoInicio
-                          : undefined
-                      }
-                      max={periodoValido ? periodoFin : undefined}
-                      disabled={!periodoValido}
-                      onChange={(e) =>
-                        updateTramoFecha(index, "hasta", e.target.value)
-                      }
-                      className={`${FORM_FIELD_INPUT} text-body-sm disabled:opacity-50`}
-                    />
-                  </div>
-                </div>
+                <FormDateField
+                  label="Desde"
+                  value={tramo.desde}
+                  min={periodoValido ? periodoInicio : undefined}
+                  max={
+                    periodoValido
+                      ? tramo.hasta < periodoFin
+                        ? tramo.hasta
+                        : periodoFin
+                      : undefined
+                  }
+                  disabled={!periodoValido}
+                  onISOChange={(iso) => updateTramoFecha(index, "desde", iso)}
+                />
+                <FormDateField
+                  label="Hasta"
+                  value={tramo.hasta}
+                  min={
+                    periodoValido
+                      ? tramo.desde > periodoInicio
+                        ? tramo.desde
+                        : periodoInicio
+                      : undefined
+                  }
+                  max={periodoValido ? periodoFin : undefined}
+                  disabled={!periodoValido}
+                  onISOChange={(iso) => updateTramoFecha(index, "hasta", iso)}
+                />
                 <div className="flex flex-col gap-1.5">
                   <label className="text-label-sm text-on-surface-variant px-1">
                     Cuñas / día
@@ -423,21 +402,61 @@ export function ContractTramosSection({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2 px-1">
-                  <span className="text-label-sm text-on-surface-variant">
-                    Días de transmisión
-                  </span>
+              <div className="space-y-3">
+                <p className="text-label-sm text-on-surface-variant px-1">
+                  Días de transmisión
+                </p>
+                <div
+                  className="flex flex-wrap gap-2 px-0.5"
+                  role="group"
+                  aria-label={`Plantillas del tramo ${index + 1}`}
+                >
                   <button
                     type="button"
+                    disabled={!periodoValido}
+                    aria-pressed={presetLvOnly}
                     onClick={() =>
                       updateTramo(index, {
                         dias_semana: [...DIAS_SEMANA_LV],
                       })
                     }
-                    className="text-label-sm text-tertiary hover:underline underline-offset-2 shrink-0"
+                    className={`${PRESET_CHIP_BASE} ${
+                      presetLvOnly ? PRESET_CHIP_ACTIVE : PRESET_CHIP_IDLE
+                    }`}
                   >
+                    <MaterialIcon name="schedule" className="text-base shrink-0" />
                     Solo L–V
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!periodoValido}
+                    aria-pressed={presetLvPeriodo}
+                    onClick={() => applyTramoLvPeriodoCompleto(index)}
+                    className={`${PRESET_CHIP_BASE} ${
+                      presetLvPeriodo ? PRESET_CHIP_ACTIVE : PRESET_CHIP_IDLE
+                    }`}
+                  >
+                    <MaterialIcon
+                      name="event_available"
+                      className="text-base shrink-0"
+                    />
+                    <span className="hidden sm:inline">L–V · periodo completo</span>
+                    <span className="sm:hidden">L–V periodo</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!periodoValido}
+                    aria-pressed={presetTodosPeriodo}
+                    onClick={() => applyTramoTodosLosDiasPeriodo(index)}
+                    className={`${PRESET_CHIP_BASE} ${
+                      presetTodosPeriodo ? PRESET_CHIP_ACTIVE : PRESET_CHIP_IDLE
+                    }`}
+                  >
+                    <MaterialIcon
+                      name="calendar_today"
+                      className="text-base shrink-0"
+                    />
+                    Todos los días
                   </button>
                 </div>
                 <div
@@ -467,7 +486,8 @@ export function ContractTramosSection({
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
 
       <button

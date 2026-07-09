@@ -33,9 +33,12 @@ const POPOVER_GAP = 0;
 interface FormDateFieldProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "name"> {
   label: string;
-  name: string;
+  /** Omitir en campos controlados que no participan en el submit del formulario. */
+  name?: string;
   required?: boolean;
   defaultValue?: string;
+  /** Modo controlado: sincroniza cuando el valor ISO cambia desde fuera. */
+  value?: string;
   /** Se invoca cuando la fecha ISO válida cambia (texto, blur o calendario). */
   onISOChange?: (iso: string) => void;
 }
@@ -45,6 +48,7 @@ export function FormDateField({
   required,
   name,
   defaultValue = "",
+  value: controlledValue,
   onISOChange,
   min,
   max,
@@ -52,6 +56,7 @@ export function FormDateField({
   id,
   ...inputProps
 }: FormDateFieldProps) {
+  const isControlled = controlledValue !== undefined;
   const portalRoot = usePortalRoot();
   const generatedId = useId();
   const fieldId = id ?? name ?? generatedId;
@@ -59,10 +64,16 @@ export function FormDateField({
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [selectedISO, setSelectedISO] = useState(defaultValue);
-  const [textValue, setTextValue] = useState(() => isoToDisplayInput(defaultValue));
+  const [selectedISO, setSelectedISO] = useState(
+    () => (isControlled ? controlledValue : defaultValue) ?? "",
+  );
+  const [textValue, setTextValue] = useState(() =>
+    isoToDisplayInput((isControlled ? controlledValue : defaultValue) ?? ""),
+  );
   const [viewDate, setViewDate] = useState(
-    () => fromISODate(defaultValue) ?? new Date(),
+    () =>
+      fromISODate((isControlled ? controlledValue : defaultValue) ?? "") ??
+      new Date(),
   );
   const [popoverStyle, setPopoverStyle] = useState<CSSProperties>({});
   const [placement, setPlacement] = useState<DatePickerPlacement>("below");
@@ -165,18 +176,36 @@ export function FormDateField({
   }, [open]);
 
   useEffect(() => {
+    if (!isControlled) return;
+    const next = controlledValue ?? "";
+    setSelectedISO((current) => {
+      if (current === next) return current;
+      return next;
+    });
+    setTextValue((current) => {
+      const display = isoToDisplayInput(next);
+      return current === display ? current : display;
+    });
+    const parsed = fromISODate(next);
+    if (parsed) {
+      setViewDate(parsed);
+    }
+  }, [controlledValue, isControlled]);
+
+  useEffect(() => {
     const form = containerRef.current?.closest("form");
     if (!form) return;
 
     const handleReset = () => {
-      setSelectedISO(defaultValue);
-      setTextValue(isoToDisplayInput(defaultValue));
-      setViewDate(fromISODate(defaultValue) ?? new Date());
+      const resetValue = isControlled ? (controlledValue ?? "") : defaultValue;
+      setSelectedISO(resetValue);
+      setTextValue(isoToDisplayInput(resetValue));
+      setViewDate(fromISODate(resetValue) ?? new Date());
     };
 
     form.addEventListener("reset", handleReset);
     return () => form.removeEventListener("reset", handleReset);
-  }, [defaultValue]);
+  }, [controlledValue, defaultValue, isControlled]);
 
   const handleSelect = (date: Date) => {
     commitISO(toISODate(date));
@@ -229,7 +258,7 @@ export function FormDateField({
       >
         <input
           id={fieldId}
-          name={name}
+          {...(name ? { name } : {})}
           type="text"
           inputMode="numeric"
           autoComplete="off"
