@@ -6,7 +6,7 @@ export type ContentSecurityPolicyOptions = {
   /** Nonce por petición (middleware). Sin nonce → fallback legacy con unsafe-inline. */
   nonce?: string;
   allowUnsafeEval?: boolean;
-  /** Dev: Emotion/MUI sin nonce en estilos. Prod: usar nonce. */
+  /** Next/Image y MUI/Emotion requieren estilos inline (style-src-attr). */
   styleUnsafeInline?: boolean;
 };
 
@@ -21,7 +21,8 @@ export function buildContentSecurityPolicy(
 
   const scriptParts = ["'self'"];
   if (nonce) {
-    scriptParts.push(`'nonce-${nonce}'`, "'strict-dynamic'");
+    // Sin strict-dynamic: los chunks de /_next/static/ no llevan nonce y quedarían bloqueados.
+    scriptParts.push(`'nonce-${nonce}'`);
   } else {
     scriptParts.push("'unsafe-inline'");
   }
@@ -32,13 +33,14 @@ export function buildContentSecurityPolicy(
   const styleParts = ["'self'"];
   if (styleUnsafeInline) {
     styleParts.push("'unsafe-inline'");
-  } else if (nonce) {
+  }
+  if (nonce) {
     styleParts.push(`'nonce-${nonce}'`);
-  } else {
+  } else if (!styleUnsafeInline) {
     styleParts.push("'unsafe-inline'");
   }
 
-  return [
+  const directives = [
     "default-src 'self'",
     `script-src ${scriptParts.join(" ")}`,
     `style-src ${styleParts.join(" ")}`,
@@ -50,7 +52,13 @@ export function buildContentSecurityPolicy(
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
-  ].join("; ");
+  ];
+
+  if (styleUnsafeInline) {
+    directives.push("style-src-attr 'unsafe-inline'");
+  }
+
+  return directives.join("; ");
 }
 
 /** CSP legacy estática (solo si no hay middleware/proxy con nonce). */
@@ -110,6 +118,6 @@ export function buildNonceContentSecurityPolicy(isDev: boolean, nonce: string) {
   return buildContentSecurityPolicy({
     nonce,
     allowUnsafeEval: isDev,
-    styleUnsafeInline: isDev,
+    styleUnsafeInline: true,
   });
 }
