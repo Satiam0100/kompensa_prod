@@ -107,15 +107,7 @@ export function EditAgenciaModal({
     >
       {showDetail && agencia && (
         <>
-          <AgenciaDetalleView agencia={agencia} />
-          <div className="flex justify-end gap-3 pt-6 mt-2 border-t border-outline-variant/40">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:text-on-surface rounded-lg"
-            >
-              Cerrar
-            </button>
+          <div className="flex justify-end mb-4">
             <button
               type="button"
               onClick={onStartEdit}
@@ -125,6 +117,7 @@ export function EditAgenciaModal({
               Editar
             </button>
           </div>
+          <AgenciaDetalleView agencia={agencia} />
         </>
       )}
       {showForm && (
