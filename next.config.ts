@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import {
-  appSecurityHeaders,
   developmentSecurityHeaders,
+  staticSecurityHeaders,
 } from "./security-headers";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: isDev ? developmentSecurityHeaders : appSecurityHeaders,
+        headers: isDev ? developmentSecurityHeaders : staticSecurityHeaders,
       },
     ];
   },

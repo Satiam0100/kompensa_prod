@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { TransmissionOrderForm } from "@/components/ordenes/TransmissionOrderForm";
+import { RequiredFieldsLegend } from "@/components/ui/RequiredFieldsLegend";
 import { listarAgencias, listarEmisoras } from "@/app/actions/catalogos";
 
 export const metadata = {
@@ -33,9 +34,7 @@ export default async function NuevaOrdenPage() {
             Completa los datos de la campaña y añade una o más emisoras. Se
             registrará una orden por cada emisora.
           </p>
-          <p className="text-label-sm text-on-surface-variant mt-3">
-            <span className="text-tertiary">*</span> Campos obligatorios
-          </p>
+          <RequiredFieldsLegend className="mt-3" />
         </div>
 
         <TransmissionOrderForm

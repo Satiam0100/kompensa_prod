@@ -3,6 +3,17 @@
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import type { ReactNode } from "react";
 
-export function MuiProvider({ children }: { children: ReactNode }) {
-  return <AppRouterCacheProvider>{children}</AppRouterCacheProvider>;
+interface MuiProviderProps {
+  children: ReactNode;
+  nonce?: string;
+}
+
+export function MuiProvider({ children, nonce }: MuiProviderProps) {
+  return (
+    <AppRouterCacheProvider
+      options={nonce ? { nonce, key: "mui" } : { key: "mui" }}
+    >
+      {children}
+    </AppRouterCacheProvider>
+  );
 }

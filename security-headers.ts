@@ -1,14 +1,47 @@
-/** Cabeceras de seguridad compartidas (next.config + vercel.json). */
+/** Cabeceras de seguridad compartidas (next.config + vercel.json + middleware). */
 
-function buildContentSecurityPolicy(options: { allowUnsafeEval: boolean }): string {
-  const scriptSrc = options.allowUnsafeEval
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    : "script-src 'self' 'unsafe-inline'";
+export const xRobotsTag = "noindex, nofollow, noarchive";
+
+export type ContentSecurityPolicyOptions = {
+  /** Nonce por petición (middleware). Sin nonce → fallback legacy con unsafe-inline. */
+  nonce?: string;
+  allowUnsafeEval?: boolean;
+  /** Dev: Emotion/MUI sin nonce en estilos. Prod: usar nonce. */
+  styleUnsafeInline?: boolean;
+};
+
+export function buildContentSecurityPolicy(
+  options: ContentSecurityPolicyOptions = {},
+): string {
+  const {
+    nonce,
+    allowUnsafeEval = false,
+    styleUnsafeInline = false,
+  } = options;
+
+  const scriptParts = ["'self'"];
+  if (nonce) {
+    scriptParts.push(`'nonce-${nonce}'`, "'strict-dynamic'");
+  } else {
+    scriptParts.push("'unsafe-inline'");
+  }
+  if (allowUnsafeEval) {
+    scriptParts.push("'unsafe-eval'");
+  }
+
+  const styleParts = ["'self'"];
+  if (styleUnsafeInline) {
+    styleParts.push("'unsafe-inline'");
+  } else if (nonce) {
+    styleParts.push(`'nonce-${nonce}'`);
+  } else {
+    styleParts.push("'unsafe-inline'");
+  }
 
   return [
     "default-src 'self'",
-    scriptSrc,
-    "style-src 'self' 'unsafe-inline'",
+    `script-src ${scriptParts.join(" ")}`,
+    `style-src ${styleParts.join(" ")}`,
     "img-src 'self' data: blob:",
     "font-src 'self'",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
@@ -20,14 +53,14 @@ function buildContentSecurityPolicy(options: { allowUnsafeEval: boolean }): stri
   ].join("; ");
 }
 
-/** CSP producción (sin unsafe-eval; React no lo usa en prod). */
+/** CSP legacy estática (solo si no hay middleware/proxy con nonce). */
 export const contentSecurityPolicy = buildContentSecurityPolicy({
   allowUnsafeEval: false,
 });
 
-/** CSP desarrollo (React/Turbopack requieren eval en dev). */
 export const developmentContentSecurityPolicy = buildContentSecurityPolicy({
   allowUnsafeEval: true,
+  styleUnsafeInline: true,
 });
 
 export const permissionsPolicy =
@@ -35,28 +68,48 @@ export const permissionsPolicy =
 
 export type SecurityHeader = { key: string; value: string };
 
-function withCsp(csp: string): SecurityHeader[] {
-  return [
-    { key: "X-DNS-Prefetch-Control", value: "on" },
-    { key: "X-Content-Type-Options", value: "nosniff" },
-    { key: "X-Frame-Options", value: "DENY" },
-    { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-    { key: "Permissions-Policy", value: permissionsPolicy },
-    { key: "Content-Security-Policy", value: csp },
-  ];
-}
+/** Cabeceras estáticas (sin CSP; la CSP dinámica la aplica middleware). */
+export const staticSecurityHeaders: SecurityHeader[] = [
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: permissionsPolicy },
+  { key: "X-Robots-Tag", value: xRobotsTag },
+];
 
-/** Respuestas Next.js en producción (sin HSTS; Vercel lo añade en edge). */
-export const appSecurityHeaders = withCsp(contentSecurityPolicy);
+/** @deprecated Usar staticSecurityHeaders; CSP va en middleware. */
+export const appSecurityHeaders: SecurityHeader[] = [
+  ...staticSecurityHeaders,
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
+];
 
-/** Localhost / pnpm dev — incluye unsafe-eval para React y Turbopack. */
-export const developmentSecurityHeaders = withCsp(developmentContentSecurityPolicy);
+/** Localhost / pnpm dev — CSP legacy si middleware no corre. */
+export const developmentSecurityHeaders: SecurityHeader[] = [
+  ...staticSecurityHeaders,
+  {
+    key: "Content-Security-Policy",
+    value: developmentContentSecurityPolicy,
+  },
+];
 
-/** Producción en edge (Vercel): incluye HSTS. */
+/** Producción en edge (Vercel): incluye HSTS. Sin CSP (middleware). */
 export const productionSecurityHeaders: SecurityHeader[] = [
-  ...appSecurityHeaders,
+  ...staticSecurityHeaders,
   {
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains",
   },
 ];
+
+export function createRequestNonce(): string {
+  return Buffer.from(crypto.randomUUID()).toString("base64");
+}
+
+export function buildNonceContentSecurityPolicy(isDev: boolean, nonce: string) {
+  return buildContentSecurityPolicy({
+    nonce,
+    allowUnsafeEval: isDev,
+    styleUnsafeInline: isDev,
+  });
+}

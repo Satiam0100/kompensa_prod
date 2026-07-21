@@ -15,6 +15,7 @@ import { FormLiveRegions } from "@/components/ui/FormLiveRegions";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { FormStatusMessage } from "@/components/ui/FormStatusMessage";
 import { PrivacyNotice } from "@/components/legal/PrivacyNotice";
+import { REQUIRED_FIELDS_LEGEND_ID } from "@/components/ui/RequiredFieldsLegend";
 import { getFirstInvalidFieldMessage } from "@/lib/form-a11y";
 import { useOrderEstadoSpot } from "@/hooks/useOrderEstadoSpot";
 import {
@@ -166,6 +167,7 @@ export function TransmissionOrderForm({
         onChange={handleFormChange}
         onSubmit={handleSubmit}
         aria-busy={isPending}
+        aria-describedby={REQUIRED_FIELDS_LEGEND_ID}
       >
         <SectionCard
           title="Identificación de Campaña"
@@ -203,14 +205,14 @@ export function TransmissionOrderForm({
               emptyMessage="No hay agencias que coincidan"
             />
             <FormField
-              label="Email Cliente"
+              label="Correo del coordinador"
               name="email_cliente"
               type="email"
               required
               placeholder="email@dominio.com"
             />
             <FormPhoneField
-              label="Teléfono Cliente"
+              label="Teléfono del coordinador"
               name="telefono_cliente"
               required
               icon="phone"
@@ -293,7 +295,7 @@ export function TransmissionOrderForm({
           <p className="mt-4 text-body-sm text-on-surface-variant">
             Indica las franjas horarias de transmisión. Al finalizar la fecha de
             fin del contrato, el certificado PDF se enviará automáticamente al
-            email del cliente.
+            email del coordinador.
           </p>
           <ContractTramosSection
             periodoInicio={periodoInicio}
@@ -367,10 +369,10 @@ function FormActionsBar({
         />
       )}
       <PrivacyNotice className="mb-3 px-1 w-full max-w-5xl mx-auto md:max-w-none" />
-      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 max-w-5xl mx-auto md:max-w-none">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-4 max-w-5xl mx-auto md:max-w-none">
         <button
           type="button"
-          className="w-full sm:w-auto px-8 py-3 text-body-md font-medium text-on-surface border border-outline-variant bg-transparent rounded-lg hover:bg-surface-container-high hover:border-outline transition-all disabled:opacity-60"
+          className="w-full sm:w-auto px-6 py-2.5 text-body-sm font-medium text-on-surface-variant border border-outline-variant/70 bg-transparent rounded-lg hover:bg-surface-container-high hover:text-on-surface hover:border-outline transition-all disabled:opacity-60"
           onClick={onCancel}
           disabled={isPending}
         >
@@ -388,7 +390,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
       <button
         type="submit"
         disabled
-        className="w-full sm:w-auto px-10 py-3 bg-tertiary text-on-tertiary text-body-md font-bold rounded-lg flex items-center justify-center gap-2 opacity-80"
+        className="w-full sm:w-auto sm:min-w-[12.5rem] px-10 py-3.5 bg-tertiary text-on-tertiary text-body-lg font-bold rounded-lg shadow-lg flex items-center justify-center gap-2 opacity-80"
       >
         <MaterialIcon name="sync" className="animate-spin" />
         Procesando...
@@ -399,7 +401,7 @@ function SubmitButton({ isPending }: { isPending: boolean }) {
   return (
     <button
       type="submit"
-      className="w-full sm:w-auto px-10 py-3 bg-tertiary text-on-tertiary text-body-md font-bold rounded-lg shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+      className="w-full sm:w-auto sm:min-w-[12.5rem] px-10 py-3.5 bg-tertiary text-on-tertiary text-body-lg font-bold rounded-lg shadow-lg hover:brightness-110 hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2"
     >
       <MaterialIcon name="save" filled />
       Guardar órdenes

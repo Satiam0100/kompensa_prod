@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
+import { connection } from "next/server";
 import { MuiProvider } from "@/components/providers/MuiProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { themeInitScript } from "@/lib/theme/apply";
+import {
+  buildThemeInitScript,
+  getResolvedThemeFromCookie,
+} from "@/lib/theme/cookie";
+import { RESOLVED_THEME_COOKIE } from "@/lib/theme/types";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,23 +36,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await connection();
+  const nonce = (await headers()).get("x-nonce") || undefined;
+  const cookieStore = await cookies();
+  const initialResolved =
+    getResolvedThemeFromCookie(
+      cookieStore.get(RESOLVED_THEME_COOKIE)?.value,
+    ) ?? "light";
+
   return (
-    <html
-      lang="es"
-      className="h-full"
-      suppressHydrationWarning
-    >
+    <html lang="es" className="h-full" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          suppressHydrationWarning
+          {...(nonce ? { nonce } : {})}
+          dangerouslySetInnerHTML={{ __html: buildThemeInitScript() }}
+        />
       </head>
       <body className="bg-background text-on-background text-body-lg overflow-hidden flex h-screen transition-colors duration-200">
-        <MuiProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+        <MuiProvider nonce={nonce}>
+          <ThemeProvider initialResolved={initialResolved}>
+            {children}
+          </ThemeProvider>
         </MuiProvider>
       </body>
     </html>

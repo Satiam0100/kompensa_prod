@@ -54,7 +54,7 @@ export function FormDateField({
 }: FormDateFieldProps) {
   const portalRoot = usePortalRoot();
   const generatedId = useId();
-  const fieldId = id ?? generatedId;
+  const fieldId = id ?? name ?? generatedId;
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);

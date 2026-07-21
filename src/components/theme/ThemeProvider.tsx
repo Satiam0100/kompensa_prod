@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -28,22 +28,30 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+interface ThemeProviderProps {
+  children: ReactNode;
+  initialResolved?: ResolvedTheme;
+}
+
+export function ThemeProvider({
+  children,
+  initialResolved = "light",
+}: ThemeProviderProps) {
   const [mode, setModeState] = useState<ThemeMode>("system");
-  const [resolved, setResolved] = useState<ResolvedTheme>("light");
+  const [resolved, setResolved] = useState<ResolvedTheme>(initialResolved);
 
   const sync = useCallback((nextMode: ThemeMode) => {
     applyThemeMode(nextMode);
     setResolved(resolveTheme(nextMode));
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stored = getStoredThemeMode();
     setModeState(stored);
     sync(stored);
   }, [sync]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
     const onChange = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ajustarTramoAlPeriodo,
   ajustarTramosAlPeriodo,
@@ -30,6 +30,24 @@ interface ContractTramosSectionProps {
   cuniasDiarias: number;
   totalContratadas: number;
   initialTramos?: TramoCuota[] | null;
+  /** Subsección bajo H2 (formulario) = 3; bajo H3 (modal editar) = 4. */
+  headingLevel?: 3 | 4;
+}
+
+const TRAMOS_TITLE_CLASS =
+  "text-label-sm text-on-surface font-medium";
+
+function TramosHeading({
+  level,
+  children,
+}: {
+  level: 3 | 4;
+  children: ReactNode;
+}) {
+  if (level === 4) {
+    return <h4 className={TRAMOS_TITLE_CLASS}>{children}</h4>;
+  }
+  return <h3 className={TRAMOS_TITLE_CLASS}>{children}</h3>;
 }
 
 const ALL_DIAS: DiaSemanaIso[] = [...DIAS_SEMANA_TODOS];
@@ -100,6 +118,7 @@ export function ContractTramosSection({
   cuniasDiarias,
   totalContratadas,
   initialTramos,
+  headingLevel = 3,
 }: ContractTramosSectionProps) {
   const [tramos, setTramos] = useState<TramoCuota[]>(() =>
     defaultTramos(periodoInicio, periodoFin, cuniasDiarias, initialTramos),
@@ -252,9 +271,7 @@ export function ContractTramosSection({
           <MaterialIcon name="event_available" className="text-lg" />
         </div>
         <div className="min-w-0 flex-1">
-          <h4 className="text-label-sm text-on-surface font-medium">
-            Tramos de cuota
-          </h4>
+          <TramosHeading level={headingLevel}>Tramos de cuota</TramosHeading>
           <p className="text-body-sm text-on-surface-variant mt-1">
             Cuántas cuñas aplican por día y en qué días de la semana. Las
             transmisiones fuera de esos días cuentan como compensación en el

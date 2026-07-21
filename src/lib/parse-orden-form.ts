@@ -202,8 +202,8 @@ function validateOrdenFormCompartido(
   const missing: string[] = [];
   if (!data.cliente) missing.push("Cliente");
   if (!data.campaña) missing.push("Campaña");
-  if (!data.email_cliente) missing.push("Email Cliente");
-  if (!data.telefono_cliente) missing.push("Teléfono Cliente");
+  if (!data.email_cliente) missing.push("Correo del coordinador");
+  if (!data.telefono_cliente) missing.push("Teléfono del coordinador");
   if (!data.periodo_inicio) missing.push("Periodo Inicio");
   if (!data.periodo_fin) missing.push("Periodo Fin");
 

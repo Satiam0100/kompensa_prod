@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -27,6 +26,7 @@ export interface SelectOption {
 interface FormSelectProps {
   label: string;
   name: string;
+  id?: string;
   defaultValue?: string;
   value?: string;
   onChange?: (value: string) => void;
@@ -42,6 +42,7 @@ const MENU_PADDING = 8;
 export function FormSelect({
   label,
   name,
+  id,
   defaultValue = "",
   value: controlledValue,
   onChange,
@@ -50,8 +51,8 @@ export function FormSelect({
   className = "",
 }: FormSelectProps) {
   const portalRoot = usePortalRoot();
-  const generatedId = useId();
-  const labelId = `${generatedId}-label`;
+  const fieldId = id ?? name;
+  const labelId = `${fieldId}-label`;
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const hiddenRef = useRef<HTMLInputElement>(null);
@@ -166,10 +167,16 @@ export function FormSelect({
     <div className={`flex flex-col gap-1.5 ${className}`} ref={containerRef}>
       <label
         id={labelId}
+        htmlFor={fieldId}
         className="text-label-sm text-on-surface-variant px-1"
       >
         {label}
-        {required && <span className="text-tertiary"> *</span>}
+        {required && (
+          <span className="text-tertiary" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        )}
       </label>
       <div
         ref={triggerRef}
@@ -178,13 +185,15 @@ export function FormSelect({
         <input
           ref={hiddenRef}
           type="hidden"
-          id={generatedId}
           name={name}
           value={value}
           required={required}
+          tabIndex={-1}
+          aria-hidden="true"
         />
         <button
           type="button"
+          id={fieldId}
           className="form-select-trigger"
           onClick={toggleOpen}
           aria-labelledby={labelId}

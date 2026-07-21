@@ -43,7 +43,7 @@ export function formatTelefonoForDisplay(stored: string): string {
 
 export function validateTelefonoCliente(normalized: string): string | null {
   if (!normalized) {
-    return "Teléfono Cliente es obligatorio.";
+    return "El teléfono del coordinador es obligatorio.";
   }
 
   if (!/^58\d{10}$/.test(normalized)) {

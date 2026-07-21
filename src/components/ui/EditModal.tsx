@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/ui/MaterialIcon";
 import { PortalRootContext } from "@/components/ui/portal-root-context";
 
@@ -30,6 +30,7 @@ export function EditModal({
 }: EditModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const portalLayerRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
   const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -52,10 +53,13 @@ export function EditModal({
       <dialog
         ref={dialogRef}
         onClose={onClose}
+        aria-labelledby={titleId}
         className={`backdrop:bg-black/60 bg-surface-container text-on-surface border border-outline-variant rounded-xl p-0 w-[calc(100%-2rem)] ${MAX_WIDTH_CLASS[maxWidth]} max-h-[90vh] shadow-2xl fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 overflow-hidden`}
       >
         <div className="p-5 border-b border-outline-variant flex items-center justify-between shrink-0">
-          <h3 className="text-title-md">{title}</h3>
+          <h2 id={titleId} className="text-title-md">
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
