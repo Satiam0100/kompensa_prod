@@ -501,21 +501,45 @@ export function ContractTramosSection({
       </button>
 
       {periodoValido && (
-        <div className="flex items-center gap-3 rounded-lg border border-outline-variant/60 bg-surface-container-low px-4 py-3">
+        <div
+          className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${
+            totalContratadas > 0 && totalCalculado !== totalContratadas
+              ? "border-error/40 bg-error-container/20"
+              : "border-outline-variant/60 bg-surface-container-low"
+          }`}
+          role={
+            totalContratadas > 0 && totalCalculado !== totalContratadas
+              ? "alert"
+              : undefined
+          }
+        >
           <MaterialIcon
-            name="functions"
-            className="text-tertiary text-lg shrink-0"
+            name={
+              totalContratadas > 0 && totalCalculado !== totalContratadas
+                ? "error"
+                : "functions"
+            }
+            className={`text-lg shrink-0 ${
+              totalContratadas > 0 && totalCalculado !== totalContratadas
+                ? "text-error"
+                : "text-tertiary"
+            }`}
           />
-          <p className="text-body-sm text-on-surface-variant">
+          <p
+            className={`text-body-sm ${
+              totalContratadas > 0 && totalCalculado !== totalContratadas
+                ? "text-on-error-container"
+                : "text-on-surface-variant"
+            }`}
+          >
             Total calculado desde tramos:{" "}
-            <strong className="text-on-surface font-semibold tabular-nums">
+            <strong className="font-semibold tabular-nums text-on-surface">
               {totalCalculado}
             </strong>
             {totalContratadas > 0 && totalCalculado !== totalContratadas && (
-              <span className="text-tertiary ml-1.5">
-                · total contratadas en contrato: {totalContratadas}
-                {totalCalculado > totalContratadas &&
-                  " (el acumulado de campaña se limita a ese tope)"}
+              <span className="ml-1.5">
+                · Total contratadas en contrato: {totalContratadas}. Deben
+                coincidir para guardar.
               </span>
             )}
           </p>

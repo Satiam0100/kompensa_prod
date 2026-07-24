@@ -14,7 +14,13 @@ import {
   validateTelefonoCliente,
 } from "@/lib/normalize-telefono";
 import { validateEmail } from "@/lib/validate-email";
-import { parseTramosCuotas, resolveTramosCuotas, validarHuecosCoberturaTramos, validarTramosDentroPeriodo } from "@/lib/meta-campana";
+import {
+  parseTramosCuotas,
+  resolveTramosCuotas,
+  totalContratadasCalculado,
+  validarHuecosCoberturaTramos,
+  validarTramosDentroPeriodo,
+} from "@/lib/meta-campana";
 import type { TramoCuota } from "@/lib/types/tramo-cuota";
 
 /** Nombres ASCII en el HTML (evita problemas con ñ en FormData en algunos navegadores). */
@@ -267,6 +273,17 @@ function validateOrdenFormCompartido(
     tramos,
   );
   if (huecosError) return huecosError;
+
+  const totalDesdeTramos = totalContratadasCalculado({
+    periodo_inicio: data.periodo_inicio,
+    periodo_fin: data.periodo_fin,
+    cuñas_diarias: data.cuñas_diarias,
+    total_contratadas: data.total_contratadas,
+    tramos_cuotas: tramos,
+  });
+  if (data.total_contratadas !== totalDesdeTramos) {
+    return `Total contratadas (${data.total_contratadas}) debe coincidir con el total de los tramos de cuota (${totalDesdeTramos}).`;
+  }
 
   const telefonoError = validateTelefonoCliente(data.telefono_cliente);
   if (telefonoError) return telefonoError;
