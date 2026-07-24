@@ -29,6 +29,12 @@ export const navItems = [
     label: "Emisoras",
     match: (path: string) => path.startsWith("/emisoras"),
   },
+  {
+    href: "/reconocimiento",
+    icon: "settings_input_antenna",
+    label: "Reconocimiento",
+    match: (path: string) => path.startsWith("/reconocimiento"),
+  },
 ] as const;
 
 export function navLinkClass(active: boolean) {
